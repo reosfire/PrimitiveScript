@@ -19,6 +19,7 @@ class IntHandle(
     override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
         when (functionName) {
             "set" -> value = (args[0] as IntHandle).value
+            "plus" -> return IntHandle(value + (args[0] as IntHandle).value)
             "minus" -> return IntHandle(value - (args[0] as IntHandle).value)
             "greater" -> return BoolHandle(value > (args[0] as IntHandle).value)
             "less" -> return BoolHandle(value < (args[0] as IntHandle).value)

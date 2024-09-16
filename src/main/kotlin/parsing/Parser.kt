@@ -1,6 +1,6 @@
 package parsing
 
-val stringToTokenMap = mapOf(
+private val spacedTokensMap = mapOf(
     "true" to Token.TrueSpecialValue,
     "false" to Token.FalseSpecialValue,
 
@@ -12,7 +12,9 @@ val stringToTokenMap = mapOf(
     "void" to Token.VoidSpecialValue,
     "break" to Token.Break,
     "continue" to Token.Continue,
+)
 
+private val simpleMatchTokensMap = mapOf(
     "(" to Token.OpenRoundBracket,
     ")" to Token.ClosedRoundBracket,
     "{" to Token.OpenCurlyBracket,
@@ -27,6 +29,10 @@ val stringToTokenMap = mapOf(
 )
 
 fun tokenize(source: String): List<Token> {
+    var source = source
+    if (!source.endsWith(System.lineSeparator())) source += System.lineSeparator()
+    if (!source.startsWith(System.lineSeparator())) source = "\n" + source
+
     val result = mutableListOf<Token>()
     fun addStringToken(s: String) {
         if (s.isBlank()) return
@@ -53,7 +59,7 @@ fun tokenize(source: String): List<Token> {
     var currentToken = ""
     var currentLine = 0
     var currentSymbolInLine = 0
-    for (c in source) {
+    for ((i, c) in source.withIndex()) {
         if (c == '\n') {
             currentLine++
             currentSymbolInLine = 0
@@ -62,8 +68,18 @@ fun tokenize(source: String): List<Token> {
 
         currentToken += c
 
-        for ((key, token) in stringToTokenMap) {
+        for ((key, token) in simpleMatchTokensMap) {
             if (currentToken.endsWith(key)) {
+                val rest = currentToken.substring(0, currentToken.length - key.length).trim()
+                addStringToken(rest)
+                result.add(token)
+
+                currentToken = ""
+            }
+        }
+
+        for ((key, token) in spacedTokensMap) {
+            if (currentToken.endsWith(key) && source[i - key.length].isTokenSeparator() && source[i + 1].isTokenSeparator()) {
                 val rest = currentToken.substring(0, currentToken.length - key.length).trim()
                 addStringToken(rest)
                 result.add(token)
@@ -76,4 +92,8 @@ fun tokenize(source: String): List<Token> {
     if (currentToken.isNotBlank()) result.add(Token.JustString(currentToken))
 
     return result
+}
+
+private fun Char.isTokenSeparator(): Boolean {
+    return isWhitespace() || simpleMatchTokensMap.keys.contains(this.toString())
 }

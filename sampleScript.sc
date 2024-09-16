@@ -1,4 +1,5 @@
 fun runInDirection(direction) {
+    var ifwhile = 1
     var a = 0
     var b = true
     var v = this.makeVec(10, 10)
@@ -21,14 +22,14 @@ fun recursiveLoop(i) {
 }
 
 fun main1(someNumber) {
-    this.recursiveLoop(100)
+    var fifty = 50
     var i = 0
     while (true) {
         if (i.modulo(4).equals(0)) {
             this.println(i)
         }
 
-        if (i.greater(100)) {
+        if (i.greater(fifty.plus(fifty))) {
             break
         }
 

@@ -103,7 +103,7 @@ private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarat
 
 private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: MutableMap<String, CallableClass>): CallableClass {
      return when (evaluable) {
-         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable not found")
+         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable ${evaluable.name} not found")
 
          is TreeNode.Evaluable.CompilationConstant.IntNode -> IntHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.BoolNode -> BoolHandle(evaluable.value)
