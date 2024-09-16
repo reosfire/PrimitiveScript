@@ -17,14 +17,14 @@ fun main() {
 
     val functionsMap = tree.createFunctionsMap()
 
-    val memory = mutableMapOf<String, CallableClass>()
-    memory["this"] = ThisHandle(functionsMap)
+    val memory = Memory()
+    val thisHandle = ThisHandle(functionsMap)
+    memory.globalVariables["this"] = thisHandle
 
     val someNumber = IntHandle(10)
-    memory["someNumber"] = someNumber
 
-    val main = functionsMap["main1"] ?: error("Main function not found")
-    main.run(memory)
+    thisHandle.call("main1", listOf(someNumber), memory)
+
     println(someNumber.value)
 }
 
@@ -36,4 +36,25 @@ fun TreeNode.RootNode.createFunctionsMap(): Map<String, RunnableFunction> {
     }
 
     return result
+}
+
+data class Memory(
+    val globalVariables: MutableMap<String, CallableClass> = mutableMapOf(),
+    val localVariables: MutableMap<String, CallableClass> = mutableMapOf(),
+) {
+    fun withFunctionParametersAsLocalVariables(function: RunnableFunction, args: List<CallableClass>): Memory {
+        val parameters = function.node.parameters
+        if (parameters.size != args.size) error("Function parameters mismatch")
+
+        val newLocalVariables = mutableMapOf<String, CallableClass>()
+        for ((parameter, value) in parameters.zip(args)) {
+            newLocalVariables[parameter] = value
+        }
+
+        return Memory(globalVariables = globalVariables, localVariables = newLocalVariables)
+    }
+
+    operator fun get(key: String): CallableClass? {
+        return globalVariables[key] ?: localVariables[key]
+    }
 }

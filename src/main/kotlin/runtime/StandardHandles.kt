@@ -1,9 +1,11 @@
 package runtime
 
+import Memory
+
 class BoolHandle(
     var value: Boolean
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
         when (functionName) {
             "set" -> value = (args[0] as BoolHandle).value
         }
@@ -16,7 +18,7 @@ class BoolHandle(
 class IntHandle(
     var value: Int
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
         when (functionName) {
             "set" -> value = (args[0] as IntHandle).value
             "plus" -> return IntHandle(value + (args[0] as IntHandle).value)
@@ -43,7 +45,7 @@ class IntHandle(
 class StringHandle(
     var value: String
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
         when (functionName) {
 
         }
@@ -57,11 +59,10 @@ class ThisHandle(
     val loadedFunctions: Map<String, RunnableFunction>
 ): CallableClass {
 
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
         val loadedFunction = loadedFunctions[functionName]
         if (loadedFunction != null) {
-            // TODO this is very inefficient
-            return loadedFunction.run(memory = memory.withArgs(loadedFunction, args))
+            return loadedFunction.run(memory = memory.withFunctionParametersAsLocalVariables(loadedFunction, args))
         }
 
         when (functionName) {
@@ -76,24 +77,12 @@ class ThisHandle(
 }
 
 interface CallableClass {
-    fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass
+    fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass
 }
 
 object VoidHandle: CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
         error("Cannot call method \"$functionName\" on void")
     }
-}
-
-private fun Map<String, CallableClass>.withArgs(function: RunnableFunction, args: List<CallableClass>): MutableMap<String, CallableClass> {
-    val parameters = function.node.parameters
-    if (parameters.size != args.size) error("Function parameters mismatch")
-
-    val result = HashMap(this)
-    for ((parameter, value) in parameters.zip(args)) {
-        result[parameter] = value
-    }
-
-    return result
 }
 

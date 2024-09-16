@@ -21,11 +21,15 @@ fun recursiveLoop(i) {
     this.recursiveLoop(i.minus(1))
 }
 
+fun needPrint(i) {
+    return i.modulo(4).equals(0)
+}
+
 fun main1(someNumber) {
     this.recursiveLoop(100)
     var i = 0
     while (true) {
-        if (i.modulo(4).equals(0)) {
+        if (this.needPrint(i)) {
             this.println(i)
         }
 

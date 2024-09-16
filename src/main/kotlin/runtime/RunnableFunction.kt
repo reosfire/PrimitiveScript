@@ -1,10 +1,11 @@
 package runtime
 
+import Memory
 import treeBuilding.TreeNode
 
 class RunnableFunction(val node: TreeNode.FunctionNode) {
 
-    fun run(memory: MutableMap<String, CallableClass>): CallableClass {
+    fun run(memory: Memory): CallableClass {
         return when (val flowControl = runBody(node.body, memory)) {
             is FlowControl.Return -> flowControl.result
             FlowControl.Pass -> VoidHandle
@@ -27,7 +28,7 @@ sealed class FlowControl {
     data object Pass : FlowControl()
 }
 
-private fun runBody(body: TreeNode.BodyNode, memory: MutableMap<String, CallableClass>): FlowControl {
+private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
     body.children.forEach {
         when (it) {
             is TreeNode.Evaluable.FunctionCallChainNode -> runFunctionCall(it, memory)
@@ -50,7 +51,7 @@ private fun runBody(body: TreeNode.BodyNode, memory: MutableMap<String, Callable
     return FlowControl.Pass
 }
 
-private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: MutableMap<String, CallableClass>): CallableClass {
+private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: Memory): CallableClass {
     var objectToCall = runEvaluable(callNode.objectToCall, memory)
     for (functionCall in callNode.functions) {
         val evaluatedParameters = functionCall.parameters.map { runEvaluable(it, memory) }
@@ -60,32 +61,23 @@ private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, 
     return objectToCall
 }
 
-private fun runIf(ifNode: TreeNode.IfNode, memory: MutableMap<String, CallableClass>): FlowControl {
+private fun runIf(ifNode: TreeNode.IfNode, memory: Memory): FlowControl {
     val conditionResult = runEvaluable(ifNode.condition, memory)
     if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
 
     if (!conditionResult.value) return FlowControl.Pass
 
-    val flowControl = runBody(ifNode.body, memory)
-
-    when (flowControl) {
-        is FlowControl.Return,
-        FlowControl.Break,
-        FlowControl.Continue-> return flowControl
-
-        FlowControl.Pass -> return FlowControl.Pass
-    }
+    return runBody(ifNode.body, memory)
 }
 
-private fun runWhile(whileNode: TreeNode.WhileNode, memory: MutableMap<String, CallableClass>): FlowControl {
+private fun runWhile(whileNode: TreeNode.WhileNode, memory: Memory): FlowControl {
     while (true) {
         val conditionResult = runEvaluable(whileNode.condition, memory)
         if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
 
         if (!conditionResult.value) break
-        val flowControl = runBody(whileNode.body, memory)
 
-        when (flowControl) {
+        when (val flowControl = runBody(whileNode.body, memory)) {
             is FlowControl.Return -> return flowControl
             FlowControl.Break -> break
 
@@ -97,13 +89,13 @@ private fun runWhile(whileNode: TreeNode.WhileNode, memory: MutableMap<String, C
     return FlowControl.Pass
 }
 
-private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: MutableMap<String, CallableClass>) {
-    memory[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
+private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: Memory) {
+    memory.localVariables[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
 }
 
-private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: MutableMap<String, CallableClass>): CallableClass {
+private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): CallableClass {
      return when (evaluable) {
-         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable ${evaluable.name} not found")
+         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable \"${evaluable.name}\" not found")
 
          is TreeNode.Evaluable.CompilationConstant.IntNode -> IntHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.BoolNode -> BoolHandle(evaluable.value)

@@ -64,13 +64,15 @@ fun buildBody(tokens: List<Token>, index: WrappedInt): TreeNode.BodyNode {
 
         if (bracketsBalance == 0) break
 
-        val nodeToAdd = if (token is Token.If) buildIf(tokens, index)
-            else if (token is Token.While) buildWhile(tokens, index)
-            else if (token is Token.Var) buildVariableDeclaration(tokens, index)
-            else if (token is Token.Return) buildReturn(tokens, index)
-            else if (token is Token.Break) buildBreak(tokens, index)
-            else if (token is Token.Continue) buildContinue(tokens, index)
-            else buildFunctionCallChain(tokens, index)
+        val nodeToAdd = when (token) {
+            Token.If -> buildIf(tokens, index)
+            Token.While -> buildWhile(tokens, index)
+            Token.Var -> buildVariableDeclaration(tokens, index)
+            Token.Return -> buildReturn(tokens, index)
+            Token.Break -> buildBreak(tokens, index)
+            Token.Continue -> buildContinue(tokens, index)
+            else -> buildFunctionCallChain(tokens, index)
+        }
 
         childrenNodes.add(nodeToAdd)
     }
