@@ -1,6 +1,5 @@
 package runtime
 
-import Memory
 import treeBuilding.TreeNode
 
 class RunnableFunction(val node: TreeNode.FunctionNode) {

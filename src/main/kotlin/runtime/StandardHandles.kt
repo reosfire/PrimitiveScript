@@ -1,7 +1,5 @@
 package runtime
 
-import Memory
-
 class BoolHandle(
     var value: Boolean
 ): CallableClass {
