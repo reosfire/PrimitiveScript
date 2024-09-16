@@ -15,7 +15,7 @@ fun recursiveLoop(i) {
         return void
     }
 
-    this.println(i)
+    this.println(i, "hello world")
 
     this.recursiveLoop(i.minus(1))
 }
@@ -24,11 +24,9 @@ fun main1(someNumber) {
     this.recursiveLoop(100)
     var i = 0
     while (true) {
-        if (i.modulo(2).equals(0)) {
+        if (i.modulo(4).equals(0)) {
             this.println(i)
         }
-
-        i.adfasdf()
 
         if (i.greater(100)) {
             break

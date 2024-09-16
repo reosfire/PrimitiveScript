@@ -31,6 +31,10 @@ sealed class Token {
         override fun toString() = "}"
     }
 
+    data object DoubleQuote: Token() {
+        override fun toString() = "\""
+    }
+
     data object DotOperator: Token() {
         override fun toString() = "."
     }
@@ -50,11 +54,12 @@ sealed class Token {
     }
 }
 
-val Token.isConstant: Boolean
+val Token.isConstantSignal: Boolean
     get() = when (this) {
         Token.TrueSpecialValue -> true
         Token.FalseSpecialValue -> true
         Token.VoidSpecialValue -> true
+        Token.DoubleQuote -> true
         is Token.IntConstant -> true
         else -> false
     }

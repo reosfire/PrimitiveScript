@@ -18,6 +18,8 @@ val stringToTokenMap = mapOf(
     "{" to Token.OpenCurlyBracket,
     "}" to Token.ClosedCurlyBracket,
 
+    "\"" to Token.DoubleQuote,
+
     "." to Token.DotOperator,
     "," to Token.CommaOperator,
 

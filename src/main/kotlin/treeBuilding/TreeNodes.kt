@@ -87,6 +87,12 @@ sealed class TreeNode {
                 override fun toString() = "$value"
             }
 
+            data class StringNode(
+                val value: String,
+            ): CompilationConstant() {
+                override fun toString() = value
+            }
+
             data object VoidNode: CompilationConstant() {
                 override fun toString() = "void"
             }

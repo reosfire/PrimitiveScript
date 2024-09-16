@@ -1,7 +1,7 @@
 package treeBuilding
 
 import parsing.Token
-import parsing.isConstant
+import parsing.isConstantSignal
 
 class WrappedInt(var value: Int)
 
@@ -153,7 +153,7 @@ fun buildContinue(tokens: List<Token>, index: WrappedInt): TreeNode.ContinueNode
 
 fun buildEvaluable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
     val currentToken = tokens[index.value]
-    if (currentToken.isConstant) return buildCompilationConstant(tokens, index)
+    if (currentToken.isConstantSignal) return buildCompilationConstant(tokens, index)
 
     val nextToken = tokens[index.value + 1]
     if (nextToken is Token.DotOperator) return buildFunctionCallChain(tokens, index)
@@ -213,6 +213,16 @@ fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.E
     return when (val constantValue = tokens[index.value++]) {
         is Token.TrueSpecialValue -> TreeNode.Evaluable.CompilationConstant.BoolNode(true)
         is Token.FalseSpecialValue -> TreeNode.Evaluable.CompilationConstant.BoolNode(false)
+
+        is Token.DoubleQuote -> {
+            val innerText = tokens[index.value++]
+            if (innerText !is Token.JustString) error("expected string inside quotes")
+
+            val closingQuote = tokens[index.value++]
+            if (closingQuote !is Token.DoubleQuote) error("expected string literal closing quote")
+
+            TreeNode.Evaluable.CompilationConstant.StringNode(innerText.value)
+        }
 
         is Token.VoidSpecialValue -> TreeNode.Evaluable.CompilationConstant.VoidNode
 

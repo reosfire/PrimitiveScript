@@ -1,14 +1,17 @@
 package runtime
 
-import CallableClass
-import VoidHandle
 import treeBuilding.TreeNode
 
 class RunnableFunction(val node: TreeNode.FunctionNode) {
 
     fun run(memory: MutableMap<String, CallableClass>): CallableClass {
-        runBody(node.body, memory)
-        return VoidHandle
+        return when (val flowControl = runBody(node.body, memory)) {
+            is FlowControl.Return -> flowControl.result
+            FlowControl.Pass -> VoidHandle
+
+            FlowControl.Continue -> error("continue is not supported in a body of a function")
+            FlowControl.Break -> error("break is not supported in a body of a function")
+        }
     }
 
     override fun toString() = node.toString()
@@ -19,26 +22,32 @@ sealed class FlowControl {
         val result: CallableClass
     ): FlowControl()
 
-    class Continue : FlowControl()
-    class Break : FlowControl()
+    data object Continue : FlowControl()
+    data object Break : FlowControl()
+    data object Pass : FlowControl()
 }
 
-private fun runBody(body: TreeNode.BodyNode, memory: MutableMap<String, CallableClass>): Boolean {
+private fun runBody(body: TreeNode.BodyNode, memory: MutableMap<String, CallableClass>): FlowControl {
     body.children.forEach {
         when (it) {
             is TreeNode.Evaluable.FunctionCallChainNode -> runFunctionCall(it, memory)
-            is TreeNode.IfNode -> runIf(it, memory)
-            is TreeNode.WhileNode -> runWhile(it, memory)
-            is TreeNode.VariableDeclarationNode -> runVariableAllocation(it, memory)
-            is TreeNode.ReturnNode -> {
-                val evaluated = runEvaluable(it.expression, memory)
-                return true
+            is TreeNode.IfNode -> {
+                val flowControl = runIf(it, memory)
+                if (flowControl != FlowControl.Pass) return flowControl
             }
-            else -> error("Unexpected node in function ($it)")
+            is TreeNode.WhileNode -> {
+                val flowControl = runWhile(it, memory)
+                if (flowControl != FlowControl.Pass) return flowControl
+            }
+            is TreeNode.VariableDeclarationNode -> runVariableAllocation(it, memory)
+            is TreeNode.ReturnNode -> return FlowControl.Return(runEvaluable(it.expression, memory))
+            is TreeNode.BreakNode -> return FlowControl.Break
+            is TreeNode.ContinueNode -> return FlowControl.Continue
+            else -> error("Unexpected node ($it) in body")
         }
     }
 
-    return false
+    return FlowControl.Pass
 }
 
 private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: MutableMap<String, CallableClass>): CallableClass {
@@ -51,23 +60,41 @@ private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, 
     return objectToCall
 }
 
-private fun runIf(ifNode: TreeNode.IfNode, memory: MutableMap<String, CallableClass>) {
+private fun runIf(ifNode: TreeNode.IfNode, memory: MutableMap<String, CallableClass>): FlowControl {
     val conditionResult = runEvaluable(ifNode.condition, memory)
     if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
 
-    if (!conditionResult.value) return
+    if (!conditionResult.value) return FlowControl.Pass
 
-    runBody(ifNode.body, memory)
+    val flowControl = runBody(ifNode.body, memory)
+
+    when (flowControl) {
+        is FlowControl.Return,
+        FlowControl.Break,
+        FlowControl.Continue-> return flowControl
+
+        FlowControl.Pass -> return FlowControl.Pass
+    }
 }
 
-private fun runWhile(ifNode: TreeNode.WhileNode, memory: MutableMap<String, CallableClass>) {
+private fun runWhile(whileNode: TreeNode.WhileNode, memory: MutableMap<String, CallableClass>): FlowControl {
     while (true) {
-        val conditionResult = runEvaluable(ifNode.condition, memory)
+        val conditionResult = runEvaluable(whileNode.condition, memory)
         if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
 
         if (!conditionResult.value) break
-        runBody(ifNode.body, memory)
+        val flowControl = runBody(whileNode.body, memory)
+
+        when (flowControl) {
+            is FlowControl.Return -> return flowControl
+            FlowControl.Break -> break
+
+            FlowControl.Pass,
+            FlowControl.Continue -> continue
+        }
     }
+
+    return FlowControl.Pass
 }
 
 private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: MutableMap<String, CallableClass>) {
@@ -80,39 +107,11 @@ private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: MutableMap<Strin
 
          is TreeNode.Evaluable.CompilationConstant.IntNode -> IntHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.BoolNode -> BoolHandle(evaluable.value)
+         is TreeNode.Evaluable.CompilationConstant.StringNode -> StringHandle(evaluable.value)
+
          is TreeNode.Evaluable.CompilationConstant.VoidNode -> VoidHandle
 
          is TreeNode.Evaluable.FunctionCallChainNode -> runFunctionCall(evaluable, memory)
-         else -> error("Unsupported argement")
+         else -> error("Unsupported argument")
      }
-}
-
-class BoolHandle(
-    var value: Boolean
-): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
-        when (functionName) {
-            "set" -> value = (args[0] as BoolHandle).value
-        }
-        return VoidHandle
-    }
-
-    override fun toString() = "$value"
-}
-
-class IntHandle(
-    var value: Int
-): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: MutableMap<String, CallableClass>): CallableClass {
-        when (functionName) {
-            "set" -> value = (args[0] as IntHandle).value
-            "greater" -> return BoolHandle(value > (args[0] as IntHandle).value)
-            "decrement" -> value--
-            "modulo" -> return IntHandle(value % (args[0] as IntHandle).value)
-            "equals" -> return BoolHandle(value == (args[0] as? IntHandle)?.value)
-        }
-        error("function \"IntHandle::$functionName\" not found")
-    }
-
-    override fun toString() = "$value"
 }
