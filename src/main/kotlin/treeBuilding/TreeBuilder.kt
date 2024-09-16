@@ -152,18 +152,21 @@ fun buildContinue(tokens: List<Token>, index: WrappedInt): TreeNode.ContinueNode
 }
 
 fun buildEvaluable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
-    val currentToken = tokens[index.value]
-    if (currentToken.isConstantSignal) return buildCompilationConstant(tokens, index)
-
     val nextToken = tokens[index.value + 1]
-    if (nextToken is Token.DotOperator) return buildFunctionCallChain(tokens, index)
 
-    return buildVariableName(tokens, index)
+    return if (nextToken is Token.DotOperator) buildFunctionCallChain(tokens, index)
+    else return buildConstantOrVariable(tokens, index)
+}
+
+fun buildConstantOrVariable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
+    val currentToken = tokens[index.value]
+
+    return if (currentToken.isConstantSignal) buildCompilationConstant(tokens, index)
+    else buildVariableName(tokens, index)
 }
 
 fun buildFunctionCallChain(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable.FunctionCallChainNode {
-    val objectToCall = tokens[index.value++]
-    if (objectToCall !is Token.JustString) error("object to call name expected")
+    val objectToCall = buildConstantOrVariable(tokens, index)
 
     val calls = mutableListOf<TreeNode.FunctionCallNode>()
 
@@ -174,7 +177,7 @@ fun buildFunctionCallChain(tokens: List<Token>, index: WrappedInt): TreeNode.Eva
         calls.add(buildFunctionCall(tokens, index))
     }
 
-    return TreeNode.Evaluable.FunctionCallChainNode(objectToCall.value, calls)
+    return TreeNode.Evaluable.FunctionCallChainNode(objectToCall, calls)
 }
 
 fun buildFunctionCall(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionCallNode {

@@ -51,7 +51,7 @@ private fun runBody(body: TreeNode.BodyNode, memory: MutableMap<String, Callable
 }
 
 private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: MutableMap<String, CallableClass>): CallableClass {
-    var objectToCall = memory[callNode.objectToCall] ?: error("callable object not found")
+    var objectToCall = runEvaluable(callNode.objectToCall, memory)
     for (functionCall in callNode.functions) {
         val evaluatedParameters = functionCall.parameters.map { runEvaluable(it, memory) }
         objectToCall = objectToCall.call(functionCall.functionName, evaluatedParameters, memory)

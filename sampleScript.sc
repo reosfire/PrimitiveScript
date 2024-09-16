@@ -22,14 +22,14 @@ fun recursiveLoop(i) {
 }
 
 fun main1(someNumber) {
-    var fifty = 50
+    this.recursiveLoop(100)
     var i = 0
     while (true) {
         if (i.modulo(4).equals(0)) {
             this.println(i)
         }
 
-        if (i.greater(fifty.plus(fifty))) {
+        if (i.greater(50.plus(50))) {
             break
         }
 

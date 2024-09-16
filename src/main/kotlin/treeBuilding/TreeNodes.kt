@@ -62,7 +62,7 @@ sealed class TreeNode {
 
     sealed class Evaluable: TreeNode() {
         data class FunctionCallChainNode(
-            val objectToCall: String,
+            val objectToCall: Evaluable,
             val functions: List<FunctionCallNode>,
         ): Evaluable() {
             override fun toString() = "$objectToCall.${functions.joinToString(".")}"

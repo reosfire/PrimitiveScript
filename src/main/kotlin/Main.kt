@@ -7,7 +7,6 @@ import treeBuilding.TreeNode
 import treeBuilding.buildTree
 import java.io.File
 
-
 fun main() {
     val sourceCode = File("./sampleScript.sc").readText()
     val tokens = tokenize(sourceCode)
