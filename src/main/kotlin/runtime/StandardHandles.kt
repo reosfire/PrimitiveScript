@@ -3,11 +3,12 @@ package runtime
 class BoolHandle(
     var value: Boolean
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
-        when (functionName) {
-            "set" -> value = (args[0] as BoolHandle).value
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "set" -> {
+            value = (args[0] as BoolHandle).value
+            VoidHandle
         }
-        error("function \"BoolHandle::$functionName\" not found")
+        else -> error("function \"BoolHandle::$functionName\" not found")
     }
 
     override fun toString() = "$value"
@@ -16,25 +17,27 @@ class BoolHandle(
 class IntHandle(
     var value: Int
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
-        when (functionName) {
-            "set" -> value = (args[0] as IntHandle).value
-            "plus" -> return IntHandle(value + (args[0] as IntHandle).value)
-            "minus" -> return IntHandle(value - (args[0] as IntHandle).value)
-            "greater" -> return BoolHandle(value > (args[0] as IntHandle).value)
-            "less" -> return BoolHandle(value < (args[0] as IntHandle).value)
-            "decrement" -> {
-                value--
-                return VoidHandle
-            }
-            "increment" -> {
-                value++
-                return VoidHandle
-            }
-            "modulo" -> return IntHandle(value % (args[0] as IntHandle).value)
-            "equals" -> return BoolHandle(value == (args[0] as? IntHandle)?.value)
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "set" -> {
+            value = (args[0] as IntHandle).value
+            VoidHandle
         }
-        error("function \"IntHandle::$functionName\" not found")
+        "plus" -> IntHandle(value + (args[0] as IntHandle).value)
+        "minus" -> IntHandle(value - (args[0] as IntHandle).value)
+        "greater" -> BoolHandle(value > (args[0] as IntHandle).value)
+        "less" -> BoolHandle(value < (args[0] as IntHandle).value)
+        "decrement" -> {
+            value--
+            VoidHandle
+        }
+        "increment" -> {
+            value++
+            VoidHandle
+        }
+        "modulo" -> IntHandle(value % (args[0] as IntHandle).value)
+        "equals" -> BoolHandle(value == (args[0] as? IntHandle)?.value)
+
+        else -> error("function \"IntHandle::$functionName\" not found")
     }
 
     override fun toString() = "$value"
@@ -43,11 +46,13 @@ class IntHandle(
 class StringHandle(
     var value: String
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
-        when (functionName) {
-
+    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "set" -> {
+            value = (args[0] as StringHandle).value
+            VoidHandle
         }
-        error("function \"BoolHandle::$functionName\" not found")
+
+        else -> error("function \"StringHandle::$functionName\" not found")
     }
 
     override fun toString() = value
@@ -63,14 +68,16 @@ class ThisHandle(
             return loadedFunction.run(memory = memory.withFunctionParametersAsLocalVariables(loadedFunction, args))
         }
 
-        when (functionName) {
+        return when (functionName) {
             "println" -> {
                 println(args.joinToString(" "))
-                return VoidHandle
+                VoidHandle
             }
-        }
+            "readln" -> StringHandle(readln())
+            "int" -> IntHandle((args[0] as StringHandle).value.toInt())
 
-        error("function \"this::$functionName\" not found")
+            else -> error("function \"this::$functionName\" not found")
+        }
     }
 }
 
@@ -83,4 +90,3 @@ object VoidHandle: CallableClass {
         error("Cannot call method \"$functionName\" on void")
     }
 }
-

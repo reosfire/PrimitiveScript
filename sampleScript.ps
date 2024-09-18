@@ -21,9 +21,7 @@ fun recursiveLoop(i) {
     this.recursiveLoop(i.minus(1))
 }
 
-fun needPrint(i) {
-    return i.modulo(4).equals(0)
-}
+fun needPrint(i) { return i.modulo(4).equals(0) }
 
 fun main1(someNumber) {
     this.recursiveLoop(100)
@@ -39,6 +37,8 @@ fun main1(someNumber) {
 
         i.increment()
     }
+
+    someNumber.set(this.int(this.readln()))
 }
 
 fun main(currentPos, brd, result) {

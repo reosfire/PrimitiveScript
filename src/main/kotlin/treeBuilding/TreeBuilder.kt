@@ -2,8 +2,7 @@ package treeBuilding
 
 import parsing.Token
 import parsing.isConstantSignal
-
-class WrappedInt(var value: Int)
+import shared.WrappedInt
 
 operator fun <T> List<T>.get(index: WrappedInt): T = this[index.value]
 
