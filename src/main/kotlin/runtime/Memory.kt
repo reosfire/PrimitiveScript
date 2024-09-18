@@ -4,7 +4,7 @@ data class Memory(
     val globalVariables: MutableMap<String, CallableClass> = mutableMapOf(),
     val localVariables: MutableMap<String, CallableClass> = mutableMapOf(),
 ) {
-    fun withFunctionParametersAsLocalVariables(function: RunnableFunction, args: List<CallableClass>): Memory {
+    fun withFunctionParametersAsLocalVariables(function: RunnableFunction, args: Array<CallableClass>): Memory {
         val parameters = function.node.parameters
         if (parameters.size != args.size) error("Function parameters mismatch")
 

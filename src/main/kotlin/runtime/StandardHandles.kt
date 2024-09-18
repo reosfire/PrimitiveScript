@@ -3,7 +3,7 @@ package runtime
 class BoolHandle(
     var value: Boolean
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
         "set" -> {
             value = (args[0] as BoolHandle).value
             VoidHandle
@@ -17,7 +17,7 @@ class BoolHandle(
 class IntHandle(
     var value: Int
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
         "set" -> {
             value = (args[0] as IntHandle).value
             VoidHandle
@@ -46,7 +46,7 @@ class IntHandle(
 class StringHandle(
     var value: String
 ): CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
         "set" -> {
             value = (args[0] as StringHandle).value
             VoidHandle
@@ -62,7 +62,7 @@ class ThisHandle(
     val loadedFunctions: Map<String, RunnableFunction>
 ): CallableClass {
 
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
         val loadedFunction = loadedFunctions[functionName]
         if (loadedFunction != null) {
             return loadedFunction.run(memory = memory.withFunctionParametersAsLocalVariables(loadedFunction, args))
@@ -82,11 +82,11 @@ class ThisHandle(
 }
 
 interface CallableClass {
-    fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass
+    fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass
 }
 
 object VoidHandle: CallableClass {
-    override fun call(functionName: String, args: List<CallableClass>, memory: Memory): CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
         error("Cannot call method \"$functionName\" on void")
     }
 }

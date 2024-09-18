@@ -53,7 +53,9 @@ private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
 private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: Memory): CallableClass {
     var objectToCall = runEvaluable(callNode.objectToCall, memory)
     for (functionCall in callNode.functions) {
-        val evaluatedParameters = functionCall.parameters.map { runEvaluable(it, memory) }
+        val evaluatedParameters = Array(functionCall.parameters.size) {
+            runEvaluable(functionCall.parameters[it], memory)
+        }
         objectToCall = objectToCall.call(functionCall.functionName, evaluatedParameters, memory)
     }
 

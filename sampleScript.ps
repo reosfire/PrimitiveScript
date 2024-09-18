@@ -1,9 +1,7 @@
-fun runInDirection(direction) {
-    var ifwhile = 1
+fun variableDeclarations(direction) {
     var a = 0
     var b = true
     var v = this.makeVec(10, 10)
-    return a
 }
 
 fun noArgsFunction() {
@@ -23,7 +21,7 @@ fun recursiveLoop(i) {
 
 fun needPrint(i) { return i.modulo(4).equals(0) }
 
-fun main1(someNumber) {
+fun main(someNumber) {
     this.recursiveLoop(100)
     var i = 0
     while (true) {
@@ -39,22 +37,4 @@ fun main1(someNumber) {
     }
 
     someNumber.set(this.int(this.readln()))
-}
-
-fun main(currentPos, brd, result) {
-    var i = 0
-
-    while (i.lessThan(10)) {
-        this.runInDirection(this.makeVec(-1, -2))
-        i.set(i.plus(1))
-    }
-
-	if (currentPos.getRow().equals(2)) {
-		result.set(currentPos.minus(this.makeVec(1, 0)), true)
-		result.set(currentPos.minus(this.makeVec(2, 0)), true)
-	}
-
-	if (currentPos.getRow().notEquals(2)) {
-
-	}
 }

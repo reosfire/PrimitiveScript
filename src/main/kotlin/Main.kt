@@ -5,7 +5,7 @@ import treeBuilding.buildTree
 import java.io.File
 
 fun main() {
-    val sourceCode = File("./sampleScript.sc").readText()
+    val sourceCode = File("./sampleScript.ps").readText()
     val tokens = tokenize(sourceCode)
     println(tokens)
 
@@ -20,7 +20,7 @@ fun main() {
 
     val someNumber = IntHandle(10)
 
-    thisHandle.call("main1", listOf(someNumber), memory)
+    thisHandle.call("main", arrayOf(someNumber), memory)
 
     println(someNumber.value)
 }
