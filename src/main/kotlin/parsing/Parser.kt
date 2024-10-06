@@ -34,7 +34,7 @@ fun tokenize(source: String): List<Token> {
     if (!source.startsWith(System.lineSeparator())) source = "\n" + source
 
     val result = mutableListOf<Token>()
-    fun addStringToken(s: String) {
+    fun addSimpleStringToken(s: String) {
         if (s.isBlank()) return
 
         var isCorrectConstantPattern = true
@@ -54,6 +54,10 @@ fun tokenize(source: String): List<Token> {
         } else {
             result.add(Token.JustString(s))
         }
+    }
+
+    fun addStringToken(s: String) {
+        s.split("\\r?\\n|\\r|\\f".toRegex()).forEach { addSimpleStringToken(it.trim()) }
     }
 
     var currentToken = ""

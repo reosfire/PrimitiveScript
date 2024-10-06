@@ -1,40 +1,40 @@
-fun variableDeclarations(direction) {
-    var a = 0
-    var b = true
-    var v = this.makeVec(10, 10)
-}
-
-fun noArgsFunction() {
-    this.noArgsFunction()
-    this.print(1)
-}
-
-fun recursiveLoop(i) {
-    if (i.less(0)) {
+fun fibonacciUpTo(n) {
+    if (n.less(1)) {
         return void
     }
 
-    this.println(i, "hello world")
+    var result = new.list(1)
 
-    this.recursiveLoop(i.minus(1))
-}
+    if (n.equals(1)) {
+        return result
+    }
+    result.add(1)
 
-fun needPrint(i) { return i.modulo(4).equals(0) }
+    var a = 1
+    var b = 1
+    var fib = 0
+    var i = 2
 
-fun main(someNumber) {
-    this.recursiveLoop(100)
-    var i = 0
-    while (true) {
-        if (this.needPrint(i)) {
-            this.println(i)
-        }
-
-        if (i.greater(50.plus(50))) {
-            break
-        }
-
+    while (i.less(n)) {
+        fib.set(a.plus(b))
+        result.add(new.int(fib))
+        a.set(b)
+        b.set(fib)
         i.increment()
     }
+    return result
+}
 
-    someNumber.set(this.int(this.readln()))
+fun main() {
+    while (true) {
+        this.println("Enter n: ")
+        var n = this.int(this.readln())
+        var result = this.fibonacciUpTo(n)
+        var i = 0
+        var resultSize = result.size()
+        while (i.less(resultSize)) {
+            this.println(result.get(i))
+            i.increment()
+        }
+    }
 }

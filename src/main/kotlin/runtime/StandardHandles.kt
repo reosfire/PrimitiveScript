@@ -58,6 +58,37 @@ class StringHandle(
     override fun toString() = value
 }
 
+class ListHandle(
+    private val items: MutableList<CallableClass> = mutableListOf()
+): CallableClass {
+
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "add" -> {
+            items.add(args[0])
+            VoidHandle
+        }
+        "get" -> {
+            val index = (args[0] as IntHandle).value
+            if (index < 0 || index >= items.size) {
+                error("Index out of bounds")
+            }
+            items[index]
+        }
+        "size" -> IntHandle(items.size)
+        "remove" -> {
+            val index = (args[0] as IntHandle).value
+            if (index < 0 || index >= items.size) {
+                error("Index out of bounds")
+            }
+            items.removeAt(index)
+            VoidHandle
+        }
+        else -> error("function \"ListHandle::$functionName\" not found")
+    }
+
+    override fun toString() = items.joinToString(", ", "[", "]")
+}
+
 class ThisHandle(
     val loadedFunctions: Map<String, RunnableFunction>
 ): CallableClass {
@@ -75,6 +106,17 @@ class ThisHandle(
             }
             "readln" -> StringHandle(readln())
             "int" -> IntHandle((args[0] as StringHandle).value.toInt())
+
+            else -> error("function \"this::$functionName\" not found")
+        }
+    }
+}
+
+class ConstructorHandle: CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
+        return when (functionName) {
+            "list" -> ListHandle(args.toMutableList())
+            "int" -> IntHandle((args[0] as IntHandle).value)
 
             else -> error("function \"this::$functionName\" not found")
         }

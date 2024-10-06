@@ -17,10 +17,11 @@ fun main() {
     val memory = Memory()
     val thisHandle = ThisHandle(functionsMap)
     memory.globalVariables["this"] = thisHandle
+    memory.globalVariables["new"] = ConstructorHandle()
 
     val someNumber = IntHandle(10)
 
-    thisHandle.call("main", arrayOf(someNumber), memory)
+    thisHandle.call("main", arrayOf(), memory)
 
     println(someNumber.value)
 }
