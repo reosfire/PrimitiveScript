@@ -9,7 +9,7 @@ fun main() {
     val tokens = tokenize(sourceCode)
     println(tokens)
 
-    val tree = buildTree(tokens)
+    val tree = buildTree(tokens.map { it.token })
     println(tree)
 
     val functionsMap = tree.createFunctionsMap()
@@ -19,11 +19,7 @@ fun main() {
     memory.globalVariables["this"] = thisHandle
     memory.globalVariables["new"] = ConstructorHandle()
 
-    val someNumber = IntHandle(10)
-
     thisHandle.call("main", arrayOf(), memory)
-
-    println(someNumber.value)
 }
 
 fun TreeNode.RootNode.createFunctionsMap(): Map<String, RunnableFunction> {

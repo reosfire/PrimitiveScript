@@ -8,6 +8,14 @@ class BoolHandle(
             value = (args[0] as BoolHandle).value
             VoidHandle
         }
+        "or" -> BoolHandle(value || (args[0] as BoolHandle).value)
+        "and" -> BoolHandle(value && (args[0] as BoolHandle).value)
+        "not" -> BoolHandle(!value)
+
+        "invert" -> {
+            value = !value
+            VoidHandle
+        }
         else -> error("function \"BoolHandle::$functionName\" not found")
     }
 
@@ -24,8 +32,16 @@ class IntHandle(
         }
         "plus" -> IntHandle(value + (args[0] as IntHandle).value)
         "minus" -> IntHandle(value - (args[0] as IntHandle).value)
+        "multiply" -> IntHandle(value * (args[0] as IntHandle).value)
+        "divide" -> IntHandle(value / (args[0] as IntHandle).value)
+        "mod" -> IntHandle(value % (args[0] as IntHandle).value)
+
         "greater" -> BoolHandle(value > (args[0] as IntHandle).value)
         "less" -> BoolHandle(value < (args[0] as IntHandle).value)
+        "greaterOrEqual" -> BoolHandle(value >= (args[0] as IntHandle).value)
+        "lessOrEqual" -> BoolHandle(value <= (args[0] as IntHandle).value)
+        "equal" -> BoolHandle(value == (args[0] as? IntHandle)?.value)
+
         "decrement" -> {
             value--
             VoidHandle
@@ -34,8 +50,6 @@ class IntHandle(
             value++
             VoidHandle
         }
-        "modulo" -> IntHandle(value % (args[0] as IntHandle).value)
-        "equals" -> BoolHandle(value == (args[0] as? IntHandle)?.value)
 
         else -> error("function \"IntHandle::$functionName\" not found")
     }
@@ -73,6 +87,14 @@ class ListHandle(
                 error("Index out of bounds")
             }
             items[index]
+        }
+        "set" -> {
+            val index = (args[0] as IntHandle).value
+            if (index < 0 || index >= items.size) {
+                error("Index out of bounds")
+            }
+            items[index] = args[1]
+            VoidHandle
         }
         "size" -> IntHandle(items.size)
         "remove" -> {
