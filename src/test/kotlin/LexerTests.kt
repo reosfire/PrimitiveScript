@@ -82,7 +82,7 @@ class LexerTests {
 
     @Test
     fun testVariableDeclarationLexing() {
-        val lexingResult = tokenize(getTestScript("variablesDeclaration.psc"))
+        val lexingResult = tokenize(getTestScript("variableDeclarations.psc"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -157,6 +157,107 @@ class LexerTests {
                 Token.JustString("voidSpecial"),
                 Token.AssignOperator,
                 Token.VoidSpecialValue,
+
+                Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
+
+    @Test
+    fun testFunctionCalls() {
+        val lexingResult = tokenize(getTestScript("functionCalls.psc"))
+        assertContentEquals(
+            listOf(
+                Token.Fun,
+                Token.JustString("main"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.CommaOperator,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.CommaOperator,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("e"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("f"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
 
                 Token.ClosedCurlyBracket,
             ),
