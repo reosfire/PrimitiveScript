@@ -1,5 +1,18 @@
 package runtime
 
+import java.io.File
+
+class FileHandle(
+    val path: String
+): CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
+        return when (functionName) {
+            "readText" -> StringHandle(File(path).readText())
+            else -> error("function \"FileHandle::$functionName\" not found")
+        }
+    }
+}
+
 class BoolHandle(
     var value: Boolean
 ): CallableClass {
@@ -60,14 +73,31 @@ class IntHandle(
 class StringHandle(
     var value: String
 ): CallableClass {
-    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
-        "set" -> {
-            value = (args[0] as StringHandle).value
-            VoidHandle
-        }
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass =
+        when (functionName) {
+            "set" -> {
+                value = (args[0] as StringHandle).value
+                VoidHandle
+            }
+            "replaceAt" -> {
+                val stringBuilder = StringBuilder(value)
+                val index = (args[0] as IntHandle).value
+                val replacement = (args[1] as StringHandle).value
+                stringBuilder[index] = replacement.first()
 
-        else -> error("function \"StringHandle::$functionName\" not found")
-    }
+                value = stringBuilder.toString()
+                VoidHandle
+            }
+
+            "get" -> StringHandle(value[(args[0] as IntHandle).value].toString())
+            "split" ->
+                ListHandle(value.split((args[0] as StringHandle).value).map { StringHandle(it) }.toMutableList())
+
+            "size" -> IntHandle(value.length)
+            "equal" -> BoolHandle(value == (args[0] as StringHandle).value)
+
+            else -> error("function \"StringHandle::$functionName\" not found")
+        }
 
     override fun toString() = value
 }
@@ -126,6 +156,10 @@ class ThisHandle(
                 println(args.joinToString(" "))
                 VoidHandle
             }
+            "print" -> {
+                print(args.joinToString(" "))
+                VoidHandle
+            }
             "readln" -> StringHandle(readln())
             "int" -> IntHandle((args[0] as StringHandle).value.toInt())
 
@@ -139,6 +173,7 @@ class ConstructorHandle: CallableClass {
         return when (functionName) {
             "list" -> ListHandle(args.toMutableList())
             "int" -> IntHandle((args[0] as IntHandle).value)
+            "File" -> FileHandle((args[0] as StringHandle).value)
 
             else -> error("function \"this::$functionName\" not found")
         }

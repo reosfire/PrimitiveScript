@@ -1,6 +1,9 @@
 package parsing
 
 sealed class Token {
+    var line: Int = 0
+    var column: Int = 0
+
     data object TrueSpecialValue : Token() {
         override fun toString() = "true"
     }

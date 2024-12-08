@@ -3,6 +3,8 @@ package treeBuilding
 import parsing.Token
 import parsing.isConstantSignal
 import shared.WrappedInt
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 operator fun <T> List<T>.get(index: WrappedInt): T = this[index.value]
 
@@ -20,13 +22,13 @@ fun buildTree(tokes: List<Token>): TreeNode.RootNode {
 
 fun buildFunction(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionNode {
     val functionKeyword = tokens[index.value++]
-    if (functionKeyword !is Token.Fun) error("expected function at top level")
+    functionKeyword.expectType<Token.Fun>()
 
     val name = tokens[index.value++]
-    if (name !is Token.JustString) error("name of function expected after fun")
+    name.expectType<Token.JustString>()
 
     val openBracket = tokens[index.value++]
-    if (openBracket !is Token.OpenRoundBracket) error("Open bracket expected after function name")
+    openBracket.expectType<Token.OpenRoundBracket>()
 
     val parameters = mutableListOf<String>()
     val possibleClosedBracket = tokens[index.value]
@@ -37,7 +39,7 @@ fun buildFunction(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionNode
 
     while (true) {
         val parameterName = tokens[index.value++]
-        if (parameterName !is Token.JustString) error("Parameter name expected")
+        parameterName.expectType<Token.JustString>()
 
         parameters.add(parameterName.value)
 
@@ -52,7 +54,7 @@ fun buildFunction(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionNode
 
 fun buildBody(tokens: List<Token>, index: WrappedInt): TreeNode.BodyNode {
     val bodyOpen = tokens[index.value++]
-    if (bodyOpen !is Token.OpenCurlyBracket) error("Body open expected")
+    bodyOpen.expectType<Token.OpenCurlyBracket>()
 
     var bracketsBalance = 1
     val childrenNodes = mutableListOf<TreeNode>()
@@ -83,15 +85,15 @@ fun buildBody(tokens: List<Token>, index: WrappedInt): TreeNode.BodyNode {
 
 fun buildIf(tokens: List<Token>, index: WrappedInt): TreeNode.IfNode {
     val ifKeyword = tokens[index.value++]
-    if (ifKeyword !is Token.If) error("if keyword expected")
+    ifKeyword.expectType<Token.If>()
 
     val openBracket = tokens[index.value++]
-    if (openBracket !is Token.OpenRoundBracket) error("Open bracket expected")
+    openBracket.expectType<Token.OpenRoundBracket>()
 
     val condition = buildEvaluable(tokens, index)
 
     val closedBracket = tokens[index.value++]
-    if (closedBracket !is Token.ClosedRoundBracket) error("Condition closed bracket expected")
+    closedBracket.expectType<Token.ClosedRoundBracket>()
 
     val body = buildBody(tokens, index)
 
@@ -100,15 +102,15 @@ fun buildIf(tokens: List<Token>, index: WrappedInt): TreeNode.IfNode {
 
 fun buildWhile(tokens: List<Token>, index: WrappedInt): TreeNode.WhileNode {
     val whileKeyword = tokens[index.value++]
-    if (whileKeyword !is Token.While) error("while keyword expected")
+    whileKeyword.expectType<Token.While>()
 
     val openBracket = tokens[index.value++]
-    if (openBracket !is Token.OpenRoundBracket) error("Open bracket expected")
+    openBracket.expectType<Token.OpenRoundBracket>()
 
     val condition = buildEvaluable(tokens, index)
 
     val closedBracket = tokens[index.value++]
-    if (closedBracket !is Token.ClosedRoundBracket) error("Condition closed bracket expected")
+    closedBracket.expectType<Token.ClosedRoundBracket>()
 
     val body = buildBody(tokens, index)
 
@@ -117,13 +119,13 @@ fun buildWhile(tokens: List<Token>, index: WrappedInt): TreeNode.WhileNode {
 
 fun buildVariableDeclaration(tokens: List<Token>, index: WrappedInt): TreeNode.VariableDeclarationNode {
     val type = tokens[index.value++]
-    if (type !is Token.Var) error("var keyword expected")
+    type.expectType<Token.Var>()
 
     val name = tokens[index.value++]
-    if (name !is Token.JustString) error("name of variable expected")
+    name.expectType<Token.JustString>()
 
     val assign = tokens[index.value++]
-    if (assign !is Token.AssignOperator) error("assign expected after variable name")
+    assign.expectType<Token.AssignOperator>()
 
     val evaluable = buildEvaluable(tokens, index)
     return TreeNode.VariableDeclarationNode(name.value, evaluable)
@@ -131,7 +133,7 @@ fun buildVariableDeclaration(tokens: List<Token>, index: WrappedInt): TreeNode.V
 
 fun buildReturn(tokens: List<Token>, index: WrappedInt): TreeNode.ReturnNode {
     val returnKeyword = tokens[index.value++]
-    if (returnKeyword !is Token.Return) error("return keyword expected")
+    returnKeyword.expectType<Token.Return>()
 
     val expression = buildEvaluable(tokens, index)
 
@@ -140,14 +142,14 @@ fun buildReturn(tokens: List<Token>, index: WrappedInt): TreeNode.ReturnNode {
 
 fun buildBreak(tokens: List<Token>, index: WrappedInt): TreeNode.BreakNode {
     val breakKeyword = tokens[index.value++]
-    if (breakKeyword !is Token.Break) error("break keyword expected")
+    breakKeyword.expectType<Token.Break>()
 
     return TreeNode.BreakNode
 }
 
 fun buildContinue(tokens: List<Token>, index: WrappedInt): TreeNode.ContinueNode {
     val continueKeyword = tokens[index.value++]
-    if (continueKeyword !is Token.Continue) error("continue keyword expected")
+    continueKeyword.expectType<Token.Continue>()
 
     return TreeNode.ContinueNode
 }
@@ -183,13 +185,13 @@ fun buildFunctionCallChain(tokens: List<Token>, index: WrappedInt): TreeNode.Eva
 
 fun buildFunctionCall(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionCallNode {
     val dot = tokens[index.value++]
-    if (dot !is Token.DotOperator) error("dot expected after object to call")
+    dot.expectType<Token.DotOperator>()
 
     val functionName = tokens[index.value++]
-    if (functionName !is Token.JustString) error("function name expected")
+    functionName.expectType<Token.JustString>()
 
     val openBracket = tokens[index.value++]
-    if (openBracket !is Token.OpenRoundBracket) error("function call open bracket expected")
+    openBracket.expectType<Token.OpenRoundBracket>()
 
     val parameters = mutableListOf<TreeNode.Evaluable>()
 
@@ -220,12 +222,12 @@ fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.E
 
         is Token.DoubleQuote -> {
             val innerText = tokens[index.value++]
-            if (innerText !is Token.JustString) error("expected string inside quotes")
+            innerText.expectType<Token.JustString>()
 
             val closingQuote = tokens[index.value++]
-            if (closingQuote !is Token.DoubleQuote) error("expected string literal closing quote")
+            closingQuote.expectType<Token.DoubleQuote>()
 
-            TreeNode.Evaluable.CompilationConstant.StringNode(innerText.value)
+            TreeNode.Evaluable.CompilationConstant.StringNode(applyEscapeSequences(innerText.value))
         }
 
         is Token.VoidSpecialValue -> TreeNode.Evaluable.CompilationConstant.VoidNode
@@ -238,7 +240,43 @@ fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.E
 
 fun buildVariableName(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable.VariableNameNode {
     val variableName = tokens[index.value++]
-    if (variableName !is Token.JustString) error("variable name expected")
+    variableName.expectType<Token.JustString>()
 
     return TreeNode.Evaluable.VariableNameNode(variableName.value)
+}
+
+fun applyEscapeSequences(text: String): String {
+    val result = StringBuilder()
+
+    var index = 0
+    while (index < text.length) {
+        val currentChar = text[index]
+
+        if (currentChar == '\\') {
+            val nextChar = text[index + 1]
+            when (nextChar) {
+                'n' -> result.append('\n')
+                'r' -> result.append('\r')
+                't' -> result.append('\t')
+                '\\' -> result.append('\\')
+                '"' -> result.append('"')
+                else -> error("Unknown escape sequence")
+            }
+
+            index += 2
+        } else {
+            result.append(currentChar)
+            index++
+        }
+    }
+
+    return result.toString()
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun <reified T: Token> Token.expectType() {
+    contract {
+        returns() implies (this@expectType is T)
+    }
+    if (this !is T) error("Expected token with type ${T::class.simpleName} but found ${this::class.simpleName}. At ($line $column)")
 }

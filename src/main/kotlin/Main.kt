@@ -1,15 +1,18 @@
 import parsing.tokenize
-import runtime.*
+import runtime.ConstructorHandle
+import runtime.Memory
+import runtime.RunnableFunction
+import runtime.ThisHandle
 import treeBuilding.TreeNode
 import treeBuilding.buildTree
 import java.io.File
 
 fun main() {
-    val sourceCode = File("./sampleScript.ps").readText()
+    val sourceCode = File("./examples/sorts.psc").readText()
     val tokens = tokenize(sourceCode)
     println(tokens)
 
-    val tree = buildTree(tokens.map { it.token })
+    val tree = buildTree(tokens)
     println(tree)
 
     val functionsMap = tree.createFunctionsMap()

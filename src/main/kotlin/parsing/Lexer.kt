@@ -28,9 +28,9 @@ private val simpleMatchTokensMap = mapOf(
     '=' to Token.AssignOperator,
 )
 
-fun tokenize(source: String): List<PlacedToken> {
+fun tokenize(source: String): List<Token> {
     val lexer = Lexer(source.trim())
-    val result = mutableListOf<PlacedToken>()
+    val result = mutableListOf<Token>()
 
     while(!lexer.ended) {
         result.add(lexer.next())
@@ -38,12 +38,6 @@ fun tokenize(source: String): List<PlacedToken> {
 
     return result
 }
-
-class PlacedToken(
-    val token: Token,
-    val line: Int,
-    val column: Int,
-)
 
 class Lexer(private val source: String) {
     val ended: Boolean get() = currentIndex >= source.length
@@ -54,14 +48,16 @@ class Lexer(private val source: String) {
     private var line = 0
     private var column = 0
 
-    fun next(): PlacedToken {
+    fun next(): Token {
         val startSymbol = get()
         val simpleMatch = simpleMatchTokensMap[startSymbol]
 
         if (simpleMatch == Token.DoubleQuote) quoteOpened = !quoteOpened
         if (simpleMatch != null) {
             getAndMove()
-            skipSpaces()
+            if (!quoteOpened) {
+                skipSpaces()
+            }
             return simpleMatch.withPlace()
         }
 
@@ -134,5 +130,9 @@ class Lexer(private val source: String) {
         return got
     }
 
-    private fun Token.withPlace() = PlacedToken(this, line, column)
+    private fun Token.withPlace(): Token {
+        this@withPlace.line = this@Lexer.line
+        this@withPlace.column = this@Lexer.column
+        return this
+    }
 }
