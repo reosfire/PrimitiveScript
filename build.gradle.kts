@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.4.1")
     testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.11.0")
 }
 
 tasks.test {
