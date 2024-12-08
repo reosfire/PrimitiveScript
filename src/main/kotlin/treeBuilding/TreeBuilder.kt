@@ -158,6 +158,7 @@ fun buildEvaluable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
     val nextToken = tokens[index.value + 1]
 
     return if (nextToken is Token.DotOperator) buildFunctionCallChain(tokens, index)
+    else if (nextToken is Token.OpenRoundBracket) buildFunctionCallChain(tokens, index)
     else return buildConstantOrVariable(tokens, index)
 }
 
@@ -169,24 +170,37 @@ fun buildConstantOrVariable(tokens: List<Token>, index: WrappedInt): TreeNode.Ev
 }
 
 fun buildFunctionCallChain(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable.FunctionCallChainNode {
-    val objectToCall = buildConstantOrVariable(tokens, index)
+    val objectToCall = when(val nextToken = tokens[index.value + 1]) {
+        is Token.DotOperator -> {
+            val result = buildConstantOrVariable(tokens, index)
+
+            val dot = tokens[index.value++]
+            dot.expectType<Token.DotOperator>()
+
+            result
+        }
+        is Token.OpenRoundBracket -> {
+            TreeNode.Evaluable.VariableNameNode("this")
+        }
+        else -> error("Unexpected token in the function call chain (Expected dot or open round bracket, but found $nextToken)")
+    }
 
     val calls = mutableListOf<TreeNode.FunctionCallNode>()
 
     while (true) {
+        calls.add(buildFunctionCall(tokens, index))
+
         val token = tokens[index.value]
         if (token !is Token.DotOperator) break
 
-        calls.add(buildFunctionCall(tokens, index))
+        val dot = tokens[index.value++]
+        dot.expectType<Token.DotOperator>()
     }
 
     return TreeNode.Evaluable.FunctionCallChainNode(objectToCall, calls)
 }
 
 fun buildFunctionCall(tokens: List<Token>, index: WrappedInt): TreeNode.FunctionCallNode {
-    val dot = tokens[index.value++]
-    dot.expectType<Token.DotOperator>()
-
     val functionName = tokens[index.value++]
     functionName.expectType<Token.JustString>()
 

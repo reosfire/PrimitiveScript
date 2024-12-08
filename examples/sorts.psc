@@ -1,42 +1,42 @@
 fun main() {
-    this.println("Enter number of elements: ")
-    var numElements = this.int(this.readln())
+    println("Enter number of elements: ")
+    var numElements = int(readln())
 
     var numbers = new.list()
 
     var i = 0
     while (i.less(numElements)) {
-        this.println("Enter number: ")
-        var num = this.int(this.readln())
+        println("Enter number: ")
+        var num = int(readln())
         numbers.add(num)
         i.increment()
     }
 
-    this.println("Sorted numbers using quick sort: ")
-    this.quickSort(numbers, 0, numbers.size().minus(1))
+    println("Sorted numbers using quick sort: ")
+    quickSort(numbers, 0, numbers.size().minus(1))
     var j = 0
     while (j.less(numbers.size())) {
-        this.println(numbers.get(j))
+        println(numbers.get(j))
         j.increment()
     }
 
-    this.println("Sorted numbers using bubble sort:")
-    this.bubbleSort(numbers)
+    println("Sorted numbers using bubble sort:")
+    bubbleSort(numbers)
     var k = 0
     while (k.less(numbers.size())) {
-        this.println(numbers.get(k))
+        println(numbers.get(k))
         k.increment()
     }
 
-    this.println("Enter number to binary search: ")
-    var target = this.int(this.readln())
-    var result = this.binarySearch(numbers, 0, numbers.size().minus(1), target)
+    println("Enter number to binary search: ")
+    var target = int(readln())
+    var result = binarySearch(numbers, 0, numbers.size().minus(1), target)
     if (result.equal(-1)) {
-        this.println("Number not found.")
+        println("Number not found.")
     }
     if (result.equal(-1).not()) {
-        this.print("Number found at index: ")
-        this.println(result)
+        print("Number found at index: ")
+        println(result)
     }
 }
 
@@ -62,9 +62,9 @@ fun quickSort(numbers, left, right) {
         return void
     }
 
-    var pivotIndex = this.partition(numbers, left, right)
-    this.quickSort(numbers, left, pivotIndex.minus(1))
-    this.quickSort(numbers, pivotIndex.plus(1), right)
+    var pivotIndex = partition(numbers, left, right)
+    quickSort(numbers, left, pivotIndex.minus(1))
+    quickSort(numbers, pivotIndex.plus(1), right)
 }
 
 fun partition(numbers, left, right) {
@@ -99,7 +99,7 @@ fun binarySearch(numbers, left, right, target) {
         return mid
     }
     if (numbers.get(mid).greater(target)) {
-        return this.binarySearch(numbers, left, mid.minus(1), target)
+        return binarySearch(numbers, left, mid.minus(1), target)
     }
-    return this.binarySearch(numbers, mid.plus(1), right, target)
+    return binarySearch(numbers, mid.plus(1), right, target)
 }

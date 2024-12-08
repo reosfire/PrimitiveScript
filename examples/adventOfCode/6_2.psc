@@ -18,11 +18,11 @@ fun main() {
                  obstacleCol.increment()
                  continue
             }
-            if (this.isStuck(inputText, obstacleRow, obstacleCol)) {
-                this.print(obstacleRow)
-                this.print(" ")
-                this.print(obstacleCol)
-                this.println()
+            if (isStuck(inputText, obstacleRow, obstacleCol)) {
+                print(obstacleRow)
+                print(" ")
+                print(obstacleCol)
+                println()
 
                 result.increment()
             }
@@ -31,7 +31,7 @@ fun main() {
         obstacleRow.increment()
     }
 
-    this.println(result)
+    println(result)
 }
 
 fun isStuck(inputText, obstacleRow, obstacleCol) {
@@ -71,8 +71,8 @@ fun isStuck(inputText, obstacleRow, obstacleCol) {
             return false
         }
         while (inputLines.get(nextRow).get(nextCol).equal("#")) {
-            var newDirectionRow = this.rotateDirectionRow(directionRow, directionCol)
-            var newDirectionCol = this.rotateDirectionCol(directionCol, directionRow)
+            var newDirectionRow = rotateDirectionRow(directionRow, directionCol)
+            var newDirectionCol = rotateDirectionCol(directionCol, directionRow)
             directionRow.set(newDirectionRow)
             directionCol.set(newDirectionCol)
             nextRow.set(currentRow.plus(directionRow))
