@@ -5,8 +5,8 @@ import treeBuilding.buildTree
 import java.io.File
 
 fun main() {
-    runSingleScript("./examples/adventOfCode/6_2.psc", "main", arrayOf())
-    runSingleScript("./examples/sorts.psc", "main", arrayOf())
+    runSingleScript("./examples/adventOfCode/7_1.psc", "main", arrayOf())
+    //runSingleScript("./examples/sorts.psc", "main", arrayOf())
 }
 
 fun runSingleScript(path: String, startFunction: String, args: Array<CallableClass>) {

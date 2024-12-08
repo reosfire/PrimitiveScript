@@ -70,6 +70,41 @@ class IntHandle(
     override fun toString() = "$value"
 }
 
+class LongHandle(
+    var value: Long
+): CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "set" -> {
+            value = (args[0] as LongHandle).value
+            VoidHandle
+        }
+        "plus" -> LongHandle(value + (args[0] as LongHandle).value)
+        "minus" -> LongHandle(value - (args[0] as LongHandle).value)
+        "multiply" -> LongHandle(value * (args[0] as LongHandle).value)
+        "divide" -> LongHandle(value / (args[0] as LongHandle).value)
+        "mod" -> LongHandle(value % (args[0] as LongHandle).value)
+
+        "greater" -> BoolHandle(value > (args[0] as LongHandle).value)
+        "less" -> BoolHandle(value < (args[0] as LongHandle).value)
+        "greaterOrEqual" -> BoolHandle(value >= (args[0] as LongHandle).value)
+        "lessOrEqual" -> BoolHandle(value <= (args[0] as LongHandle).value)
+        "equal" -> BoolHandle(value == (args[0] as? LongHandle)?.value)
+
+        "decrement" -> {
+            value--
+            VoidHandle
+        }
+        "increment" -> {
+            value++
+            VoidHandle
+        }
+
+        else -> error("function \"IntHandle::$functionName\" not found")
+    }
+
+    override fun toString() = "$value"
+}
+
 class StringHandle(
     var value: String
 ): CallableClass {
@@ -172,7 +207,21 @@ class ConstructorHandle: CallableClass {
     override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
         return when (functionName) {
             "list" -> ListHandle(args.toMutableList())
-            "int" -> IntHandle((args[0] as IntHandle).value)
+            "int" -> {
+                when(val arg = args[0]) {
+                    is IntHandle -> IntHandle(arg.value)
+                    is StringHandle -> IntHandle(arg.value.toInt())
+                    else -> error("Cannot convert $arg to long")
+                }
+            }
+            "long" -> {
+                when(val arg = args[0]) {
+                    is IntHandle -> LongHandle(arg.value.toLong())
+                    is LongHandle -> LongHandle(arg.value)
+                    is StringHandle -> LongHandle(arg.value.toLong())
+                    else -> error("Cannot convert $arg to long")
+                }
+            }
             "File" -> FileHandle((args[0] as StringHandle).value)
 
             else -> error("function \"this::$functionName\" not found")

@@ -223,7 +223,7 @@ fun buildFunctionCall(tokens: List<Token>, index: WrappedInt): TreeNode.Function
         val commaOrBracket = tokens[index.value++]
         if (commaOrBracket is Token.CommaOperator) continue
         else if (commaOrBracket is Token.ClosedRoundBracket) break
-        else error("Unexpected token at the end of the function parameter")
+        else error("Unexpected token at the end of the function parameter. At (${commaOrBracket.line} ${commaOrBracket.column})")
     }
 
     return TreeNode.FunctionCallNode(functionName.value, parameters)
