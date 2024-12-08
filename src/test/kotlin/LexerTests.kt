@@ -264,4 +264,95 @@ class LexerTests {
             lexingResult
         )
     }
+
+    @Test
+    fun testVariableDeclarationWithCommentsLexing() {
+        val lexingResult = tokenize(getTestScript("variableDeclarationsWithComments.psc"))
+        assertContentEquals(
+            listOf(
+                Token.Fun,
+                Token.JustString("main"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+
+                Token.Var,
+                Token.JustString("int"),
+                Token.AssignOperator,
+                Token.IntConstant(1),
+
+                Token.Var,
+                Token.JustString("negativeInt"),
+                Token.AssignOperator,
+                Token.IntConstant(-10),
+
+                Token.Var,
+                Token.JustString("word"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString("string"),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("emptyString"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString(""),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("spaceString"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString(" "),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("spacesAroundString"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString("  string  "),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("stringWithLanguageTokens"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString(".=(){} var fun while if return true false void 1 -10"),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("escapedString"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString("\r\n\t\\\""),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("stringWithCommentInside"),
+                Token.AssignOperator,
+                Token.DoubleQuote,
+                Token.JustString(" This is a string with // a comment inside "),
+                Token.DoubleQuote,
+
+                Token.Var,
+                Token.JustString("trueBoolean"),
+                Token.AssignOperator,
+                Token.TrueSpecialValue,
+
+                Token.Var,
+                Token.JustString("falseBoolean"),
+                Token.AssignOperator,
+                Token.FalseSpecialValue,
+
+                Token.Var,
+                Token.JustString("voidSpecial"),
+                Token.AssignOperator,
+                Token.VoidSpecialValue,
+
+                Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
 }

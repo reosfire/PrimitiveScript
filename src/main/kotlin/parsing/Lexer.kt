@@ -33,7 +33,7 @@ fun tokenize(source: String): List<Token> {
     val result = mutableListOf<Token>()
 
     while(!lexer.ended) {
-        result.add(lexer.next())
+        result.add(lexer.next() ?: break)
     }
 
     return result
@@ -49,7 +49,7 @@ class Lexer(private val source: String) {
     private var line = 0
     private var column = 0
 
-    fun next(): Token {
+    fun next(): Token? {
         val startSymbol = get()
         val simpleMatch = simpleMatchTokensMap[startSymbol]
 
@@ -81,6 +81,7 @@ class Lexer(private val source: String) {
         val word = nextWord()
         if (!quoteOpened && word.startsWith("//")) {
             skipLine()
+            if (ended) return null
             return next()
         }
         skipSpaces()
