@@ -355,4 +355,175 @@ class LexerTests {
             lexingResult
         )
     }
+
+    @Test
+    fun testFunctionCallsWithCallableInferred() {
+        val lexingResult = tokenize(getTestScript("functionCallsWithCallableInferred.psc"))
+        assertContentEquals(
+            listOf(
+                Token.Fun,
+                Token.JustString("main"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.CommaOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.JustString("c"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("d"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.CommaOperator,
+                Token.JustString("e"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.DotOperator,
+                Token.JustString("f"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+
+                Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
+
+    @Test
+    fun testIfStatement() {
+        val lexingResult = tokenize(getTestScript("ifStatement.psc"))
+        assertContentEquals(
+            listOf(
+                Token.Fun,
+                Token.JustString("main"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+
+                Token.If,
+                Token.OpenRoundBracket,
+                Token.TrueSpecialValue,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Return,
+                Token.IntConstant(0),
+                Token.ClosedCurlyBracket,
+
+                Token.If,
+                Token.OpenRoundBracket,
+                Token.FalseSpecialValue,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Return,
+                Token.IntConstant(1),
+                Token.ClosedCurlyBracket,
+
+                Token.If,
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Return,
+                Token.IntConstant(2),
+                Token.ClosedCurlyBracket,
+
+                Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
+
+    @Test
+    fun testWhileStatement() {
+        val lexingResult = tokenize(getTestScript("whileStatement.psc"))
+        assertContentEquals(
+            listOf(
+                Token.Fun,
+                Token.JustString("main"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+
+                Token.While,
+                Token.OpenRoundBracket,
+                Token.TrueSpecialValue,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Break,
+                Token.ClosedCurlyBracket,
+
+                Token.While,
+                Token.OpenRoundBracket,
+                Token.FalseSpecialValue,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Continue,
+                Token.ClosedCurlyBracket,
+
+                Token.While,
+                Token.OpenRoundBracket,
+                Token.JustString("a"),
+                Token.DotOperator,
+                Token.JustString("b"),
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.Return,
+                Token.IntConstant(2),
+                Token.ClosedCurlyBracket,
+
+                Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
 }
