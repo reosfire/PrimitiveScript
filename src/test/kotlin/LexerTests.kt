@@ -60,7 +60,7 @@ class LexerTests {
     }
 
     @Test
-    fun getThreeArgumentFunctionLexing() {
+    fun getThreeArgumentsFunctionLexing() {
         val lexingResult = tokenize(getTestScript("threeArgumentsFunction.psc"))
         assertContentEquals(
             listOf(
