@@ -67,7 +67,7 @@ class IntHandle(
         else -> error("function \"IntHandle::$functionName\" not found")
     }
 
-    override fun toString() = "$value"
+    override fun toString() = value.toString()
 }
 
 class LongHandle(
@@ -102,7 +102,7 @@ class LongHandle(
         else -> error("function \"IntHandle::$functionName\" not found")
     }
 
-    override fun toString() = "$value"
+    override fun toString() = value.toString()
 }
 
 class StringHandle(
@@ -130,6 +130,7 @@ class StringHandle(
 
             "size" -> IntHandle(value.length)
             "equal" -> BoolHandle(value == (args[0] as StringHandle).value)
+            "add" -> StringHandle(value + args[0].toString())
 
             else -> error("function \"StringHandle::$functionName\" not found")
         }
@@ -222,6 +223,7 @@ class ConstructorHandle: CallableClass {
                     else -> error("Cannot convert $arg to long")
                 }
             }
+            "string" -> StringHandle(args[0].toString())
             "File" -> FileHandle((args[0] as StringHandle).value)
 
             else -> error("function \"this::$functionName\" not found")
