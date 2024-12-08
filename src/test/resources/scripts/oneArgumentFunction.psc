@@ -1,0 +1,3 @@
+fun oneArgumentFunction(argument) {
+
+}

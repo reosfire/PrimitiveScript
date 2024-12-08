@@ -241,7 +241,7 @@ fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.E
             val closingQuote = tokens[index.value++]
             closingQuote.expectType<Token.DoubleQuote>()
 
-            TreeNode.Evaluable.CompilationConstant.StringNode(applyEscapeSequences(innerText.value))
+            TreeNode.Evaluable.CompilationConstant.StringNode(innerText.value)
         }
 
         is Token.VoidSpecialValue -> TreeNode.Evaluable.CompilationConstant.VoidNode
@@ -257,34 +257,6 @@ fun buildVariableName(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluabl
     variableName.expectType<Token.JustString>()
 
     return TreeNode.Evaluable.VariableNameNode(variableName.value)
-}
-
-fun applyEscapeSequences(text: String): String {
-    val result = StringBuilder()
-
-    var index = 0
-    while (index < text.length) {
-        val currentChar = text[index]
-
-        if (currentChar == '\\') {
-            val nextChar = text[index + 1]
-            when (nextChar) {
-                'n' -> result.append('\n')
-                'r' -> result.append('\r')
-                't' -> result.append('\t')
-                '\\' -> result.append('\\')
-                '"' -> result.append('"')
-                else -> error("Unknown escape sequence")
-            }
-
-            index += 2
-        } else {
-            result.append(currentChar)
-            index++
-        }
-    }
-
-    return result.toString()
 }
 
 @OptIn(ExperimentalContracts::class)

@@ -44,6 +44,7 @@ class Lexer(private val source: String) {
 
     private var currentIndex = 0
     private var quoteOpened = false
+    private var wordExtractedAfterQuoteOpened = false
 
     private var line = 0
     private var column = 0
@@ -52,17 +53,33 @@ class Lexer(private val source: String) {
         val startSymbol = get()
         val simpleMatch = simpleMatchTokensMap[startSymbol]
 
-        if (simpleMatch == Token.DoubleQuote) quoteOpened = !quoteOpened
-        if (simpleMatch != null) {
-            getAndMove()
-            if (!quoteOpened) {
+        if (simpleMatch == Token.DoubleQuote) {
+            if (quoteOpened) {
+                if (!wordExtractedAfterQuoteOpened) {
+                    wordExtractedAfterQuoteOpened = true
+                    return Token.JustString("").withPlace()
+                }
+                quoteOpened = false
+
+                getAndMove()
                 skipSpaces()
+                return Token.DoubleQuote.withPlace()
+            } else {
+                quoteOpened = true
+                wordExtractedAfterQuoteOpened = false
+
+                getAndMove()
+                return Token.DoubleQuote.withPlace()
             }
+        }
+        if (simpleMatch != null && !quoteOpened) {
+            getAndMove()
+            skipSpaces()
             return simpleMatch.withPlace()
         }
 
         val word = nextWord()
-        if (word.startsWith("//")) {
+        if (!quoteOpened && word.startsWith("//")) {
             skipLine()
             return next()
         }
@@ -74,6 +91,7 @@ class Lexer(private val source: String) {
             return Token.IntConstant(it).withPlace()
         }
 
+        wordExtractedAfterQuoteOpened = true
         return Token.JustString(word).withPlace()
     }
 
@@ -82,8 +100,20 @@ class Lexer(private val source: String) {
         var read = get()
         if (quoteOpened) {
             while (!ended && read != '"') {
-                buffer.append(read)
-                read = moveAndGet()
+                if (read == '\\') {
+                    when (val escapeCode = moveAndGet()) {
+                        'r' -> buffer.append('\r')
+                        'n' -> buffer.append('\n')
+                        't' -> buffer.append('\t')
+                        '\\' -> buffer.append('\\')
+                        '"' -> buffer.append('"')
+                        else -> throw IllegalStateException("Unknown escape code: $escapeCode")
+                    }
+                    read = moveAndGet()
+                } else {
+                    buffer.append(read)
+                    read = moveAndGet()
+                }
             }
         } else {
             while (!ended && !read.isWhitespace() && read !in simpleMatchTokensMap) {
