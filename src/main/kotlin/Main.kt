@@ -3,9 +3,13 @@ import runtime.*
 import treeBuilding.TreeNode
 import treeBuilding.buildTree
 import java.io.File
+import kotlin.time.measureTime
 
 fun main() {
-    runSingleScript("./examples/adventOfCode/7_2.psc", "main", arrayOf())
+    val time = measureTime {
+        runSingleScript("./examples/adventOfCode/7_2.psc", "main", arrayOf())
+    }
+    println("Time: $time")
     //runSingleScript("./examples/sorts.psc", "main", arrayOf())
 }
 

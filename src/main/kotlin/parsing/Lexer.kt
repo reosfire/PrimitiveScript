@@ -1,15 +1,15 @@
 package parsing
 
 private val wordTokensMap = mapOf(
-    "true" to Token.TrueSpecialValue,
-    "false" to Token.FalseSpecialValue,
+    "true" to Token.TrueLiteral,
+    "false" to Token.FalseLiteral,
 
     "fun" to Token.Fun,
     "var" to Token.Var,
     "if" to Token.If,
     "while" to Token.While,
     "return" to Token.Return,
-    "void" to Token.VoidSpecialValue,
+    "void" to Token.VoidLiteral,
     "break" to Token.Break,
     "continue" to Token.Continue,
 )
@@ -20,8 +20,6 @@ private val simpleMatchTokensMap = mapOf(
     '{' to Token.OpenCurlyBracket,
     '}' to Token.ClosedCurlyBracket,
 
-    '"' to Token.DoubleQuote,
-
     '.' to Token.DotOperator,
     ',' to Token.CommaOperator,
 
@@ -30,97 +28,101 @@ private val simpleMatchTokensMap = mapOf(
 
 fun tokenize(source: String): List<Token> {
     val lexer = Lexer(source.trim())
-    val result = mutableListOf<Token>()
+    lexer.run()
 
-    while(!lexer.ended) {
-        result.add(lexer.next() ?: break)
-    }
-
-    return result
+    return lexer.resultTokens
 }
 
 class Lexer(private val source: String) {
     val ended: Boolean get() = currentIndex >= source.length
 
     private var currentIndex = 0
-    private var quoteOpened = false
     private var wordExtractedAfterQuoteOpened = false
 
     private var line = 0
     private var column = 0
 
-    fun next(): Token? {
+    val resultTokens = mutableListOf<Token>()
+
+    fun run() {
+        while (!ended) {
+            next()
+        }
+    }
+
+    private fun next() {
         val startSymbol = get()
+
+        if (startSymbol == '\"') {
+            getAndMove() // consume open "
+            emitStringLiteral()
+            getAndMove() // consume close "
+            skipSpaces()
+            return
+        }
+
         val simpleMatch = simpleMatchTokensMap[startSymbol]
 
-        if (simpleMatch == Token.DoubleQuote) {
-            if (quoteOpened) {
-                if (!wordExtractedAfterQuoteOpened) {
-                    wordExtractedAfterQuoteOpened = true
-                    return Token.JustString("").withPlace()
-                }
-                quoteOpened = false
-
-                getAndMove()
-                skipSpaces()
-                return Token.DoubleQuote.withPlace()
-            } else {
-                quoteOpened = true
-                wordExtractedAfterQuoteOpened = false
-
-                getAndMove()
-                return Token.DoubleQuote.withPlace()
-            }
-        }
-        if (simpleMatch != null && !quoteOpened) {
+        if (simpleMatch != null) {
             getAndMove()
             skipSpaces()
-            return simpleMatch.withPlace()
+            resultTokens.add(simpleMatch.withPlace())
+            return
         }
 
         val word = nextWord()
-        if (!quoteOpened && word.startsWith("//")) {
+        if (word.startsWith("//")) {
             skipLine()
-            if (ended) return null
-            return next()
+            return
         }
         skipSpaces()
         val wordToken = wordTokensMap[word]
-        if (wordToken != null) return wordToken.withPlace()
+        if (wordToken != null) {
+            resultTokens.add(wordToken.withPlace())
+            return
+        }
 
         word.toIntOrNull()?.let {
-            return Token.IntConstant(it).withPlace()
+            resultTokens.add(Token.IntLiteral(it).withPlace())
+            return
         }
 
         wordExtractedAfterQuoteOpened = true
-        return Token.JustString(word).withPlace()
+        resultTokens.add(Token.JustString(word).withPlace())
+        return
+    }
+
+    private fun emitStringLiteral() {
+        val buffer = StringBuilder()
+        var read = get()
+
+        while (!ended && read != '"') {
+            if (read == '\\') {
+                when (val escapeCode = moveAndGet()) {
+                    'r' -> buffer.append('\r')
+                    'n' -> buffer.append('\n')
+                    't' -> buffer.append('\t')
+                    '\\' -> buffer.append('\\')
+                    '"' -> buffer.append('"')
+                    else -> throw IllegalStateException("Unknown escape code: $escapeCode")
+                }
+                read = moveAndGet()
+            } else {
+                buffer.append(read)
+                read = moveAndGet()
+            }
+        }
+
+        resultTokens.add(Token.StringLiteral(buffer.toString()).withPlace())
     }
 
     private fun nextWord(): String {
         val buffer = StringBuilder()
         var read = get()
-        if (quoteOpened) {
-            while (!ended && read != '"') {
-                if (read == '\\') {
-                    when (val escapeCode = moveAndGet()) {
-                        'r' -> buffer.append('\r')
-                        'n' -> buffer.append('\n')
-                        't' -> buffer.append('\t')
-                        '\\' -> buffer.append('\\')
-                        '"' -> buffer.append('"')
-                        else -> throw IllegalStateException("Unknown escape code: $escapeCode")
-                    }
-                    read = moveAndGet()
-                } else {
-                    buffer.append(read)
-                    read = moveAndGet()
-                }
-            }
-        } else {
-            while (!ended && !read.isWhitespace() && read !in simpleMatchTokensMap) {
-                buffer.append(read)
-                read = moveAndGet()
-            }
+
+        while (!ended && !read.isWhitespace() && read !in simpleMatchTokensMap) {
+            buffer.append(read)
+            read = moveAndGet()
         }
 
         return buffer.toString()

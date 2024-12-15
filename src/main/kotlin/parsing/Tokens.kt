@@ -4,14 +4,14 @@ sealed class Token {
     var line: Int = 0
     var column: Int = 0
 
-    data object TrueSpecialValue : Token() {
+    data object TrueLiteral : Token() {
         override fun toString() = "true"
     }
-    data object FalseSpecialValue : Token() {
+    data object FalseLiteral : Token() {
         override fun toString() = "false"
     }
 
-    data object VoidSpecialValue : Token()
+    data object VoidLiteral : Token()
 
     data object Fun : Token()
     data object Var : Token()
@@ -34,10 +34,6 @@ sealed class Token {
         override fun toString() = "}"
     }
 
-    data object DoubleQuote: Token() {
-        override fun toString() = "\""
-    }
-
     data object DotOperator: Token() {
         override fun toString() = "."
     }
@@ -49,20 +45,23 @@ sealed class Token {
         override fun toString() = "="
     }
 
-    data class IntConstant(val value: Int): Token() {
+    data class StringLiteral(val value: String): Token() {
+        override fun toString() = "\"$value\""
+    }
+    data class IntLiteral(val value: Int): Token() {
         override fun toString() = "$value"
     }
     data class JustString(val value: String): Token() {
-        override fun toString(): String = "\"$value\""
+        override fun toString(): String = value
     }
 }
 
-val Token.isConstantSignal: Boolean
+val Token.isLiteral: Boolean
     get() = when (this) {
-        Token.TrueSpecialValue -> true
-        Token.FalseSpecialValue -> true
-        Token.VoidSpecialValue -> true
-        Token.DoubleQuote -> true
-        is Token.IntConstant -> true
+        Token.TrueLiteral -> true
+        Token.FalseLiteral -> true
+        Token.VoidLiteral -> true
+        is Token.StringLiteral -> true
+        is Token.IntLiteral -> true
         else -> false
     }

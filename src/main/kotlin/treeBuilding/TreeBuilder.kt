@@ -1,7 +1,7 @@
 package treeBuilding
 
 import parsing.Token
-import parsing.isConstantSignal
+import parsing.isLiteral
 import shared.WrappedInt
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -165,7 +165,7 @@ fun buildEvaluable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
 fun buildConstantOrVariable(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable {
     val currentToken = tokens[index.value]
 
-    return if (currentToken.isConstantSignal) buildCompilationConstant(tokens, index)
+    return if (currentToken.isLiteral) buildCompilationConstant(tokens, index)
     else buildVariableName(tokens, index)
 }
 
@@ -231,22 +231,12 @@ fun buildFunctionCall(tokens: List<Token>, index: WrappedInt): TreeNode.Function
 
 fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.Evaluable.CompilationConstant {
     return when (val constantValue = tokens[index.value++]) {
-        is Token.TrueSpecialValue -> TreeNode.Evaluable.CompilationConstant.BoolNode(true)
-        is Token.FalseSpecialValue -> TreeNode.Evaluable.CompilationConstant.BoolNode(false)
+        is Token.TrueLiteral -> TreeNode.Evaluable.CompilationConstant.BoolNode(true)
+        is Token.FalseLiteral -> TreeNode.Evaluable.CompilationConstant.BoolNode(false)
+        is Token.VoidLiteral -> TreeNode.Evaluable.CompilationConstant.VoidNode
 
-        is Token.DoubleQuote -> {
-            val innerText = tokens[index.value++]
-            innerText.expectType<Token.JustString>()
-
-            val closingQuote = tokens[index.value++]
-            closingQuote.expectType<Token.DoubleQuote>()
-
-            TreeNode.Evaluable.CompilationConstant.StringNode(innerText.value)
-        }
-
-        is Token.VoidSpecialValue -> TreeNode.Evaluable.CompilationConstant.VoidNode
-
-        is Token.IntConstant -> TreeNode.Evaluable.CompilationConstant.IntNode(constantValue.value)
+        is Token.StringLiteral -> TreeNode.Evaluable.CompilationConstant.StringNode(constantValue.value)
+        is Token.IntLiteral -> TreeNode.Evaluable.CompilationConstant.IntNode(constantValue.value)
 
         else -> error("Unknown constant")
     }
