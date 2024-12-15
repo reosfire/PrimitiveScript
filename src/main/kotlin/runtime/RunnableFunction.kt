@@ -99,6 +99,7 @@ private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): Callabl
          is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable \"${evaluable.name}\" not found")
 
          is TreeNode.Evaluable.CompilationConstant.IntNode -> IntHandle(evaluable.value)
+         is TreeNode.Evaluable.CompilationConstant.DoubleNode -> DoubleHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.BoolNode -> BoolHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.StringNode -> StringHandle(evaluable.value)
 

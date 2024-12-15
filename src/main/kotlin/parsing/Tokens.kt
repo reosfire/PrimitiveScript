@@ -51,6 +51,9 @@ sealed class Token {
     data class IntLiteral(val value: Int): Token() {
         override fun toString() = "$value"
     }
+    data class DoubleLiteral(val value: Double): Token() {
+        override fun toString() = "$value"
+    }
     data class JustString(val value: String): Token() {
         override fun toString(): String = value
     }
@@ -63,5 +66,6 @@ val Token.isLiteral: Boolean
         Token.VoidLiteral -> true
         is Token.StringLiteral -> true
         is Token.IntLiteral -> true
+        is Token.DoubleLiteral -> true
         else -> false
     }

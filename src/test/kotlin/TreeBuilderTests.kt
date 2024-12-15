@@ -115,6 +115,10 @@ class TreeBuilderTests {
                                 TreeNode.Evaluable.CompilationConstant.IntNode(-10)
                             ),
                             TreeNode.VariableDeclarationNode(
+                                "double",
+                                TreeNode.Evaluable.CompilationConstant.DoubleNode(-12345.67890)
+                            ),
+                            TreeNode.VariableDeclarationNode(
                                 "word",
                                 TreeNode.Evaluable.CompilationConstant.StringNode("string")
                             ),

@@ -1,6 +1,7 @@
 fun main() {
     var int = 1
     var negativeInt = -10
+    var double = -12345.67890
     var word = "string"
     var emptyString = ""
     var spaceString = " "

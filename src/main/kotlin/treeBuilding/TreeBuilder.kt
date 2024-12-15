@@ -237,6 +237,7 @@ fun buildCompilationConstant(tokens: List<Token>, index: WrappedInt): TreeNode.E
 
         is Token.StringLiteral -> TreeNode.Evaluable.CompilationConstant.StringNode(constantValue.value)
         is Token.IntLiteral -> TreeNode.Evaluable.CompilationConstant.IntNode(constantValue.value)
+        is Token.DoubleLiteral -> TreeNode.Evaluable.CompilationConstant.DoubleNode(constantValue.value)
 
         else -> error("Unknown constant")
     }

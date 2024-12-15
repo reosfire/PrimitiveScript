@@ -34,10 +34,9 @@ fun tokenize(source: String): List<Token> {
 }
 
 class Lexer(private val source: String) {
-    val ended: Boolean get() = currentIndex >= source.length
+    private val ended: Boolean get() = currentIndex >= source.length
 
     private var currentIndex = 0
-    private var wordExtractedAfterQuoteOpened = false
 
     private var line = 0
     private var column = 0
@@ -57,6 +56,12 @@ class Lexer(private val source: String) {
             getAndMove() // consume open "
             emitStringLiteral()
             getAndMove() // consume close "
+            skipSpaces()
+            return
+        }
+
+        if (startSymbol.isDigit() || startSymbol == '-') {
+            emitNumberLiteral()
             skipSpaces()
             return
         }
@@ -82,12 +87,6 @@ class Lexer(private val source: String) {
             return
         }
 
-        word.toIntOrNull()?.let {
-            resultTokens.add(Token.IntLiteral(it).withPlace())
-            return
-        }
-
-        wordExtractedAfterQuoteOpened = true
         resultTokens.add(Token.JustString(word).withPlace())
         return
     }
@@ -114,6 +113,32 @@ class Lexer(private val source: String) {
         }
 
         resultTokens.add(Token.StringLiteral(buffer.toString()).withPlace())
+    }
+
+    private fun emitNumberLiteral() {
+        val buffer = StringBuilder()
+        var read = get()
+        if (read == '-') {
+            buffer.append(read)
+            read = moveAndGet()
+        }
+
+        while (!ended && read.isDigit()) {
+            buffer.append(read)
+            read = moveAndGet()
+        }
+
+        if (read == '.') {
+            buffer.append(read)
+            read = moveAndGet()
+            while (!ended && read.isDigit()) {
+                buffer.append(read)
+                read = moveAndGet()
+            }
+            resultTokens.add(Token.DoubleLiteral(buffer.toString().toDouble()).withPlace())
+        } else {
+            resultTokens.add(Token.IntLiteral(buffer.toString().toInt()).withPlace())
+        }
     }
 
     private fun nextWord(): String {

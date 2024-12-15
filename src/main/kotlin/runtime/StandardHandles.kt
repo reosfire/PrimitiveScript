@@ -70,6 +70,41 @@ class IntHandle(
     override fun toString() = value.toString()
 }
 
+class DoubleHandle(
+    var value: Double
+): CallableClass {
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "set" -> {
+            value = (args[0] as DoubleHandle).value
+            VoidHandle
+        }
+        "plus" -> DoubleHandle(value + (args[0] as DoubleHandle).value)
+        "minus" -> DoubleHandle(value - (args[0] as DoubleHandle).value)
+        "multiply" -> DoubleHandle(value * (args[0] as DoubleHandle).value)
+        "divide" -> DoubleHandle(value / (args[0] as DoubleHandle).value)
+        "mod" -> DoubleHandle(value % (args[0] as DoubleHandle).value)
+
+        "greater" -> BoolHandle(value > (args[0] as DoubleHandle).value)
+        "less" -> BoolHandle(value < (args[0] as DoubleHandle).value)
+        "greaterOrEqual" -> BoolHandle(value >= (args[0] as DoubleHandle).value)
+        "lessOrEqual" -> BoolHandle(value <= (args[0] as DoubleHandle).value)
+        "equal" -> BoolHandle(value == (args[0] as? DoubleHandle)?.value)
+
+        "decrement" -> {
+            value--
+            VoidHandle
+        }
+        "increment" -> {
+            value++
+            VoidHandle
+        }
+
+        else -> error("function \"IntHandle::$functionName\" not found")
+    }
+
+    override fun toString() = value.toString()
+}
+
 class LongHandle(
     var value: Long
 ): CallableClass {
@@ -220,6 +255,15 @@ class ConstructorHandle: CallableClass {
                     is IntHandle -> LongHandle(arg.value.toLong())
                     is LongHandle -> LongHandle(arg.value)
                     is StringHandle -> LongHandle(arg.value.toLong())
+                    else -> error("Cannot convert $arg to long")
+                }
+            }
+            "double" -> {
+                when(val arg = args[0]) {
+                    is IntHandle -> DoubleHandle(arg.value.toDouble())
+                    is LongHandle -> DoubleHandle(arg.value.toDouble())
+                    is DoubleHandle -> DoubleHandle(arg.value)
+                    is StringHandle -> DoubleHandle(arg.value.toDouble())
                     else -> error("Cannot convert $arg to long")
                 }
             }

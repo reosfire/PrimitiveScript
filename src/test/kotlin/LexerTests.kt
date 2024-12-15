@@ -102,6 +102,11 @@ class LexerTests {
                 Token.IntLiteral(-10),
 
                 Token.Var,
+                Token.JustString("double"),
+                Token.AssignOperator,
+                Token.DoubleLiteral(-12345.67890),
+
+                Token.Var,
                 Token.JustString("word"),
                 Token.AssignOperator,
                 Token.StringLiteral("string"),
