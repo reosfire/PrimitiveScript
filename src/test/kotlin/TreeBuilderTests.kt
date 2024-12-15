@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 class TreeBuilderTests {
     @Test
     fun testSingleEmptyFunction() {
-        val script = getTestScript("singleEmptyFunction.psc")
+        val script = getTestScript("singleEmptyFunction")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -28,7 +28,7 @@ class TreeBuilderTests {
 
     @Test
     fun testTwoEmptyFunctions() {
-        val script = getTestScript("twoEmptyFunctions.psc")
+        val script = getTestScript("twoEmptyFunctions")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -55,7 +55,7 @@ class TreeBuilderTests {
 
     @Test
     fun testOneArgumentFunctionLexing() {
-        val script = getTestScript("oneArgumentFunction.psc")
+        val script = getTestScript("oneArgumentFunction")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -75,7 +75,7 @@ class TreeBuilderTests {
 
     @Test
     fun testThreeArgumentsFunctionLexing() {
-        val script = getTestScript("threeArgumentsFunction.psc")
+        val script = getTestScript("threeArgumentsFunction")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -95,7 +95,7 @@ class TreeBuilderTests {
 
     @Test
     fun testVariableDeclaration() {
-        val script = getTestScript("variableDeclarations.psc")
+        val script = getTestScript("variableDeclarations")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -164,7 +164,7 @@ class TreeBuilderTests {
 
     @Test
     fun testFunctionCalls() {
-        val script = getTestScript("functionCalls.psc")
+        val script = getTestScript("functionCalls")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -314,7 +314,7 @@ class TreeBuilderTests {
 
     @Test
     fun testFunctionCallsWithCallableInferred() {
-        val script = getTestScript("functionCallsWithCallableInferred.psc")
+        val script = getTestScript("functionCallsWithCallableInferred")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -464,7 +464,7 @@ class TreeBuilderTests {
 
     @Test
     fun testBuildingIfs() {
-        val script = getTestScript("ifStatement.psc")
+        val script = getTestScript("ifStatement")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -523,7 +523,7 @@ class TreeBuilderTests {
 
     @Test
     fun testWhileStatement() {
-        val script = getTestScript("whileStatement.psc")
+        val script = getTestScript("whileStatement")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 

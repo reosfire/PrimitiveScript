@@ -6,7 +6,7 @@ import kotlin.test.assertContentEquals
 class LexerTests {
     @Test
     fun testSingleEmptyFunctionLexing() {
-        val lexingResult = tokenize(getTestScript("singleEmptyFunction.psc"))
+        val lexingResult = tokenize(getTestScript("singleEmptyFunction"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -22,7 +22,7 @@ class LexerTests {
 
     @Test
     fun testTwoEmptyFunctionsLexing() {
-        val lexingResult = tokenize(getTestScript("twoEmptyFunctions.psc"))
+        val lexingResult = tokenize(getTestScript("twoEmptyFunctions"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -44,7 +44,7 @@ class LexerTests {
 
     @Test
     fun testOneArgumentFunctionLexing() {
-        val lexingResult = tokenize(getTestScript("oneArgumentFunction.psc"))
+        val lexingResult = tokenize(getTestScript("oneArgumentFunction"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -61,7 +61,7 @@ class LexerTests {
 
     @Test
     fun getThreeArgumentsFunctionLexing() {
-        val lexingResult = tokenize(getTestScript("threeArgumentsFunction.psc"))
+        val lexingResult = tokenize(getTestScript("threeArgumentsFunction"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -82,7 +82,7 @@ class LexerTests {
 
     @Test
     fun testVariableDeclarationLexing() {
-        val lexingResult = tokenize(getTestScript("variableDeclarations.psc"))
+        val lexingResult = tokenize(getTestScript("variableDeclarations"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -159,7 +159,7 @@ class LexerTests {
 
     @Test
     fun testFunctionCalls() {
-        val lexingResult = tokenize(getTestScript("functionCalls.psc"))
+        val lexingResult = tokenize(getTestScript("functionCalls"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -260,7 +260,7 @@ class LexerTests {
 
     @Test
     fun testVariableDeclarationWithCommentsLexing() {
-        val lexingResult = tokenize(getTestScript("variableDeclarationsWithComments.psc"))
+        val lexingResult = tokenize(getTestScript("variableDeclarationsWithComments"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -337,7 +337,7 @@ class LexerTests {
 
     @Test
     fun testFunctionCallsWithCallableInferred() {
-        val lexingResult = tokenize(getTestScript("functionCallsWithCallableInferred.psc"))
+        val lexingResult = tokenize(getTestScript("functionCallsWithCallableInferred"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -414,7 +414,7 @@ class LexerTests {
 
     @Test
     fun testIfStatement() {
-        val lexingResult = tokenize(getTestScript("ifStatement.psc"))
+        val lexingResult = tokenize(getTestScript("ifStatement"))
         assertContentEquals(
             listOf(
                 Token.Fun,
@@ -462,7 +462,7 @@ class LexerTests {
 
     @Test
     fun testWhileStatement() {
-        val lexingResult = tokenize(getTestScript("whileStatement.psc"))
+        val lexingResult = tokenize(getTestScript("whileStatement"))
         assertContentEquals(
             listOf(
                 Token.Fun,

@@ -11,7 +11,7 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoop(iterations: Int) {
-        val script = getTestScript("incrementInLoop.psc")
+        val script = getTestScript("incrementInLoop")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -30,7 +30,7 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInWhileTrueWithBreak(iterations: Int) {
-        val script = getTestScript("incrementInWhileTrueWithBreak.psc")
+        val script = getTestScript("incrementInWhileTrueWithBreak")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -49,7 +49,7 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoopWithRecursion(iterations: Int) {
-        val script = getTestScript("incrementInLoopWithRecursion.psc")
+        val script = getTestScript("incrementInLoopWithRecursion")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
@@ -68,7 +68,7 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 1, 2, 3, 10, 15, 20])
     fun binaryDoublePower(power: Int) {
-        val script = getTestScript("binaryDoublePower.psc")
+        val script = getTestScript("binaryDoublePower")
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
 
