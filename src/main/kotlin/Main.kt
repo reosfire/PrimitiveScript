@@ -1,5 +1,6 @@
 import parsing.tokenize
 import runtime.*
+import treeBuilding.PrettyPrinter
 import treeBuilding.TreeNode
 import treeBuilding.buildTree
 import java.io.File
