@@ -212,6 +212,33 @@ class ListHandle(
     override fun toString() = items.joinToString(", ", "[", "]")
 }
 
+class ArrayHandle(
+    private val items: Array<CallableClass>
+): CallableClass {
+
+    override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {
+        "get" -> {
+            val index = (args[0] as IntHandle).value
+            if (index < 0 || index >= items.size) {
+                error("Index out of bounds")
+            }
+            items[index]
+        }
+        "set" -> {
+            val index = (args[0] as IntHandle).value
+            if (index < 0 || index >= items.size) {
+                error("Index out of bounds")
+            }
+            items[index] = args[1]
+            VoidHandle
+        }
+        "size" -> IntHandle(items.size)
+        else -> error("function \"ArrayHandle::$functionName\" not found")
+    }
+
+    override fun toString() = items.joinToString(", ", "[", "]")
+}
+
 class ThisHandle(
     val loadedFunctions: Map<String, RunnableFunction>
 ): CallableClass {
@@ -243,6 +270,7 @@ class ConstructorHandle: CallableClass {
     override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass {
         return when (functionName) {
             "list" -> ListHandle(args.toMutableList())
+            "array" -> ArrayHandle(Array((args[0] as IntHandle).value) { VoidHandle })
             "int" -> {
                 when(val arg = args[0]) {
                     is IntHandle -> IntHandle(arg.value)

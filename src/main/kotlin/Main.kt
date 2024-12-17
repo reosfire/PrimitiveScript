@@ -1,6 +1,5 @@
 import parsing.tokenize
 import runtime.*
-import treeBuilding.PrettyPrinter
 import treeBuilding.TreeNode
 import treeBuilding.buildTree
 import java.io.File
@@ -8,7 +7,7 @@ import kotlin.time.measureTime
 
 fun main() {
     val time = measureTime {
-        runSingleScript("./examples/adventOfCode/7_2.prs", "main", arrayOf())
+        runSingleScript("./examples/adventOfCode/8_2.prs", "main", arrayOf())
     }
     println("Time: $time")
     //runSingleScript("./examples/sorts.psc", "main", arrayOf())

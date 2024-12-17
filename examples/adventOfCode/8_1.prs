@@ -1,0 +1,86 @@
+fun main() {
+    var lines = new.File("input.txt").readText().split("\r\n")
+    var n = lines.size()
+    var m = lines.get(0).size()
+
+    var antinodes = new.array(n)
+    var i = 0
+    while (i.less(n)) {
+        var line = new.array(m)
+        var j = 0
+        while (j.less(m)) {
+            line.set(j, false)
+            j.increment()
+        }
+        antinodes.set(i, line)
+        i.increment()
+    }
+
+    var i = 0
+    while (i.less(n)) {
+        var j = 0
+        while (j.less(m)) {
+            var first = lines.get(i).get(j)
+            if (first.equal(".")) {
+                j.increment()
+                continue
+            }
+
+            var k = 0
+            while (k.less(n)) {
+                var l = 0
+                while (l.less(m)) {
+                    if (k.equal(i).and(l.equal(j))) {
+                        l.increment()
+                        continue
+                    }
+
+                    var second = lines.get(k).get(l)
+                    if (first.equal(second).not()) {
+                        l.increment()
+                        continue
+                    }
+
+                    var dr = k.minus(i)
+                    var dc = l.minus(j)
+
+                    var r = i.minus(dr)
+                    var c = j.minus(dc)
+                    if (inRange(r, 0, n).and(inRange(c, 0, m))) {
+                        antinodes.get(r).set(c, true)
+                    }
+
+                    var r = k.plus(dr)
+                    var c = l.plus(dc)
+                    if (inRange(r, 0, n).and(inRange(c, 0, m))) {
+                        antinodes.get(r).set(c, true)
+                    }
+
+                    l.increment()
+                }
+                k.increment()
+            }
+
+            j.increment()
+        }
+        i.increment()
+    }
+
+    var result = 0
+    var i = 0
+    while (i.less(n)) {
+        var j = 0
+        while (j.less(m)) {
+            if (antinodes.get(i).get(j)) {
+                result.increment()
+            }
+            j.increment()
+        }
+        i.increment()
+    }
+    println(result)
+}
+
+fun inRange(i, l, r) {
+    return i.greaterOrEqual(l).and(i.less(r))
+}
