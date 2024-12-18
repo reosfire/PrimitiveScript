@@ -1,0 +1,98 @@
+fun main() {
+    var input = new.File("input.txt").readText().split("\r\n")
+    var matrix = new.array(input.size())
+    var i = 0
+    while (i.less(input.size())) {
+        var line = input.get(i)
+        var matrixLine = new.array(line.size())
+        var j = 0
+        while (j.less(line.size())) {
+            matrixLine.set(j, new.int(line.get(j)))
+            j.increment()
+        }
+        matrix.set(i, matrixLine)
+        i.increment()
+    }
+
+    var result = 0
+
+    var i = 0
+    while (i.less(matrix.size())) {
+        var j = 0
+        while (j.less(matrix.get(0).size())) {
+            if (matrix.get(i).get(j).equal(0)) {
+                var goodPositions = new.list()
+                fillGoodPositions(matrix, i, j, goodPositions)
+                result.plusAssign(goodPositions.size())
+            }
+            j.increment()
+        }
+        i.increment()
+    }
+
+    println(result)
+}
+
+fun fillGoodPositions(matrix, row, col, goodPositions) {
+    var current = matrix.get(row).get(col)
+    if (current.equal(9)) {
+        var newPosition = newPosition(row, col)
+        if (containsPosition(goodPositions, newPosition).not()) {
+            goodPositions.add(newPosition)
+        }
+        return void
+    }
+
+    var next = current.plus(1)
+
+    if (validCoordinates(matrix, row.minus(1), col)) {
+        if (matrix.get(row.minus(1)).get(col).equal(next)) {
+            fillGoodPositions(matrix, row.minus(1), col, goodPositions)
+        }
+    }
+    if (validCoordinates(matrix, row.plus(1), col)) {
+        if (matrix.get(row.plus(1)).get(col).equal(next)) {
+            fillGoodPositions(matrix, row.plus(1), col, goodPositions)
+        }
+    }
+    if (validCoordinates(matrix, row, col.minus(1))) {
+        if (matrix.get(row).get(col.minus(1)).equal(next)) {
+            fillGoodPositions(matrix, row, col.minus(1), goodPositions)
+        }
+    }
+    if (validCoordinates(matrix, row, col.plus(1))) {
+        if (matrix.get(row).get(col.plus(1)).equal(next)) {
+            fillGoodPositions(matrix, row, col.plus(1), goodPositions)
+        }
+    }
+}
+
+fun validCoordinates(matrix, row, col) {
+    return inRange(row, 0, matrix.size()).and(inRange(col, 0, matrix.get(0).size()))
+}
+
+fun inRange(i, min, max) {
+    return i.greaterOrEqual(min).and(i.less(max))
+}
+
+fun containsPosition(list, position) {
+    var i = 0
+    while (i.less(list.size())) {
+        if (positionsEqual(list.get(i), position)) {
+            return true
+        }
+        i.increment()
+    }
+    return false
+}
+
+fun positionsEqual(a, b) {
+    return a.get(0).equal(b.get(0)).and(a.get(1).equal(b.get(1)))
+}
+
+fun newPosition(row, col) {
+    var res = new.array(2)
+    res.set(0, row)
+    res.set(1, col)
+    return res
+}

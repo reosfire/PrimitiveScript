@@ -55,6 +55,23 @@ class IntHandle(
         "lessOrEqual" -> BoolHandle(value <= (args[0] as IntHandle).value)
         "equal" -> BoolHandle(value == (args[0] as? IntHandle)?.value)
 
+        "plusAssign" -> {
+            value += (args[0] as IntHandle).value
+            VoidHandle
+        }
+        "minusAssign" -> {
+            value -= (args[0] as IntHandle).value
+            VoidHandle
+        }
+        "multiplyAssign" -> {
+            value *= (args[0] as IntHandle).value
+            VoidHandle
+        }
+        "divideAssign" -> {
+            value /= (args[0] as IntHandle).value
+            VoidHandle
+        }
+
         "decrement" -> {
             value--
             VoidHandle

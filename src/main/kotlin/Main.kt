@@ -7,7 +7,7 @@ import kotlin.time.measureTime
 
 fun main() {
     val time = measureTime {
-        runSingleScript("./examples/adventOfCode/9_2.prs", "main", arrayOf())
+        runSingleScript("./examples/adventOfCode/10_1.prs", "main", arrayOf())
     }
     println("Time: $time")
     //runSingleScript("./examples/sorts.psc", "main", arrayOf())
