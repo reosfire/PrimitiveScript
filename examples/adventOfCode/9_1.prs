@@ -1,0 +1,95 @@
+fun main() {
+    var input = new.File("input.txt").readText()
+
+    var decompressed = new.list()
+
+    var i = 0
+    while (i.less(input.size())) {
+        var j = int(input.get(i))
+        while (j.greater(0)) {
+            decompressed.add(i.divide(2))
+            j.decrement()
+        }
+
+        i.increment()
+
+        if (i.greaterOrEqual(input.size())) {
+            break
+        }
+
+        var j = int(input.get(i))
+        while (j.greater(0)) {
+            decompressed.add(-1)
+            j.decrement()
+        }
+
+        i.increment()
+    }
+
+    println(decompressed.size())
+
+    var lastNonNegativeIndex = decompressed.size().minus(1)
+    var firstNegativeIndex = 0
+
+    while (true) {
+        var lastNonNegativeIndex = findLastNonNegativeIndex(decompressed, lastNonNegativeIndex)
+        if (lastNonNegativeIndex.equal(-1)) {
+            break
+        }
+
+        var firstNegativeIndex = findFirstNegativeIndex(decompressed, firstNegativeIndex)
+        if (firstNegativeIndex.equal(-1)) {
+            break
+        }
+
+        if (lastNonNegativeIndex.less(firstNegativeIndex)) {
+            break
+        }
+
+        swap(decompressed, lastNonNegativeIndex, firstNegativeIndex)
+    }
+
+    var checksum = new.long(0)
+
+    var i = 0
+    while (i.less(decompressed.size())) {
+        if (decompressed.get(i).less(0)) {
+            break
+        }
+        var current = new.long(decompressed.get(i).multiply(i))
+        checksum.set(checksum.plus(current))
+        i.increment()
+    }
+
+    println(checksum)
+}
+
+fun findLastNonNegativeIndex(list, start) {
+    var i = new.int(start)
+    while (i.greaterOrEqual(0)) {
+        if (list.get(i).greaterOrEqual(0)) {
+            return i
+        }
+        i.decrement()
+    }
+
+    return -1
+}
+
+fun findFirstNegativeIndex(list, start) {
+    var i = new.int(start)
+    while (i.less(list.size())) {
+        if (list.get(i).less(0)) {
+            return i
+        }
+        i.increment()
+    }
+
+    return -1
+}
+
+fun swap(list, i, j) {
+    var temp = list.get(i)
+    list.set(i, list.get(j))
+    list.set(j, temp)
+}
