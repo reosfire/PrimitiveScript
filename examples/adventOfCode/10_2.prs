@@ -1,0 +1,74 @@
+fun main() {
+    var input = new.File("input.txt").readText().split("\r\n")
+    var matrix = new.array(input.size())
+    var i = 0
+    while (i.less(input.size())) {
+        var line = input.get(i)
+        var matrixLine = new.array(line.size())
+        var j = 0
+        while (j.less(line.size())) {
+            matrixLine.set(j, new.int(line.get(j)))
+            j.increment()
+        }
+        matrix.set(i, matrixLine)
+        i.increment()
+    }
+
+    var result = 0
+
+    var i = 0
+    while (i.less(matrix.size())) {
+        var j = 0
+        while (j.less(matrix.get(0).size())) {
+            if (matrix.get(i).get(j).equal(0)) {
+                result.plusAssign(getScore(matrix, i, j))
+            }
+            j.increment()
+        }
+        i.increment()
+    }
+
+    println(result)
+}
+
+fun getScore(matrix, row, col) {
+    var current = matrix.get(row).get(col)
+    if (current.equal(9)) {
+        return 1
+    }
+
+    var next = current.plus(1)
+
+    var score = 0
+
+    if (validCoordinates(matrix, row.minus(1), col)) {
+        if (matrix.get(row.minus(1)).get(col).equal(next)) {
+            score.plusAssign(getScore(matrix, row.minus(1), col))
+        }
+    }
+    if (validCoordinates(matrix, row.plus(1), col)) {
+        if (matrix.get(row.plus(1)).get(col).equal(next)) {
+            score.plusAssign(getScore(matrix, row.plus(1), col))
+        }
+    }
+    if (validCoordinates(matrix, row, col.minus(1))) {
+        if (matrix.get(row).get(col.minus(1)).equal(next)) {
+            score.plusAssign(getScore(matrix, row, col.minus(1)))
+        }
+    }
+    if (validCoordinates(matrix, row, col.plus(1))) {
+        if (matrix.get(row).get(col.plus(1)).equal(next)) {
+            score.plusAssign(getScore(matrix, row, col.plus(1)))
+        }
+    }
+
+    return score
+}
+
+fun validCoordinates(matrix, row, col) {
+    return inRange(row, 0, matrix.size()).and(inRange(col, 0, matrix.get(0).size()))
+}
+
+fun inRange(i, min, max) {
+    return i.greaterOrEqual(min).and(i.less(max))
+}
