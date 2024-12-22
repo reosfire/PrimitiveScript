@@ -105,11 +105,10 @@ class Lexer(private val source: String) {
                     '"' -> buffer.append('"')
                     else -> throw IllegalStateException("Unknown escape code: $escapeCode")
                 }
-                read = moveAndGet()
             } else {
                 buffer.append(read)
-                read = moveAndGet()
             }
+            read = moveAndGet()
         }
 
         resultTokens.add(Token.StringLiteral(buffer.toString()).withPlace())
