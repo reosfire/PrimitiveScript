@@ -33,7 +33,7 @@ class Parser(
         functionKeyword.expectType<Token.Fun>()
 
         val name = tokens[index++]
-        name.expectType<Token.JustString>()
+        name.expectType<Token.Identifier>()
 
         val openBracket = tokens[index++]
         openBracket.expectType<Token.OpenRoundBracket>()
@@ -47,7 +47,7 @@ class Parser(
 
         while (true) {
             val parameterName = tokens[index++]
-            parameterName.expectType<Token.JustString>()
+            parameterName.expectType<Token.Identifier>()
 
             parameters.add(parameterName.value)
 
@@ -130,7 +130,7 @@ class Parser(
         type.expectType<Token.Var>()
 
         val name = tokens[index++]
-        name.expectType<Token.JustString>()
+        name.expectType<Token.Identifier>()
 
         val assign = tokens[index++]
         assign.expectType<Token.AssignOperator>()
@@ -210,7 +210,7 @@ class Parser(
 
     private fun buildFunctionCall(): TreeNode.FunctionCallNode {
         val functionName = tokens[index++]
-        functionName.expectType<Token.JustString>()
+        functionName.expectType<Token.Identifier>()
 
         val openBracket = tokens[index++]
         openBracket.expectType<Token.OpenRoundBracket>()
@@ -253,7 +253,7 @@ class Parser(
 
     private fun buildVariableName(): TreeNode.Evaluable.VariableNameNode {
         val variableName = tokens[index++]
-        variableName.expectType<Token.JustString>()
+        variableName.expectType<Token.Identifier>()
 
         return TreeNode.Evaluable.VariableNameNode(variableName.value)
     }

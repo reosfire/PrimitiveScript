@@ -87,7 +87,7 @@ class Lexer(private val source: String) {
             return
         }
 
-        resultTokens.add(Token.JustString(word).withPlace())
+        resultTokens.add(Token.Identifier(word).withPlace())
         return
     }
 

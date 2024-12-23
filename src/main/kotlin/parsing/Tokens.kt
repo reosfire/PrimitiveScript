@@ -54,7 +54,7 @@ sealed class Token {
     data class DoubleLiteral(val value: Double): Token() {
         override fun toString() = "$value"
     }
-    data class JustString(val value: String): Token() {
+    data class Identifier(val value: String): Token() {
         override fun toString(): String = value
     }
 }
