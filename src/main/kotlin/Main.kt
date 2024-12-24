@@ -16,7 +16,7 @@ fun main() {
 fun runSingleScript(path: String, startFunction: String, args: Array<CallableClass>) {
     val sourceCode = File(path).readText()
     val tokens = tokenize(sourceCode)
-    println(tokens)
+    println(tokens.joinToString(" "))
 
     val tree = buildTree(tokens)
     println(tree)

@@ -163,10 +163,170 @@ class Parser(
     }
 
     private fun buildEvaluable(): TreeNode.Evaluable {
+        return buildOr()
+    }
+
+    private fun buildOr(): TreeNode.Evaluable {
+        var result = buildAnd()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.OrOperator) {
+                index++
+
+                val right = buildAnd()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("or", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildAnd(): TreeNode.Evaluable {
+        var result = buildEquality()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.AndOperator) {
+                index++
+
+                val right = buildEquality()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("and", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildEquality(): TreeNode.Evaluable {
+        var result = buildComparison()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.EqualOperator) {
+                index++
+
+                val right = buildComparison()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("equal", listOf(right))))
+            } else if (currentToken is Token.NotEqualOperator) {
+                index++
+
+                val right = buildComparison()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("notEqual", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildComparison(): TreeNode.Evaluable {
+        var result = buildSum()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.LessOperator) {
+                index++
+
+                val right = buildSum()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("less", listOf(right))))
+            } else if (currentToken is Token.LessOrEqualOperator) {
+                index++
+
+                val right = buildSum()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("lessOrEqual", listOf(right))))
+            } else if (currentToken is Token.GreaterOperator) {
+                index++
+
+                val right = buildSum()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("greater", listOf(right))))
+            } else if (currentToken is Token.GreaterOrEqualOperator) {
+                index++
+
+                val right = buildSum()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("greaterOrEqual", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildSum(): TreeNode.Evaluable {
+        var result = buildFactor()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.PlusOperator) {
+                index++
+
+                val right = buildFactor()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("plus", listOf(right))))
+            } else if (currentToken is Token.MinusOperator) {
+                index++
+
+                val right = buildFactor()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("minus", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildFactor(): TreeNode.Evaluable {
+        var result = buildSimpleEvaluable()
+
+        while (true) {
+            val currentToken = tokens[index]
+
+            if (currentToken is Token.MultiplyOperator) {
+                index++
+
+                val right = buildSimpleEvaluable()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("multiply", listOf(right))))
+            } else if (currentToken is Token.DivideOperator) {
+                index++
+
+                val right = buildSimpleEvaluable()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("divide", listOf(right))))
+            } else if (currentToken is Token.ModuloOperator) {
+                index++
+
+                val right = buildSimpleEvaluable()
+                result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("modulo", listOf(right))))
+            } else {
+                break
+            }
+        }
+
+        return result
+    }
+
+    private fun buildSimpleEvaluable(): TreeNode.Evaluable {
         val nextToken = tokens[index + 1]
 
         return if (nextToken is Token.DotOperator) buildFunctionCallChain()
         else if (nextToken is Token.OpenRoundBracket) buildFunctionCallChain()
+        else if (tokens[index] is Token.OpenRoundBracket) {
+            index++
+            val result = buildEvaluable()
+            val closedBracket = tokens[index++]
+            closedBracket.expectType<Token.ClosedRoundBracket>()
+            result
+        }
         else return buildConstantOrVariable()
     }
 

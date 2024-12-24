@@ -14,18 +14,6 @@ private val wordTokensMap = mapOf(
     "continue" to Token.Continue,
 )
 
-private val simpleMatchTokensMap = mapOf(
-    '(' to Token.OpenRoundBracket,
-    ')' to Token.ClosedRoundBracket,
-    '{' to Token.OpenCurlyBracket,
-    '}' to Token.ClosedCurlyBracket,
-
-    '.' to Token.DotOperator,
-    ',' to Token.CommaOperator,
-
-    '=' to Token.AssignOperator,
-)
-
 fun tokenize(source: String): List<Token> {
     val lexer = Lexer(source.trim())
     lexer.run()
@@ -60,26 +48,24 @@ class Lexer(private val source: String) {
             return
         }
 
-        if (startSymbol.isDigit() || startSymbol == '-') {
+        if (startSymbol.isDigit() || startSymbol == '-' && !ended && source[currentIndex + 1].isDigit()) {
             emitNumberLiteral()
             skipSpaces()
             return
         }
 
-        val simpleMatch = simpleMatchTokensMap[startSymbol]
+        if (startSymbol == '/' && currentIndex + 1 < source.length && source[currentIndex + 1] == '/') {
+            skipLine()
+            return
+        }
 
+        val simpleMatch = simpleMatchToken()
         if (simpleMatch != null) {
-            getAndMove()
-            skipSpaces()
-            resultTokens.add(simpleMatch.withPlace())
+            emitSimpleMatchToken(simpleMatch)
             return
         }
 
         val word = nextWord()
-        if (word.startsWith("//")) {
-            skipLine()
-            return
-        }
         skipSpaces()
         val wordToken = wordTokensMap[word]
         if (wordToken != null) {
@@ -89,6 +75,81 @@ class Lexer(private val source: String) {
 
         resultTokens.add(Token.Identifier(word).withPlace())
         return
+    }
+
+    private fun simpleMatchToken(): Token? {
+        return when(get()) {
+            '(' -> Token.OpenRoundBracket
+            ')' -> Token.ClosedRoundBracket
+            '{' -> Token.OpenCurlyBracket
+            '}' -> Token.ClosedCurlyBracket
+            '.' -> Token.DotOperator
+            ',' -> Token.CommaOperator
+            '=' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                    currentIndex++
+                    Token.EqualOperator
+                } else {
+                    Token.AssignOperator
+                }
+            }
+            '+' -> Token.PlusOperator
+            '-' -> Token.MinusOperator
+            '*' -> Token.MultiplyOperator
+            '/' -> Token.DivideOperator
+            '%' -> Token.ModuloOperator
+            '<' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                    Token.LessOrEqualOperator
+                } else {
+                    Token.LessOperator
+                }
+            }
+            '>' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                    Token.GreaterOrEqualOperator
+                } else {
+                    Token.GreaterOperator
+                }
+            }
+            '!' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                    Token.NotEqualOperator
+                } else {
+                    null
+                }
+            }
+            '&' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '&') {
+                    Token.AndOperator
+                } else {
+                    null
+                }
+            }
+            '|' -> {
+                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '|') {
+                    Token.OrOperator
+                } else {
+                    null
+                }
+            }
+            else -> null
+        }
+    }
+
+    private fun emitSimpleMatchToken(token: Token) {
+        getAndMove()
+        when (token) {
+            is Token.LessOrEqualOperator -> getAndMove()
+            is Token.GreaterOrEqualOperator -> getAndMove()
+            is Token.EqualOperator -> getAndMove()
+            is Token.NotEqualOperator -> getAndMove()
+            is Token.AndOperator -> getAndMove()
+            is Token.OrOperator -> getAndMove()
+            else -> Unit
+        }
+        skipSpaces()
+        resultTokens.add(token.withPlace())
     }
 
     private fun emitStringLiteral() {
@@ -127,7 +188,7 @@ class Lexer(private val source: String) {
             read = moveAndGet()
         }
 
-        if (read == '.') {
+        if (read == '.' && !ended && source[currentIndex + 1].isDigit()) {
             buffer.append(read)
             read = moveAndGet()
             while (!ended && read.isDigit()) {
@@ -144,7 +205,7 @@ class Lexer(private val source: String) {
         val buffer = StringBuilder()
         var read = get()
 
-        while (!ended && !read.isWhitespace() && read !in simpleMatchTokensMap) {
+        while (!ended && !read.isWhitespace() && simpleMatchToken() == null) {
             buffer.append(read)
             read = moveAndGet()
         }

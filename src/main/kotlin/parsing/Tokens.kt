@@ -38,11 +38,54 @@ sealed class Token {
         override fun toString() = "."
     }
     data object CommaOperator: Token() {
-        override fun toString() = "comma"
+        override fun toString() = ","
     }
 
     data object AssignOperator: Token() {
         override fun toString() = "="
+    }
+
+    data object PlusOperator: Token() {
+        override fun toString() = "+"
+    }
+    data object MinusOperator: Token() {
+        override fun toString() = "-"
+    }
+    data object MultiplyOperator: Token() {
+        override fun toString() = "*"
+    }
+    data object DivideOperator: Token() {
+        override fun toString() = "/"
+    }
+    data object ModuloOperator: Token() {
+        override fun toString() = "%"
+    }
+
+    data object LessOperator: Token() {
+        override fun toString() = "<"
+    }
+    data object LessOrEqualOperator: Token() {
+        override fun toString() = "<="
+    }
+    data object GreaterOperator: Token() {
+        override fun toString() = ">"
+    }
+    data object GreaterOrEqualOperator: Token() {
+        override fun toString() = ">="
+    }
+
+    data object EqualOperator: Token() {
+        override fun toString() = "=="
+    }
+    data object NotEqualOperator: Token() {
+        override fun toString() = "!="
+    }
+
+    data object AndOperator: Token() {
+        override fun toString() = "&&"
+    }
+    data object OrOperator: Token() {
+        override fun toString() = "||"
     }
 
     data class StringLiteral(val value: String): Token() {
