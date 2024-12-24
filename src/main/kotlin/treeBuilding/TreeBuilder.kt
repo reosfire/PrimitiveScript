@@ -60,34 +60,39 @@ class Parser(
     }
 
     private fun buildBody(): TreeNode.BodyNode {
-        val bodyOpen = tokens[index++]
-        bodyOpen.expectType<Token.OpenCurlyBracket>()
+        val bodyOpen = tokens[index]
+        if (bodyOpen is Token.OpenCurlyBracket) {
+            index++
 
-        var bracketsBalance = 1
-        val childrenNodes = mutableListOf<TreeNode>()
-        while (true) {
-            val token = tokens[index]
-            if (token is Token.OpenCurlyBracket) bracketsBalance++
-            else if (token is Token.ClosedCurlyBracket) bracketsBalance--
+            val childrenNodes = mutableListOf<TreeNode>()
+            while (true) {
+                val token = tokens[index]
+                if (token is Token.ClosedCurlyBracket) break
 
-            if (bracketsBalance == 0) break
+                val nextStatement = buildStatement()
 
-            val nodeToAdd = when (token) {
-                Token.If -> buildIf()
-                Token.While -> buildWhile()
-                Token.Var -> buildVariableDeclaration()
-                Token.Return -> buildReturn()
-                Token.Break -> buildBreak()
-                Token.Continue -> buildContinue()
-                else -> buildFunctionCall()
+                childrenNodes.add(nextStatement)
             }
 
-            childrenNodes.add(nodeToAdd)
+            index++
+
+            return TreeNode.BodyNode(childrenNodes)
+        } else {
+            return TreeNode.BodyNode(mutableListOf(buildStatement()))
         }
+    }
 
-        index++
-
-        return TreeNode.BodyNode(childrenNodes)
+    private fun buildStatement(): TreeNode {
+        val token = tokens[index]
+        return when (token) {
+            Token.If -> buildIf()
+            Token.While -> buildWhile()
+            Token.Var -> buildVariableDeclaration()
+            Token.Return -> buildReturn()
+            Token.Break -> buildBreak()
+            Token.Continue -> buildContinue()
+            else -> buildFunctionCall()
+        }
     }
 
     private fun buildIf(): TreeNode.IfNode {
@@ -393,6 +398,7 @@ class Parser(
         }
 
         while (true) {
+            if (index >= tokens.size) break
             val currentToken = tokens[index]
 
             callable = if (currentToken is Token.DotOperator) {

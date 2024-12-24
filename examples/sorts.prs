@@ -57,9 +57,7 @@ fun bubbleSort(numbers) {
 }
 
 fun quickSort(numbers, left, right) {
-    if (left >= right) {
-        return void
-    }
+    if (left >= right) return void
 
     var pivotIndex = partition(numbers, left, right)
     quickSort(numbers, left, pivotIndex - 1)
@@ -89,16 +87,10 @@ fun partition(numbers, left, right) {
 }
 
 fun binarySearch(numbers, left, right, target) {
-    if (left > right) {
-        return -1
-    }
+    if (left > right) return -1
 
     var mid = (left + right) / 2
-    if (numbers[mid] == target) {
-        return mid
-    } else if (numbers[mid] > target) {
-        return binarySearch(numbers, left, mid - 1, target)
-    } else {
-        return binarySearch(numbers, mid + 1, right, target)
-    }
+    if (numbers[mid] == target) return mid
+    else if (numbers[mid] > target) return binarySearch(numbers, left, mid - 1, target)
+    else return binarySearch(numbers, mid + 1, right, target)
 }

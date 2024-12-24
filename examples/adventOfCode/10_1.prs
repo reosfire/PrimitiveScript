@@ -37,58 +37,47 @@ fun fillGoodPositions(matrix, row, col, goodPositions) {
     var current = matrix[row][col]
     if (current == 9) {
         var newPosition = newPosition(row, col)
-        if (!containsPosition(goodPositions, newPosition)) {
+        if (!containsPosition(goodPositions, newPosition))
             goodPositions.add(newPosition)
-        }
         return void
     }
 
     var next = current + 1
 
-    if (validCoordinates(matrix, row - 1, col)) {
-        if (matrix[row - 1][col] == next) {
+    if (validCoordinates(matrix, row - 1, col))
+        if (matrix[row - 1][col] == next)
             fillGoodPositions(matrix, row - 1, col, goodPositions)
-        }
-    }
-    if (validCoordinates(matrix, row + 1, col)) {
-        if (matrix[row + 1][col] == next) {
+
+    if (validCoordinates(matrix, row + 1, col))
+        if (matrix[row + 1][col] == next)
             fillGoodPositions(matrix, row + 1, col, goodPositions)
-        }
-    }
-    if (validCoordinates(matrix, row, col - 1)) {
-        if (matrix[row][col - 1] == next) {
+
+    if (validCoordinates(matrix, row, col - 1))
+        if (matrix[row][col - 1] == next)
             fillGoodPositions(matrix, row, col - 1, goodPositions)
-        }
-    }
-    if (validCoordinates(matrix, row, col + 1)) {
-        if (matrix[row][col + 1] == next) {
+
+    if (validCoordinates(matrix, row, col + 1))
+        if (matrix[row][col + 1] == next)
             fillGoodPositions(matrix, row, col + 1, goodPositions)
-        }
-    }
 }
 
-fun validCoordinates(matrix, row, col) {
+fun validCoordinates(matrix, row, col)
     return inRange(row, 0, matrix.size()) && inRange(col, 0, matrix[0].size())
-}
 
-fun inRange(i, min, max) {
+fun inRange(i, min, max)
     return i >= min && i < max
-}
 
 fun containsPosition(list, position) {
     var i = 0
     while (i < list.size()) {
-        if (positionsEqual(list[i], position)) {
-            return true
-        }
+        if (positionsEqual(list[i], position)) return true
         i.increment()
     }
     return false
 }
 
-fun positionsEqual(a, b) {
+fun positionsEqual(a, b)
     return a[0] == b[0] && a[1] == b[1]
-}
 
 fun newPosition(row, col) {
     var res = new.array(2)
