@@ -194,7 +194,7 @@ class StringHandle(
 }
 
 class ListHandle(
-    private val items: MutableList<CallableClass> = mutableListOf()
+    val items: MutableList<CallableClass> = mutableListOf()
 ): CallableClass {
 
     override fun call(functionName: String, args: Array<CallableClass>, memory: Memory): CallableClass = when (functionName) {

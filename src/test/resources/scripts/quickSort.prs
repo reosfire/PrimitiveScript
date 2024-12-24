@@ -1,0 +1,33 @@
+fun main(numbers) {
+    quickSort(numbers, 0, numbers.size() - 1)
+}
+
+fun quickSort(numbers, left, right) {
+    if (left >= right) return void
+
+    var pivotIndex = partition(numbers, left, right)
+    quickSort(numbers, left, pivotIndex - 1)
+    quickSort(numbers, pivotIndex + 1, right)
+}
+
+fun partition(numbers, left, right) {
+    var pivot = numbers[right]
+    var i = left - 1
+    var j = new.int(left)
+
+    while (j < right) {
+        if (numbers[j] <= pivot) {
+            i.increment()
+            var temp = numbers[i]
+            numbers.set(i, numbers[j])
+            numbers.set(j, temp)
+        }
+        j.increment()
+    }
+
+    var temp = numbers[i + 1]
+    numbers.set(i + 1, numbers[right])
+    numbers.set(right, temp)
+
+    return i + 1
+}

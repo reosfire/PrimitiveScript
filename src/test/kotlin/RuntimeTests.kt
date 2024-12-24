@@ -4,6 +4,10 @@ import parsing.tokenize
 import runtime.*
 import treeBuilding.buildTree
 import kotlin.math.pow
+import kotlin.random.Random
+import kotlin.random.nextInt
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -83,5 +87,36 @@ class RuntimeTests {
 
         assertIs<DoubleHandle>(result)
         assertEquals(2.0.pow(power), result.value)
+    }
+
+    @Test
+    fun randomArraysQuickSortTest() {
+        val random = Random(42)
+
+        val script = getTestScript("quickSort")
+        val tokens = tokenize(script)
+        val tree = buildTree(tokens)
+        val functionsMap = tree.createFunctionsMap()
+
+        repeat(10000) {
+            val memory = Memory()
+            val thisHandle = ThisHandle(functionsMap)
+            memory.globalVariables["this"] = thisHandle
+            memory.globalVariables["new"] = ConstructorHandle()
+
+            val testData = Array(random.nextInt(1..100)) { IntHandle(random.nextInt()) }.toMutableList<CallableClass>()
+            val listHandle = ListHandle(testData)
+            thisHandle.call("main", arrayOf(listHandle), memory)
+
+            for (i in 1..<testData.size) {
+                val prev = testData[i - 1]
+                assertIs<IntHandle>(prev)
+
+                val current = testData[i]
+                assertIs<IntHandle>(current)
+
+                assert(prev.value <= current.value)
+            }
+        }
     }
 }
