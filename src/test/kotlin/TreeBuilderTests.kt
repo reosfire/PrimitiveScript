@@ -1,4 +1,3 @@
-import com.sun.source.tree.Tree
 import parsing.tokenize
 import treeBuilding.TreeNode
 import treeBuilding.buildTree
@@ -175,131 +174,83 @@ class TreeBuilderTests {
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("a"),
-                                listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf()
-                                    )
-                                )
+                                "b",
+                                listOf()
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
+                                TreeNode.Evaluable.FunctionCallNode(
+                                    TreeNode.Evaluable.VariableNameNode("a"),
+                                    "b",
+                                    listOf()
+                                ),
+                                "c",
+                                listOf()
+                            ),
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("a"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf()
-                                    ),
-                                    TreeNode.FunctionCallNode(
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("a"),
                                         "c",
                                         listOf()
                                     )
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("a"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    )
-                                                )
-                                            )
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("a"),
+                                            "c",
+                                            listOf()
+                                        ),
+                                        "d",
+                                        listOf()
                                     ),
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("a"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    )
-                                                )
-                                            )
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("a"),
+                                        "c",
+                                        listOf()
+                                    ),
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("a"),
+                                        "d",
+                                        listOf()
                                     ),
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("a"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                )
-                                            ),
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    ),
-                                                )
-                                            ),
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("a"),
+                                            "c",
+                                            listOf()
+                                        ),
+                                        "d",
+                                        listOf()
                                     ),
-                                )
-                            ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    )
-                                                )
-                                            ),
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("a"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "e",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "f",
-                                                        listOf()
-                                                    )
-                                                )
-                                            ),
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("a"),
+                                            "e",
+                                            listOf()
+                                        ),
+                                        "f",
+                                        listOf()
                                     ),
                                 )
                             )
@@ -325,131 +276,83 @@ class TreeBuilderTests {
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("this"),
-                                listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf()
-                                    )
-                                )
+                                "b",
+                                listOf()
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
+                                TreeNode.Evaluable.FunctionCallNode(
+                                    TreeNode.Evaluable.VariableNameNode("this"),
+                                    "b",
+                                    listOf()
+                                ),
+                                "c",
+                                listOf()
+                            ),
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("this"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf()
-                                    ),
-                                    TreeNode.FunctionCallNode(
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("this"),
                                         "c",
                                         listOf()
                                     )
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("this"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    )
-                                                )
-                                            )
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("this"),
+                                            "c",
+                                            listOf()
+                                        ),
+                                        "d",
+                                        listOf()
                                     ),
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("this"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    )
-                                                )
-                                            )
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("this"),
+                                        "c",
+                                        listOf()
+                                    ),
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.VariableNameNode("this"),
+                                        "d",
+                                        listOf()
                                     ),
                                 )
                             ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
+                            TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode("this"),
+                                "b",
                                 listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                )
-                                            ),
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    ),
-                                                )
-                                            ),
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("this"),
+                                            "c",
+                                            listOf()
+                                        ),
+                                        "d",
+                                        listOf()
                                     ),
-                                )
-                            ),
-                            TreeNode.Evaluable.FunctionCallChainNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                listOf(
-                                    TreeNode.FunctionCallNode(
-                                        "b",
-                                        listOf(
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "c",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "d",
-                                                        listOf()
-                                                    )
-                                                )
-                                            ),
-                                            TreeNode.Evaluable.FunctionCallChainNode(
-                                                TreeNode.Evaluable.VariableNameNode("this"),
-                                                listOf(
-                                                    TreeNode.FunctionCallNode(
-                                                        "e",
-                                                        listOf()
-                                                    ),
-                                                    TreeNode.FunctionCallNode(
-                                                        "f",
-                                                        listOf()
-                                                    )
-                                                )
-                                            ),
-                                        )
+                                    TreeNode.Evaluable.FunctionCallNode(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("this"),
+                                            "e",
+                                            listOf()
+                                        ),
+                                        "f",
+                                        listOf()
                                     ),
                                 )
                             )
@@ -496,14 +399,10 @@ class TreeBuilderTests {
                                 ),
                             ),
                             TreeNode.IfNode(
-                                TreeNode.Evaluable.FunctionCallChainNode(
+                                TreeNode.Evaluable.FunctionCallNode(
                                     TreeNode.Evaluable.VariableNameNode("a"),
-                                    listOf(
-                                        TreeNode.FunctionCallNode(
-                                            "b",
-                                            listOf()
-                                        )
-                                    ),
+                                    "b",
+                                    listOf(),
                                 ),
                                 TreeNode.BodyNode(
                                     listOf(
@@ -547,14 +446,10 @@ class TreeBuilderTests {
                                 ),
                             ),
                             TreeNode.WhileNode(
-                                TreeNode.Evaluable.FunctionCallChainNode(
+                                TreeNode.Evaluable.FunctionCallNode(
                                     TreeNode.Evaluable.VariableNameNode("a"),
-                                    listOf(
-                                        TreeNode.FunctionCallNode(
-                                            "b",
-                                            listOf()
-                                        )
-                                    ),
+                                    "b",
+                                    listOf(),
                                 ),
                                 TreeNode.BodyNode(
                                     listOf(
