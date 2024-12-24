@@ -1,7 +1,5 @@
 package treeBuilding
 
-import javax.swing.text.html.HTML.Tag.P
-
 interface Visitor<R> {
     fun visit(node: TreeNode.RootNode): R
     fun visit(node: TreeNode.FunctionNode): R
