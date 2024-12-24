@@ -60,12 +60,18 @@ private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallNode, memor
 }
 
 private fun runIf(ifNode: TreeNode.IfNode, memory: Memory): FlowControl {
-    val conditionResult = runEvaluable(ifNode.condition, memory)
-    if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
+    for (branch in ifNode.branches) {
+        val conditionResult = runEvaluable(branch.condition, memory)
+        if (conditionResult !is BoolHandle) error("condition result must be BoolHandle")
 
-    if (!conditionResult.value) return FlowControl.Pass
+        if (conditionResult.value) return runBody(branch.body, memory)
+    }
 
-    return runBody(ifNode.body, memory)
+    if (ifNode.elseBranch != null) {
+        return runBody(ifNode.elseBranch, memory)
+    }
+
+    return FlowControl.Pass
 }
 
 private fun runWhile(whileNode: TreeNode.WhileNode, memory: Memory): FlowControl {

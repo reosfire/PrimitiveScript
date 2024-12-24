@@ -1,9 +1,12 @@
 package treeBuilding
 
+import javax.swing.text.html.HTML.Tag.P
+
 interface Visitor<R> {
     fun visit(node: TreeNode.RootNode): R
     fun visit(node: TreeNode.FunctionNode): R
     fun visit(node: TreeNode.BodyNode): R
+    fun visit(node: TreeNode.IfBranch): R
     fun visit(node: TreeNode.IfNode): R
     fun visit(node: TreeNode.WhileNode): R
     fun visit(node: TreeNode.VariableDeclarationNode): R
@@ -32,8 +35,15 @@ class PrettyPrinter: Visitor<String> {
         return "{ ${node.children.joinToString(" ") { it.accept(this) } } }"
     }
 
-    override fun visit(node: TreeNode.IfNode): String {
+    override fun visit(node: TreeNode.IfBranch): String {
         return "if (${node.condition.accept(this)}) ${node.body.accept(this)}"
+    }
+
+    override fun visit(node: TreeNode.IfNode): String {
+        val branches = node.branches.joinToString(" else ") { it.accept(this) }
+
+        val elseBranch = node.elseBranch?.accept(this)
+        return if (elseBranch != null) "$branches else $elseBranch" else branches
     }
 
     override fun visit(node: TreeNode.WhileNode): String {
@@ -113,9 +123,17 @@ sealed class TreeNode {
         override fun toString() = accept(PrettyPrinter())
     }
 
-    data class IfNode(
+    data class IfBranch(
         val condition: Evaluable,
-        val body: BodyNode
+        val body: BodyNode,
+    ): TreeNode() {
+        override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
+        override fun toString() = accept(PrettyPrinter())
+    }
+
+    data class IfNode(
+        val branches: List<IfBranch>,
+        val elseBranch: BodyNode?,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
         override fun toString() = accept(PrettyPrinter())

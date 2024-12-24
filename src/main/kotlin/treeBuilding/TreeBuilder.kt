@@ -91,6 +91,25 @@ class Parser(
     }
 
     private fun buildIf(): TreeNode.IfNode {
+        val branches = mutableListOf(buildIfBranch())
+
+        while (true) {
+            val currentToken = tokens[index]
+            if (currentToken !is Token.Else) break
+            index++
+
+            if (tokens[index] is Token.If) {
+                branches.add(buildIfBranch())
+            } else {
+                val elseBody = buildBody()
+                return TreeNode.IfNode(branches, elseBody)
+            }
+        }
+
+        return TreeNode.IfNode(branches, null)
+    }
+
+    private fun buildIfBranch(): TreeNode.IfBranch {
         val ifKeyword = tokens[index++]
         ifKeyword.expectType<Token.If>()
 
@@ -104,7 +123,7 @@ class Parser(
 
         val body = buildBody()
 
-        return TreeNode.IfNode(condition, body)
+        return TreeNode.IfBranch(condition, body)
     }
 
     private fun buildWhile(): TreeNode.WhileNode {
