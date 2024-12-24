@@ -83,6 +83,9 @@ class Lexer(private val source: String) {
             ')' -> Token.ClosedRoundBracket
             '{' -> Token.OpenCurlyBracket
             '}' -> Token.ClosedCurlyBracket
+            '[' -> Token.OpenSquareBracket
+            ']' -> Token.ClosedSquareBracket
+
             '.' -> Token.DotOperator
             ',' -> Token.CommaOperator
             '=' -> {
@@ -93,6 +96,7 @@ class Lexer(private val source: String) {
                     Token.AssignOperator
                 }
             }
+
             '+' -> Token.PlusOperator
             '-' -> Token.MinusOperator
             '*' -> Token.MultiplyOperator

@@ -3,11 +3,11 @@ fun main() {
     var matrix = new.array(input.size())
     var i = 0
     while (i < input.size()) {
-        var line = input.get(i)
+        var line = input[i]
         var matrixLine = new.array(line.size())
         var j = 0
         while (j < line.size()) {
-            matrixLine.set(j, new.int(line.get(j)))
+            matrixLine.set(j, new.int(line[j]))
             j.increment()
         }
         matrix.set(i, matrixLine)
@@ -19,8 +19,8 @@ fun main() {
     var i = 0
     while (i < matrix.size()) {
         var j = 0
-        while (j < matrix.get(0).size()) {
-            if (matrix.get(i).get(j) == 0) {
+        while (j < matrix[0].size()) {
+            if (matrix[i][j] == 0) {
                 var goodPositions = new.list()
                 fillGoodPositions(matrix, i, j, goodPositions)
                 result.plusAssign(goodPositions.size())
@@ -34,10 +34,10 @@ fun main() {
 }
 
 fun fillGoodPositions(matrix, row, col, goodPositions) {
-    var current = matrix.get(row).get(col)
+    var current = matrix[row][col]
     if (current == 9) {
         var newPosition = newPosition(row, col)
-        if (containsPosition(goodPositions, newPosition).not()) {
+        if (!containsPosition(goodPositions, newPosition)) {
             goodPositions.add(newPosition)
         }
         return void
@@ -46,29 +46,29 @@ fun fillGoodPositions(matrix, row, col, goodPositions) {
     var next = current + 1
 
     if (validCoordinates(matrix, row - 1, col)) {
-        if (matrix.get(row - 1).get(col) == next) {
+        if (matrix[row - 1][col] == next) {
             fillGoodPositions(matrix, row - 1, col, goodPositions)
         }
     }
     if (validCoordinates(matrix, row + 1, col)) {
-        if (matrix.get(row + 1).get(col) == next) {
+        if (matrix[row + 1][col] == next) {
             fillGoodPositions(matrix, row + 1, col, goodPositions)
         }
     }
     if (validCoordinates(matrix, row, col - 1)) {
-        if (matrix.get(row).get(col - 1) == next) {
+        if (matrix[row][col - 1] == next) {
             fillGoodPositions(matrix, row, col - 1, goodPositions)
         }
     }
     if (validCoordinates(matrix, row, col + 1)) {
-        if (matrix.get(row).get(col + 1) == next) {
+        if (matrix[row][col + 1] == next) {
             fillGoodPositions(matrix, row, col + 1, goodPositions)
         }
     }
 }
 
 fun validCoordinates(matrix, row, col) {
-    return inRange(row, 0, matrix.size()) && inRange(col, 0, matrix.get(0).size())
+    return inRange(row, 0, matrix.size()) && inRange(col, 0, matrix[0].size())
 }
 
 fun inRange(i, min, max) {
@@ -78,7 +78,7 @@ fun inRange(i, min, max) {
 fun containsPosition(list, position) {
     var i = 0
     while (i < list.size()) {
-        if (positionsEqual(list.get(i), position)) {
+        if (positionsEqual(list[i], position)) {
             return true
         }
         i.increment()
@@ -87,7 +87,7 @@ fun containsPosition(list, position) {
 }
 
 fun positionsEqual(a, b) {
-    return a.get(0) == b.get(0) && a.get(1) == b.get(1)
+    return a[0] == b[0] && a[1] == b[1]
 }
 
 fun newPosition(row, col) {

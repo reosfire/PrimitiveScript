@@ -30,7 +30,7 @@ sealed class FlowControl {
 private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
     body.children.forEach {
         when (it) {
-            is TreeNode.Evaluable.FunctionCallChainNode -> runFunctionCall(it, memory)
+            is TreeNode.Evaluable.FunctionCallNode -> runFunctionCall(it, memory)
             is TreeNode.IfNode -> {
                 val flowControl = runIf(it, memory)
                 if (flowControl != FlowControl.Pass) return flowControl
@@ -50,16 +50,13 @@ private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
     return FlowControl.Pass
 }
 
-private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallChainNode, memory: Memory): CallableClass {
-    var objectToCall = runEvaluable(callNode.objectToCall, memory)
-    for (functionCall in callNode.functions) {
-        val evaluatedParameters = Array(functionCall.parameters.size) {
-            runEvaluable(functionCall.parameters[it], memory)
-        }
-        objectToCall = objectToCall.call(functionCall.functionName, evaluatedParameters, memory)
+private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallNode, memory: Memory): CallableClass {
+    val objectToCall = runEvaluable(callNode.callable, memory)
+    val evaluatedParameters = Array(callNode.parameters.size) {
+        runEvaluable(callNode.parameters[it], memory)
     }
 
-    return objectToCall
+    return objectToCall.call(callNode.functionName, evaluatedParameters, memory)
 }
 
 private fun runIf(ifNode: TreeNode.IfNode, memory: Memory): FlowControl {
@@ -105,7 +102,7 @@ private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): Callabl
 
          is TreeNode.Evaluable.CompilationConstant.VoidNode -> VoidHandle
 
-         is TreeNode.Evaluable.FunctionCallChainNode -> runFunctionCall(evaluable, memory)
+         is TreeNode.Evaluable.FunctionCallNode -> runFunctionCall(evaluable, memory)
          else -> error("Unsupported argument")
      }
 }

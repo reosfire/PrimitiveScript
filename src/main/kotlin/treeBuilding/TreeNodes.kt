@@ -10,8 +10,7 @@ interface Visitor<R> {
     fun visit(node: TreeNode.ReturnNode): R
     fun visit(node: TreeNode.BreakNode): R
     fun visit(node: TreeNode.ContinueNode): R
-    fun visit(node: TreeNode.FunctionCallNode): R
-    fun visit(node: TreeNode.Evaluable.FunctionCallChainNode): R
+    fun visit(node: TreeNode.Evaluable.FunctionCallNode): R
     fun visit(node: TreeNode.Evaluable.VariableNameNode): R
     fun visit(node: TreeNode.Evaluable.CompilationConstant.IntNode): R
     fun visit(node: TreeNode.Evaluable.CompilationConstant.DoubleNode): R
@@ -57,12 +56,8 @@ class PrettyPrinter: Visitor<String> {
         return "continue"
     }
 
-    override fun visit(node: TreeNode.FunctionCallNode): String {
-        return ".${node.functionName}(${node.parameters.joinToString(", ") { it.accept(this) }})"
-    }
-
-    override fun visit(node: TreeNode.Evaluable.FunctionCallChainNode): String {
-        return "${node.objectToCall.accept(this)}${node.functions.joinToString("") { it.accept(this) }}"
+    override fun visit(node: TreeNode.Evaluable.FunctionCallNode): String {
+        return "${node.callable}.${node.functionName}(${node.parameters.joinToString(", ") { it.accept(this) }})"
     }
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode): String {
@@ -159,18 +154,11 @@ sealed class TreeNode {
         override fun toString() = accept(PrettyPrinter())
     }
 
-    data class FunctionCallNode(
-        val functionName: String,
-        val parameters: List<Evaluable>,
-    ): Evaluable() {
-        override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
-    }
-
     sealed class Evaluable: TreeNode() {
-        data class FunctionCallChainNode(
-            val objectToCall: Evaluable,
-            val functions: List<FunctionCallNode>,
+        data class FunctionCallNode(
+            val callable: Evaluable,
+            val functionName: String,
+            val parameters: List<Evaluable>,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
             override fun toString() = accept(PrettyPrinter())

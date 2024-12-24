@@ -33,6 +33,12 @@ sealed class Token {
     data object ClosedCurlyBracket: Token() {
         override fun toString() = "}"
     }
+    data object OpenSquareBracket: Token() {
+        override fun toString() = "["
+    }
+    data object ClosedSquareBracket: Token() {
+        override fun toString() = "]"
+    }
 
     data object DotOperator: Token() {
         override fun toString() = "."
