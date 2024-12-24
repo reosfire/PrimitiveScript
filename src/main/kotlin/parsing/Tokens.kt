@@ -88,6 +88,10 @@ sealed class Token {
         override fun toString() = "||"
     }
 
+    data object NotOperator: Token() {
+        override fun toString() = "!"
+    }
+
     data class StringLiteral(val value: String): Token() {
         override fun toString() = "\"$value\""
     }

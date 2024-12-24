@@ -116,7 +116,7 @@ class Lexer(private val source: String) {
                 if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
                     Token.NotEqualOperator
                 } else {
-                    null
+                    Token.NotOperator
                 }
             }
             '&' -> {

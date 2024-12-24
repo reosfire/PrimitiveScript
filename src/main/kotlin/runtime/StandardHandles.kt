@@ -54,6 +54,7 @@ class IntHandle(
         "greaterOrEqual" -> BoolHandle(value >= (args[0] as IntHandle).value)
         "lessOrEqual" -> BoolHandle(value <= (args[0] as IntHandle).value)
         "equal" -> BoolHandle(value == (args[0] as? IntHandle)?.value)
+        "notEqual" -> BoolHandle(value != (args[0] as? IntHandle)?.value)
 
         "plusAssign" -> {
             value += (args[0] as IntHandle).value
@@ -106,6 +107,7 @@ class DoubleHandle(
         "greaterOrEqual" -> BoolHandle(value >= (args[0] as DoubleHandle).value)
         "lessOrEqual" -> BoolHandle(value <= (args[0] as DoubleHandle).value)
         "equal" -> BoolHandle(value == (args[0] as? DoubleHandle)?.value)
+        "notEqual" -> BoolHandle(value != (args[0] as? DoubleHandle)?.value)
 
         "decrement" -> {
             value--
@@ -141,6 +143,7 @@ class LongHandle(
         "greaterOrEqual" -> BoolHandle(value >= (args[0] as LongHandle).value)
         "lessOrEqual" -> BoolHandle(value <= (args[0] as LongHandle).value)
         "equal" -> BoolHandle(value == (args[0] as? LongHandle)?.value)
+        "notEqual" -> BoolHandle(value != (args[0] as? LongHandle)?.value)
 
         "decrement" -> {
             value--

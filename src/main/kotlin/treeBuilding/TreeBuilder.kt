@@ -98,7 +98,7 @@ class Parser(
         val openBracket = tokens[index++]
         openBracket.expectType<Token.OpenRoundBracket>()
 
-        val condition = buildEvaluable()
+        val condition = buildExpression()
 
         val closedBracket = tokens[index++]
         closedBracket.expectType<Token.ClosedRoundBracket>()
@@ -115,7 +115,7 @@ class Parser(
         val openBracket = tokens[index++]
         openBracket.expectType<Token.OpenRoundBracket>()
 
-        val condition = buildEvaluable()
+        val condition = buildExpression()
 
         val closedBracket = tokens[index++]
         closedBracket.expectType<Token.ClosedRoundBracket>()
@@ -135,7 +135,7 @@ class Parser(
         val assign = tokens[index++]
         assign.expectType<Token.AssignOperator>()
 
-        val evaluable = buildEvaluable()
+        val evaluable = buildExpression()
         return TreeNode.VariableDeclarationNode(name.value, evaluable)
     }
 
@@ -143,7 +143,7 @@ class Parser(
         val returnKeyword = tokens[index++]
         returnKeyword.expectType<Token.Return>()
 
-        val expression = buildEvaluable()
+        val expression = buildExpression()
 
         return TreeNode.ReturnNode(expression)
     }
@@ -162,7 +162,7 @@ class Parser(
         return TreeNode.ContinueNode
     }
 
-    private fun buildEvaluable(): TreeNode.Evaluable {
+    private fun buildExpression(): TreeNode.Evaluable {
         return buildOr()
     }
 
@@ -287,7 +287,7 @@ class Parser(
     }
 
     private fun buildFactor(): TreeNode.Evaluable {
-        var result = buildSimpleEvaluable()
+        var result = buildUnary()
 
         while (true) {
             val currentToken = tokens[index]
@@ -295,17 +295,17 @@ class Parser(
             if (currentToken is Token.MultiplyOperator) {
                 index++
 
-                val right = buildSimpleEvaluable()
+                val right = buildUnary()
                 result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("multiply", listOf(right))))
             } else if (currentToken is Token.DivideOperator) {
                 index++
 
-                val right = buildSimpleEvaluable()
+                val right = buildUnary()
                 result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("divide", listOf(right))))
             } else if (currentToken is Token.ModuloOperator) {
                 index++
 
-                val right = buildSimpleEvaluable()
+                val right = buildUnary()
                 result = TreeNode.Evaluable.FunctionCallChainNode(result, listOf(TreeNode.FunctionCallNode("modulo", listOf(right))))
             } else {
                 break
@@ -315,14 +315,24 @@ class Parser(
         return result
     }
 
-    private fun buildSimpleEvaluable(): TreeNode.Evaluable {
+    private fun buildUnary(): TreeNode.Evaluable {
+        return if (tokens[index] is Token.NotOperator) {
+            index++
+            val right = buildUnary()
+            TreeNode.Evaluable.FunctionCallChainNode(right, listOf(TreeNode.FunctionCallNode("not", listOf())))
+        } else {
+            buildEvaluable()
+        }
+    }
+
+    private fun buildEvaluable(): TreeNode.Evaluable {
         val nextToken = tokens[index + 1]
 
         return if (nextToken is Token.DotOperator) buildFunctionCallChain()
         else if (nextToken is Token.OpenRoundBracket) buildFunctionCallChain()
         else if (tokens[index] is Token.OpenRoundBracket) {
             index++
-            val result = buildEvaluable()
+            val result = buildExpression()
             val closedBracket = tokens[index++]
             closedBracket.expectType<Token.ClosedRoundBracket>()
             result
@@ -384,7 +394,7 @@ class Parser(
         }
 
         while (true) {
-            val expressionNode = buildEvaluable()
+            val expressionNode = buildExpression()
 
             parameters.add(expressionNode)
 
