@@ -379,38 +379,53 @@ class TreeBuilderTests {
                     TreeNode.BodyNode(
                         listOf(
                             TreeNode.IfNode(
-                                TreeNode.Evaluable.CompilationConstant.BoolNode(true),
-                                TreeNode.BodyNode(
-                                    listOf(
-                                        TreeNode.ReturnNode(
-                                            TreeNode.Evaluable.CompilationConstant.IntNode(0)
-                                        )
+                                listOf(
+                                    TreeNode.IfBranch(
+                                        TreeNode.Evaluable.CompilationConstant.BoolNode(true),
+                                        TreeNode.BodyNode(
+                                            listOf(
+                                                TreeNode.ReturnNode(
+                                                    TreeNode.Evaluable.CompilationConstant.IntNode(0)
+                                                )
+                                            )
+                                        ),
                                     )
                                 ),
+                                null
                             ),
                             TreeNode.IfNode(
-                                TreeNode.Evaluable.CompilationConstant.BoolNode(false),
-                                TreeNode.BodyNode(
-                                    listOf(
-                                        TreeNode.ReturnNode(
-                                            TreeNode.Evaluable.CompilationConstant.IntNode(1)
-                                        )
+                                listOf(
+                                    TreeNode.IfBranch(
+                                        TreeNode.Evaluable.CompilationConstant.BoolNode(false),
+                                        TreeNode.BodyNode(
+                                            listOf(
+                                                TreeNode.ReturnNode(
+                                                    TreeNode.Evaluable.CompilationConstant.IntNode(1)
+                                                )
+                                            )
+                                        ),
                                     )
                                 ),
+                                null
                             ),
                             TreeNode.IfNode(
-                                TreeNode.Evaluable.FunctionCallNode(
-                                    TreeNode.Evaluable.VariableNameNode("a"),
-                                    "b",
-                                    listOf(),
+                                listOf(
+                                    TreeNode.IfBranch(
+                                        TreeNode.Evaluable.FunctionCallNode(
+                                            TreeNode.Evaluable.VariableNameNode("a"),
+                                            "b",
+                                            listOf(),
+                                        ),
+                                        TreeNode.BodyNode(
+                                            listOf(
+                                                TreeNode.ReturnNode(
+                                                    TreeNode.Evaluable.CompilationConstant.IntNode(2)
+                                                )
+                                            )
+                                        ),
+                                    ),
                                 ),
-                                TreeNode.BodyNode(
-                                    listOf(
-                                        TreeNode.ReturnNode(
-                                            TreeNode.Evaluable.CompilationConstant.IntNode(2)
-                                        )
-                                    )
-                                ),
+                                null
                             ),
                         )
                     )
