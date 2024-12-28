@@ -2,35 +2,37 @@ fun main() {
     print("Enter number of elements: ")
     var numElements = int(readln())
 
-    var numbers = new.list()
+    var numbersQuick = new.list()
+    var numbersBubble = new.list()
 
     var i = 0
     while (i < numElements) {
         print("Enter number: ")
         var num = int(readln())
-        numbers.add(num)
+        numbersQuick.add(num)
+        numbersBubble.add(new.int(num))
         i.increment()
     }
 
     println("Sorted numbers using quick sort: ")
-    quickSort(numbers, 0, numbers.size() - 1)
+    quickSort(numbersQuick, 0, numbersQuick.size() - 1)
     var j = 0
-    while (j < numbers.size()) {
-        println(numbers[j])
+    while (j < numbersQuick.size()) {
+        println(numbersQuick[j])
         j.increment()
     }
 
     println("Sorted numbers using bubble sort:")
-    bubbleSort(numbers)
+    bubbleSort(numbersBubble)
     var k = 0
-    while (k < numbers.size()) {
-        println(numbers[k])
+    while (k < numbersBubble.size()) {
+        println(numbersBubble[k])
         k.increment()
     }
 
     println("Enter number to binary search: ")
     var target = int(readln())
-    var result = binarySearch(numbers, 0, numbers.size() - 1, target)
+    var result = binarySearch(numbersBubble, 0, numbersBubble.size() - 1, target)
     if (result == -1) {
         println("Number not found.")
     } else {
