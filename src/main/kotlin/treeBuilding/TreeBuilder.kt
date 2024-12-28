@@ -91,7 +91,14 @@ class Parser(
             Token.Return -> buildReturn()
             Token.Break -> buildBreak()
             Token.Continue -> buildContinue()
-            else -> buildFunctionCall()
+            else -> {
+                val nextToken = tokens[index + 1]
+                if (nextToken == Token.AssignOperator) {
+                    buildVariableDeclaration()
+                } else {
+                    buildFunctionCall()
+                }
+            }
         }
     }
 
@@ -149,8 +156,11 @@ class Parser(
     }
 
     private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
-        val type = tokens[index++]
-        type.expectType<Token.Var>()
+        when (val token = tokens[index]) {
+            is Token.Var -> index++
+            is Token.Identifier -> Unit
+            else -> error("Unexpected first token in variable declaration. Expected var keyword or variable name, got $token")
+        }
 
         val name = tokens[index++]
         name.expectType<Token.Identifier>()

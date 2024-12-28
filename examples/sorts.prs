@@ -1,14 +1,14 @@
 fun main() {
     print("Enter number of elements: ")
-    var numElements = int(readln())
+    numElements = int(readln())
 
-    var numbersQuick = new.list()
-    var numbersBubble = new.list()
+    numbersQuick = new.list()
+    numbersBubble = new.list()
 
-    var i = 0
+    i = 0
     while (i < numElements) {
         print("Enter number: ")
-        var num = int(readln())
+        num = int(readln())
         numbersQuick.add(num)
         numbersBubble.add(new.int(num))
         i.increment()
@@ -16,7 +16,7 @@ fun main() {
 
     println("Sorted numbers using quick sort: ")
     quickSort(numbersQuick, 0, numbersQuick.size() - 1)
-    var j = 0
+    j = 0
     while (j < numbersQuick.size()) {
         println(numbersQuick[j])
         j.increment()
@@ -24,15 +24,15 @@ fun main() {
 
     println("Sorted numbers using bubble sort:")
     bubbleSort(numbersBubble)
-    var k = 0
+    k = 0
     while (k < numbersBubble.size()) {
         println(numbersBubble[k])
         k.increment()
     }
 
     println("Enter number to binary search: ")
-    var target = int(readln())
-    var result = binarySearch(numbersBubble, 0, numbersBubble.size() - 1, target)
+    target = int(readln())
+    result = binarySearch(numbersBubble, 0, numbersBubble.size() - 1, target)
     if (result == -1) {
         println("Number not found.")
     } else {
@@ -42,13 +42,13 @@ fun main() {
 }
 
 fun bubbleSort(numbers) {
-    var n = numbers.size()
-    var i = 0
+    n = numbers.size()
+    i = 0
     while (i < n) {
-        var j = 0
+        j = 0
         while (j < n - i - 1) {
             if (numbers[j] > numbers[j + 1]) {
-                var temp = numbers[j]
+                temp = numbers[j]
                 numbers.set(j, numbers[j + 1])
                 numbers.set(j + 1, temp)
             }
@@ -61,27 +61,27 @@ fun bubbleSort(numbers) {
 fun quickSort(numbers, left, right) {
     if (left >= right) return void
 
-    var pivotIndex = partition(numbers, left, right)
+    pivotIndex = partition(numbers, left, right)
     quickSort(numbers, left, pivotIndex - 1)
     quickSort(numbers, pivotIndex + 1, right)
 }
 
 fun partition(numbers, left, right) {
-    var pivot = numbers[right]
-    var i = left - 1
-    var j = new.int(left)
+    pivot = numbers[right]
+    i = left - 1
+    j = new.int(left)
 
     while (j < right) {
         if (numbers[j] <= pivot) {
             i.increment()
-            var temp = numbers[i]
+            temp = numbers[i]
             numbers.set(i, numbers[j])
             numbers.set(j, temp)
         }
         j.increment()
     }
 
-    var temp = numbers[i + 1]
+    temp = numbers[i + 1]
     numbers.set(i + 1, numbers[right])
     numbers.set(right, temp)
 
@@ -91,7 +91,7 @@ fun partition(numbers, left, right) {
 fun binarySearch(numbers, left, right, target) {
     if (left > right) return -1
 
-    var mid = (left + right) / 2
+    mid = (left + right) / 2
     if (numbers[mid] == target) return mid
     else if (numbers[mid] > target) return binarySearch(numbers, left, mid - 1, target)
     else return binarySearch(numbers, mid + 1, right, target)
