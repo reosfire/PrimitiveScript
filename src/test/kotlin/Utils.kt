@@ -1,8 +1,5 @@
 import parsing.tokenize
-import runtime.CallableClass
-import runtime.ConstructorHandle
-import runtime.Memory
-import runtime.ThisHandle
+import runtime.*
 import treeBuilding.buildTree
 
 fun getTestScript(name: String): String {
@@ -11,7 +8,7 @@ fun getTestScript(name: String): String {
 
 fun runTestScript(
     name: String,
-    args: Array<CallableClass> = arrayOf(),
+    args: Array<LateEvaluable> = arrayOf(),
     initialFunctionName: String = "main",
 ): CallableClass {
     val script = getTestScript(name)

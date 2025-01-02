@@ -13,7 +13,7 @@ fun main() {
     //runSingleScript("./examples/sorts.psc", "main", arrayOf())
 }
 
-fun runSingleScript(path: String, startFunction: String, args: Array<CallableClass>) {
+fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluable>) {
     val sourceCode = File(path).readText()
     val tokens = tokenize(sourceCode)
     println(tokens.joinToString(" "))

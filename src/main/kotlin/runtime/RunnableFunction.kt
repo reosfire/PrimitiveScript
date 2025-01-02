@@ -2,6 +2,8 @@ package runtime
 
 import treeBuilding.TreeNode
 
+typealias LateEvaluable = () -> CallableClass
+
 class RunnableFunction(val node: TreeNode.FunctionNode) {
 
     fun run(memory: Memory): CallableClass {
@@ -53,7 +55,9 @@ private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
 private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallNode, memory: Memory): CallableClass {
     val objectToCall = runEvaluable(callNode.callable, memory)
     val evaluatedParameters = Array(callNode.parameters.size) {
-        runEvaluable(callNode.parameters[it], memory)
+        {
+            runEvaluable(callNode.parameters[it], memory)
+        }
     }
 
     return objectToCall.call(callNode.functionName, evaluatedParameters, memory)

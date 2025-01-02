@@ -16,7 +16,7 @@ class RuntimeTests {
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoop(iterations: Int) {
         val iterationsHandle = IntHandle(iterations)
-        val result = runTestScript("incrementInLoop", arrayOf(iterationsHandle))
+        val result = runTestScript("incrementInLoop", arrayOf({ iterationsHandle }))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -26,7 +26,7 @@ class RuntimeTests {
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInWhileTrueWithBreak(iterations: Int) {
         val iterationsHandle = IntHandle(iterations)
-        val result = runTestScript("incrementInWhileTrueWithBreak", arrayOf(iterationsHandle))
+        val result = runTestScript("incrementInWhileTrueWithBreak", arrayOf({ iterationsHandle }))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -36,7 +36,7 @@ class RuntimeTests {
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoopWithRecursion(iterations: Int) {
         val iterationsHandle = IntHandle(iterations)
-        val result = runTestScript("incrementInLoopWithRecursion", arrayOf(iterationsHandle))
+        val result = runTestScript("incrementInLoopWithRecursion", arrayOf({ iterationsHandle }))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -50,7 +50,7 @@ class RuntimeTests {
 
         val result = runTestScript(
             "binaryDoublePower",
-            arrayOf(baseHandle, powerHandle),
+            arrayOf({ baseHandle }, { powerHandle }),
             "binaryDoublePower"
         )
 
@@ -78,7 +78,7 @@ class RuntimeTests {
 
             val testData = Array(random.nextInt(1..100)) { IntHandle(random.nextInt()) }.toMutableList<CallableClass>()
             val listHandle = ListHandle(testData)
-            thisHandle.call("main", arrayOf(listHandle), memory)
+            thisHandle.call("main", arrayOf({ listHandle }), memory)
 
             for (i in 1..<testData.size) {
                 val prev = testData[i - 1]
