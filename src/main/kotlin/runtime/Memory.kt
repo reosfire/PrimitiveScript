@@ -1,8 +1,8 @@
 package runtime
 
 data class Memory(
-    val globalVariables: MutableMap<String, CallableClass> = mutableMapOf(),
-    val localVariables: MutableMap<String, CallableClass> = mutableMapOf(),
+    val outer: Memory? = null,
+    val content: MutableMap<String, CallableClass> = mutableMapOf(),
 ) {
     fun withFunctionParametersAsLocalVariables(function: RunnableFunction, args: Array<CallableClass>): Memory {
         val parameters = function.node.parameters
@@ -13,10 +13,10 @@ data class Memory(
             newLocalVariables[parameter] = value
         }
 
-        return Memory(globalVariables = globalVariables, localVariables = newLocalVariables)
+        return Memory(outer, content = newLocalVariables)
     }
 
     operator fun get(key: String): CallableClass? {
-        return globalVariables[key] ?: localVariables[key]
+        return content[key] ?: outer?.get(key)
     }
 }

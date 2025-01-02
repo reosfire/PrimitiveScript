@@ -15,17 +15,8 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoop(iterations: Int) {
-        val script = getTestScript("incrementInLoop")
-        val tokens = tokenize(script)
-        val tree = buildTree(tokens)
-
-        val memory = Memory()
-        val thisHandle = ThisHandle(tree.createFunctionsMap())
-        memory.globalVariables["this"] = thisHandle
-        memory.globalVariables["new"] = ConstructorHandle()
-
         val iterationsHandle = IntHandle(iterations)
-        val result = thisHandle.call("main", arrayOf(iterationsHandle), memory)
+        val result = runTestScript("incrementInLoop", arrayOf(iterationsHandle))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -34,17 +25,8 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInWhileTrueWithBreak(iterations: Int) {
-        val script = getTestScript("incrementInWhileTrueWithBreak")
-        val tokens = tokenize(script)
-        val tree = buildTree(tokens)
-
-        val memory = Memory()
-        val thisHandle = ThisHandle(tree.createFunctionsMap())
-        memory.globalVariables["this"] = thisHandle
-        memory.globalVariables["new"] = ConstructorHandle()
-
         val iterationsHandle = IntHandle(iterations)
-        val result = thisHandle.call("main", arrayOf(iterationsHandle), memory)
+        val result = runTestScript("incrementInWhileTrueWithBreak", arrayOf(iterationsHandle))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -53,17 +35,8 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 10, 20, 21])
     fun incrementInLoopWithRecursion(iterations: Int) {
-        val script = getTestScript("incrementInLoopWithRecursion")
-        val tokens = tokenize(script)
-        val tree = buildTree(tokens)
-
-        val memory = Memory()
-        val thisHandle = ThisHandle(tree.createFunctionsMap())
-        memory.globalVariables["this"] = thisHandle
-        memory.globalVariables["new"] = ConstructorHandle()
-
         val iterationsHandle = IntHandle(iterations)
-        val result = thisHandle.call("main", arrayOf(iterationsHandle), memory)
+        val result = runTestScript("incrementInLoopWithRecursion", arrayOf(iterationsHandle))
 
         assertIs<IntHandle>(result)
         assertEquals(iterations, result.value)
@@ -72,18 +45,14 @@ class RuntimeTests {
     @ParameterizedTest
     @ValueSource(ints = [0, 1, 2, 3, 10, 15, 20])
     fun binaryDoublePower(power: Int) {
-        val script = getTestScript("binaryDoublePower")
-        val tokens = tokenize(script)
-        val tree = buildTree(tokens)
-
-        val memory = Memory()
-        val thisHandle = ThisHandle(tree.createFunctionsMap())
-        memory.globalVariables["this"] = thisHandle
-        memory.globalVariables["new"] = ConstructorHandle()
-
         val baseHandle = DoubleHandle(2.0)
         val powerHandle = IntHandle(power)
-        val result = thisHandle.call("binaryDoublePower", arrayOf(baseHandle, powerHandle), memory)
+
+        val result = runTestScript(
+            "binaryDoublePower",
+            arrayOf(baseHandle, powerHandle),
+            "binaryDoublePower"
+        )
 
         assertIs<DoubleHandle>(result)
         assertEquals(2.0.pow(power), result.value)
@@ -97,12 +66,15 @@ class RuntimeTests {
         val tokens = tokenize(script)
         val tree = buildTree(tokens)
         val functionsMap = tree.createFunctionsMap()
+        val constructorHandle = ConstructorHandle()
 
         repeat(10000) {
-            val memory = Memory()
+            val globalMemory = Memory()
             val thisHandle = ThisHandle(functionsMap)
-            memory.globalVariables["this"] = thisHandle
-            memory.globalVariables["new"] = ConstructorHandle()
+            globalMemory.content["this"] = thisHandle
+            globalMemory.content["new"] = constructorHandle
+
+            val memory = Memory(globalMemory)
 
             val testData = Array(random.nextInt(1..100)) { IntHandle(random.nextInt()) }.toMutableList<CallableClass>()
             val listHandle = ListHandle(testData)

@@ -21,10 +21,12 @@ fun runSingleScript(path: String, startFunction: String, args: Array<CallableCla
     val tree = buildTree(tokens)
     println(tree)
 
-    val memory = Memory()
+    val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())
-    memory.globalVariables["this"] = thisHandle
-    memory.globalVariables["new"] = ConstructorHandle()
+    globalMemory.content["this"] = thisHandle
+    globalMemory.content["new"] = ConstructorHandle()
+
+    val memory = Memory(globalMemory)
 
     thisHandle.call(startFunction, args, memory)
 }

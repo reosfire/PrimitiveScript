@@ -94,7 +94,7 @@ private fun runWhile(whileNode: TreeNode.WhileNode, memory: Memory): FlowControl
 }
 
 private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: Memory) {
-    memory.localVariables[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
+    memory.content[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
 }
 
 private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): CallableClass {
