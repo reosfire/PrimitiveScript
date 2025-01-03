@@ -135,7 +135,7 @@ class Lexer(private val source: String) {
                 if (currentIndex + 1 < source.length && source[currentIndex + 1] == '|') {
                     Token.OrOperator
                 } else {
-                    null
+                    Token.VerticalBar
                 }
             }
             else -> null

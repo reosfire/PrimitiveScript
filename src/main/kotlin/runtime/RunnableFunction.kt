@@ -19,6 +19,20 @@ class RunnableFunction(val node: TreeNode.FunctionNode) {
     override fun toString() = node.toString()
 }
 
+class RunnableAnonymousFunction(val node: TreeNode.Evaluable.AnonymousFunctionNode) {
+    fun run(memory: Memory): CallableClass {
+        return when (val flowControl = runBody(node.body, memory)) {
+            is FlowControl.Return -> flowControl.result
+            FlowControl.Pass -> VoidHandle
+
+            FlowControl.Continue -> error("continue is not supported in a body of a function")
+            FlowControl.Break -> error("break is not supported in a body of a function")
+        }
+    }
+
+    override fun toString() = node.toString()
+}
+
 sealed class FlowControl {
     class Return(
         val result: CallableClass
@@ -98,7 +112,7 @@ private fun runWhile(whileNode: TreeNode.WhileNode, memory: Memory): FlowControl
 }
 
 private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: Memory) {
-    memory.content[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
+    memory[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
 }
 
 private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): CallableClass {
@@ -113,6 +127,11 @@ private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): Callabl
          is TreeNode.Evaluable.CompilationConstant.VoidNode -> VoidHandle
 
          is TreeNode.Evaluable.FunctionCallNode -> runFunctionCall(evaluable, memory)
-         else -> error("Unsupported argument")
+         is TreeNode.Evaluable.AnonymousFunctionNode -> {
+             LambdaHandle(
+                 RunnableAnonymousFunction(evaluable),
+                 memory
+             )
+         }
      }
 }

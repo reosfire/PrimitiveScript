@@ -17,10 +17,8 @@ fun runTestScript(
 
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())
-    globalMemory.content["this"] = thisHandle
-    globalMemory.content["new"] = ConstructorHandle()
+    globalMemory["this"] = thisHandle
+    globalMemory["new"] = ConstructorHandle()
 
-    val memory = Memory(globalMemory)
-
-    return thisHandle.call(initialFunctionName, args, memory)
+    return thisHandle.call(initialFunctionName, args, globalMemory)
 }

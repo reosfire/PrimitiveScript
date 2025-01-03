@@ -221,7 +221,7 @@ class StringHandle(
 
             "size" -> IntHandle(value.length)
             "equal" -> BoolHandle(value == (args[0] as StringHandle).value)
-            "add" -> StringHandle(value + args[0].toString())
+            "plus" -> StringHandle(value + args[0].toString())
 
             else -> error("function \"StringHandle::$functionName\" not found")
         }
@@ -316,7 +316,9 @@ class ThisHandle(
         val args = args.unwrap()
         val loadedFunction = loadedFunctions[functionName]
         if (loadedFunction != null) {
-            return loadedFunction.run(memory = memory.withFunctionParametersAsLocalVariables(loadedFunction, args))
+            val functionMemory = memory.root.derive()
+            functionMemory.applyValues(loadedFunction.node.parameters, args)
+            return loadedFunction.run(functionMemory)
         }
 
         return when (functionName) {
@@ -375,6 +377,22 @@ class ConstructorHandle : CallableClass {
             "File" -> FileHandle((args[0] as StringHandle).value)
 
             else -> error("function \"this::$functionName\" not found")
+        }
+    }
+}
+
+class LambdaHandle(
+    val runnable: RunnableAnonymousFunction,
+    val context: Memory,
+) : CallableClass {
+    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        return when (functionName) {
+            "invoke" -> {
+                val lambdaMemory = context.derive()
+                lambdaMemory.applyValues(runnable.node.parameters, args.unwrap())
+                runnable.run(lambdaMemory)
+            }
+            else -> error("function \"LambdaHandle::$functionName\" not found")
         }
     }
 }

@@ -23,12 +23,10 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
 
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())
-    globalMemory.content["this"] = thisHandle
-    globalMemory.content["new"] = ConstructorHandle()
+    globalMemory["this"] = thisHandle
+    globalMemory["new"] = ConstructorHandle()
 
-    val memory = Memory(globalMemory)
-
-    thisHandle.call(startFunction, args, memory)
+    thisHandle.call(startFunction, args, globalMemory)
 }
 
 fun TreeNode.RootNode.createFunctionsMap(): Map<String, RunnableFunction> {

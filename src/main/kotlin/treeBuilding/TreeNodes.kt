@@ -13,6 +13,7 @@ interface Visitor<R> {
     fun visit(node: TreeNode.ContinueNode): R
     fun visit(node: TreeNode.Evaluable.FunctionCallNode): R
     fun visit(node: TreeNode.Evaluable.VariableNameNode): R
+    fun visit(node: TreeNode.Evaluable.AnonymousFunctionNode): R
     fun visit(node: TreeNode.Evaluable.CompilationConstant.IntNode): R
     fun visit(node: TreeNode.Evaluable.CompilationConstant.DoubleNode): R
     fun visit(node: TreeNode.Evaluable.CompilationConstant.BoolNode): R
@@ -70,6 +71,10 @@ class PrettyPrinter: Visitor<String> {
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode): String {
         return node.name
+    }
+
+    override fun visit(node: TreeNode.Evaluable.AnonymousFunctionNode): String {
+        return "|${node.parameters.joinToString(", ")}| ${node.body.accept(this)}"
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.IntNode): String {
@@ -182,6 +187,14 @@ sealed class TreeNode {
 
         data class VariableNameNode(
             val name: String,
+        ): Evaluable() {
+            override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
+            override fun toString() = accept(PrettyPrinter())
+        }
+
+        data class AnonymousFunctionNode(
+            val parameters: List<String>,
+            val body: BodyNode,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
             override fun toString() = accept(PrettyPrinter())

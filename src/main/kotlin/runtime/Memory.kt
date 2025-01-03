@@ -1,22 +1,31 @@
 package runtime
 
-data class Memory(
-    val outer: Memory? = null,
-    val content: MutableMap<String, CallableClass> = mutableMapOf(),
+class Memory private constructor(
+    private val outer: Memory?,
+    private val content: MutableMap<String, CallableClass> = mutableMapOf(),
 ) {
-    fun withFunctionParametersAsLocalVariables(function: RunnableFunction, args: Array<CallableClass>): Memory {
-        val parameters = function.node.parameters
-        if (parameters.size != args.size) error("Function parameters mismatch")
-
-        val newLocalVariables = mutableMapOf<String, CallableClass>()
-        for ((parameter, value) in parameters.zip(args)) {
-            newLocalVariables[parameter] = value
-        }
-
-        return Memory(outer, content = newLocalVariables)
+    val root: Memory
+    init {
+        root = outer?.root ?: this
     }
+
+    constructor(): this(null)
 
     operator fun get(key: String): CallableClass? {
         return content[key] ?: outer?.get(key)
+    }
+
+    operator fun set(key: String, value: CallableClass) {
+        content[key] = value
+    }
+
+    fun derive() = Memory(this)
+
+    fun applyValues(keys: List<String>, values: Array<CallableClass>) {
+        if (keys.size != values.size) error("Keys and values size mismatch")
+
+        for (i in keys.indices) {
+            set(keys[i], values[i])
+        }
     }
 }

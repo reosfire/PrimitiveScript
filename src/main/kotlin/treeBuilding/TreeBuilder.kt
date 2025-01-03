@@ -34,6 +34,12 @@ class Parser(
         val name = tokens[index++]
         name.expectType<Token.Identifier>()
 
+        val parameters = buildFunctionParameters()
+
+        return TreeNode.FunctionNode(name.value, parameters, buildBody())
+    }
+
+    private fun buildFunctionParameters(): List<String> {
         val openBracket = tokens[index++]
         openBracket.expectType<Token.OpenRoundBracket>()
 
@@ -41,7 +47,7 @@ class Parser(
         val possibleClosedBracket = tokens[index]
         if (possibleClosedBracket is Token.ClosedRoundBracket) {
             index++
-            return TreeNode.FunctionNode(name.value, parameters, buildBody())
+            return parameters
         }
 
         while (true) {
@@ -56,7 +62,7 @@ class Parser(
             else error("Unexpected token at the end of the function parameter")
         }
 
-        return TreeNode.FunctionNode(name.value, parameters, buildBody())
+        return parameters
     }
 
     private fun buildBody(): TreeNode.BodyNode {
@@ -439,8 +445,51 @@ class Parser(
         return callable
     }
 
+    private fun buildLambdaParameters(): List<String> {
+        val openBracket = tokens[index++]
+        openBracket.expectType<Token.VerticalBar>()
+
+        val parameters = mutableListOf<String>()
+        val possibleVerticalBar = tokens[index]
+        if (possibleVerticalBar is Token.VerticalBar) {
+            index++
+            return parameters
+        }
+
+        while (true) {
+            val parameterName = tokens[index++]
+            parameterName.expectType<Token.Identifier>()
+
+            parameters.add(parameterName.value)
+
+            val commaOrVerticalBar = tokens[index++]
+            if (commaOrVerticalBar is Token.CommaOperator) continue
+            else if (commaOrVerticalBar is Token.VerticalBar) break
+            else error("Unexpected token at the end of the function parameter")
+        }
+
+        return parameters
+    }
+
     private fun buildPrimary(): TreeNode.Evaluable {
         return when (val currentToken = tokens[index]) {
+            is Token.OpenCurlyBracket -> {
+                val body = buildBody()
+
+                TreeNode.Evaluable.AnonymousFunctionNode(listOf(), body)
+            }
+            is Token.VerticalBar -> {
+                val parameters = buildLambdaParameters()
+                val body = buildBody()
+
+                TreeNode.Evaluable.AnonymousFunctionNode(parameters, body)
+            }
+            is Token.OrOperator -> {
+                index++
+                val body = buildBody()
+
+                TreeNode.Evaluable.AnonymousFunctionNode(listOf(), body)
+            }
             is Token.OpenRoundBracket -> {
                 index++
                 val result = buildExpression()

@@ -7,7 +7,6 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.random.nextInt
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -71,14 +70,12 @@ class RuntimeTests {
         repeat(10000) {
             val globalMemory = Memory()
             val thisHandle = ThisHandle(functionsMap)
-            globalMemory.content["this"] = thisHandle
-            globalMemory.content["new"] = constructorHandle
-
-            val memory = Memory(globalMemory)
+            globalMemory["this"] = thisHandle
+            globalMemory["new"] = constructorHandle
 
             val testData = Array(random.nextInt(1..100)) { IntHandle(random.nextInt()) }.toMutableList<CallableClass>()
             val listHandle = ListHandle(testData)
-            thisHandle.call("main", arrayOf({ listHandle }), memory)
+            thisHandle.call("main", arrayOf({ listHandle }), globalMemory)
 
             for (i in 1..<testData.size) {
                 val prev = testData[i - 1]

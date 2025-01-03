@@ -41,6 +41,10 @@ sealed class Token {
         override fun toString() = "]"
     }
 
+    data object VerticalBar: Token() {
+        override fun toString() = "|"
+    }
+
     data object DotOperator: Token() {
         override fun toString() = "."
     }
@@ -112,14 +116,3 @@ sealed class Token {
         override fun toString(): String = value
     }
 }
-
-val Token.isLiteral: Boolean
-    get() = when (this) {
-        Token.TrueLiteral -> true
-        Token.FalseLiteral -> true
-        Token.VoidLiteral -> true
-        is Token.StringLiteral -> true
-        is Token.IntLiteral -> true
-        is Token.DoubleLiteral -> true
-        else -> false
-    }
