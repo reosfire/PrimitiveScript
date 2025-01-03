@@ -49,7 +49,7 @@ class Lexer(private val source: String) {
             return
         }
 
-        if (startSymbol.isDigit() || startSymbol == '-' && !ended && source[currentIndex + 1].isDigit()) {
+        if (startSymbol.isDigit()) {
             emitNumberLiteral()
             skipSpaces()
             return
@@ -183,17 +183,13 @@ class Lexer(private val source: String) {
     private fun emitNumberLiteral() {
         val buffer = StringBuilder()
         var read = get()
-        if (read == '-') {
-            buffer.append(read)
-            read = moveAndGet()
-        }
 
         while (!ended && read.isDigit()) {
             buffer.append(read)
             read = moveAndGet()
         }
 
-        if (read == '.' && !ended && source[currentIndex + 1].isDigit()) {
+        if (read == '.' && currentIndex + 1 < source.length && source[currentIndex + 1].isDigit()) {
             buffer.append(read)
             read = moveAndGet()
             while (!ended && read.isDigit()) {

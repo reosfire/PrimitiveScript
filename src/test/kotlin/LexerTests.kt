@@ -99,12 +99,14 @@ class LexerTests {
                 Token.Var,
                 Token.Identifier("negativeInt"),
                 Token.AssignOperator,
-                Token.IntLiteral(-10),
+                Token.MinusOperator,
+                Token.IntLiteral(10),
 
                 Token.Var,
                 Token.Identifier("double"),
                 Token.AssignOperator,
-                Token.DoubleLiteral(-12345.67890),
+                Token.MinusOperator,
+                Token.DoubleLiteral(12345.67890),
 
                 Token.Var,
                 Token.Identifier("word"),
@@ -277,7 +279,8 @@ class LexerTests {
                 Token.Var,
                 Token.Identifier("negativeInt"),
                 Token.AssignOperator,
-                Token.IntLiteral(-10),
+                Token.MinusOperator,
+                Token.IntLiteral(10),
 
                 Token.Var,
                 Token.Identifier("word"),

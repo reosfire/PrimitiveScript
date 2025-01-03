@@ -111,11 +111,19 @@ class TreeBuilderTests {
                             ),
                             TreeNode.VariableDeclarationNode(
                                 "negativeInt",
-                                TreeNode.Evaluable.CompilationConstant.IntNode(-10)
+                                TreeNode.Evaluable.FunctionCallNode(
+                                    TreeNode.Evaluable.CompilationConstant.IntNode(10),
+                                    "negate",
+                                    listOf()
+                                )
                             ),
                             TreeNode.VariableDeclarationNode(
                                 "double",
-                                TreeNode.Evaluable.CompilationConstant.DoubleNode(-12345.67890)
+                                TreeNode.Evaluable.FunctionCallNode(
+                                    TreeNode.Evaluable.CompilationConstant.DoubleNode(12345.67890),
+                                    "negate",
+                                    listOf()
+                                )
                             ),
                             TreeNode.VariableDeclarationNode(
                                 "word",

@@ -93,6 +93,10 @@ class IntHandle(
                 VoidHandle
             }
 
+            "negate" -> {
+                IntHandle(-value)
+            }
+
             else -> error("function \"IntHandle::$functionName\" not found")
         }
     }
@@ -134,6 +138,10 @@ class DoubleHandle(
                 VoidHandle
             }
 
+            "negate" -> {
+                DoubleHandle(-value)
+            }
+
             else -> error("function \"IntHandle::$functionName\" not found")
         }
     }
@@ -173,6 +181,10 @@ class LongHandle(
             "increment" -> {
                 value++
                 VoidHandle
+            }
+
+            "negate" -> {
+                LongHandle(-value)
             }
 
             else -> error("function \"IntHandle::$functionName\" not found")

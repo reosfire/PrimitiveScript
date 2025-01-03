@@ -353,6 +353,10 @@ class Parser(
             index++
             val right = buildUnary()
             TreeNode.Evaluable.FunctionCallNode(right, "not", listOf())
+        } else if(tokens[index] is Token.MinusOperator) {
+            index++
+            val right = buildUnary()
+            TreeNode.Evaluable.FunctionCallNode(right, "negate", listOf())
         } else {
             buildFunctionCall()
         }
