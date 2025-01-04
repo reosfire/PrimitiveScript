@@ -1,0 +1,20 @@
+fun main(iterations) {
+    result = new.list()
+    counter = createCounter(iterations, |i| {
+        result.add(i)
+    })
+
+    counter.invoke()
+
+    return result
+}
+
+fun createCounter(count, block) {
+    i = 0
+    return {
+        while(i < count) {
+            block.invoke(new.int(i))
+            i.increment()
+        }
+    }
+}

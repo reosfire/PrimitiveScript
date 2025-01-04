@@ -7,6 +7,7 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.random.nextInt
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -87,5 +88,38 @@ class RuntimeTests {
                 assert(prev.value <= current.value)
             }
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [0, 1, 2, 3, 4, 5, 100, 101])
+    fun doubleRecursiveIsEvenTest(number: Int) {
+        val numberHandle = IntHandle(number)
+
+        val result = runTestScript(
+            "doubleRecursiveIsEven",
+            arrayOf({ numberHandle }),
+            "isEven"
+        )
+
+        assertIs<BoolHandle>(result)
+        assertEquals(number % 2 == 0, result.value)
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = [0, 10, 23])
+    fun counterLambdaTest(iterations: Int) {
+        val iterationsHandle = IntHandle(iterations)
+
+        val result = runTestScript(
+            "counterLambda",
+            arrayOf({ iterationsHandle }),
+            "main"
+        )
+
+        assertIs<ListHandle>(result)
+        assertContentEquals(
+            List(iterations) { it },
+            result.items.map { (it as IntHandle).value }
+        )
     }
 }
