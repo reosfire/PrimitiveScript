@@ -1,3 +1,4 @@
+import analyzes.LoopControlFlowAnalyzer
 import parsing.tokenize
 import runtime.*
 import treeBuilding.TreeNode
@@ -20,6 +21,8 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
 
     val tree = buildTree(tokens)
     println(tree)
+
+    LoopControlFlowAnalyzer().visit(tree)
 
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())

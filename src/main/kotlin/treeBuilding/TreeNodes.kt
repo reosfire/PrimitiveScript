@@ -100,7 +100,6 @@ class PrettyPrinter: Visitor<String> {
     private fun refineEscapeCodes(input: String): String {
         return input.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r")
     }
-
 }
 
 sealed class TreeNode {
