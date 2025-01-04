@@ -402,7 +402,7 @@ class Parser(
                 val commaOrBracket = tokens[index++]
                 if (commaOrBracket is Token.CommaOperator) continue
                 else if (commaOrBracket is Token.ClosedRoundBracket) break
-                else error("Unexpected in function call arguments")
+                else error("Unexpected token after function call argument. Expected comma or bracket")
             }
 
             return arguments

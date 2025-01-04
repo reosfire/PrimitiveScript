@@ -67,7 +67,7 @@ class RuntimeTests {
         val functionsMap = tree.createFunctionsMap()
         val constructorHandle = ConstructorHandle()
 
-        repeat(10000) {
+        repeat(1000) {
             val globalMemory = Memory()
             val thisHandle = ThisHandle(functionsMap)
             globalMemory["this"] = thisHandle

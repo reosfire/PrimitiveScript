@@ -1,7 +1,7 @@
+import lexing.Lexer
 import lexing.Token
 import lexing.tokenize
-import kotlin.test.Test
-import kotlin.test.assertContentEquals
+import kotlin.test.*
 
 class LexerTests {
     @Test
@@ -504,6 +504,89 @@ class LexerTests {
                 Token.ClosedCurlyBracket,
 
                 Token.ClosedCurlyBracket,
+            ),
+            lexingResult
+        )
+    }
+
+    @Test
+    fun onlyInt() {
+        val lexingResult = tokenize("12345")
+        assertContentEquals(listOf(Token.IntLiteral(12345)), lexingResult)
+    }
+
+    @Test
+    fun onlyDouble() {
+        val lexingResult = tokenize("123.678")
+        assertContentEquals(listOf(Token.DoubleLiteral(123.678)), lexingResult)
+    }
+
+    @Test
+    fun onlyString() {
+        val lexingResult = tokenize("\"some string\"")
+        assertContentEquals(listOf(Token.StringLiteral("some string")), lexingResult)
+    }
+
+    @Test
+    fun brokenString() {
+        val lexingResult = runCatching {
+            tokenize("\"some string")
+        }
+
+        val exception = lexingResult.exceptionOrNull()
+        assertIs<Lexer.LexerFinalError>(exception)
+        assertContains("No closing quote found when lexing a string.", exception.errors.first().message!!)
+    }
+
+    @Test
+    fun allTokensInARowTest() {
+        val lexingResult = tokenize(
+            """
+                true false void fun var if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! "str" 123 1.23 identifier
+            """.trimIndent()
+        )
+
+        assertContentEquals(
+            listOf(
+                Token.TrueLiteral,
+                Token.FalseLiteral,
+                Token.VoidLiteral,
+                Token.Fun,
+                Token.Var,
+                Token.If,
+                Token.Else,
+                Token.While,
+                Token.Return,
+                Token.Break,
+                Token.Continue,
+                Token.OpenRoundBracket,
+                Token.ClosedRoundBracket,
+                Token.OpenCurlyBracket,
+                Token.ClosedCurlyBracket,
+                Token.OpenSquareBracket,
+                Token.ClosedSquareBracket,
+                Token.VerticalBar,
+                Token.DotOperator,
+                Token.CommaOperator,
+                Token.AssignOperator,
+                Token.PlusOperator,
+                Token.MinusOperator,
+                Token.MultiplyOperator,
+                Token.DivideOperator,
+                Token.ModuloOperator,
+                Token.LessOperator,
+                Token.LessOrEqualOperator,
+                Token.GreaterOperator,
+                Token.GreaterOrEqualOperator,
+                Token.EqualOperator,
+                Token.NotEqualOperator,
+                Token.AndOperator,
+                Token.OrOperator,
+                Token.NotOperator,
+                Token.StringLiteral("str"),
+                Token.IntLiteral(123),
+                Token.DoubleLiteral(1.23),
+                Token.Identifier("identifier"),
             ),
             lexingResult
         )

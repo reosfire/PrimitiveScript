@@ -16,66 +16,65 @@ private val wordTokensMap = mapOf(
 )
 
 fun tokenize(source: String): List<Token> {
-    val lexer = Lexer(source.trim())
-    lexer.run()
-
-    return lexer.resultTokens
+    return Lexer(source.trim()).run()
 }
 
 class Lexer(private val source: String) {
     private val ended: Boolean get() = currentIndex >= source.length
+    private val canMoveAndGet: Boolean get() = currentIndex + 1 < source.length
 
     private var currentIndex = 0
 
     private var line = 0
     private var column = 0
 
-    val resultTokens = mutableListOf<Token>()
+    fun run(): MutableList<Token> {
+        val emittedTokens = mutableListOf<Token>()
+        val emittedErrors = mutableListOf<LexerErrorEmission>()
 
-    fun run() {
         while (!ended) {
-            next()
+            try {
+                next()
+            } catch (tokenEmission: TokenEmission) {
+                emittedTokens.addAll(tokenEmission.tokens)
+            } catch (errorEmission: LexerErrorEmission) {
+                emittedErrors.add(errorEmission)
+            } catch (error: Throwable) {
+                throw LexerFinalError("Fatal error while lexing", cause = error)
+            }
         }
+
+        if (emittedErrors.isNotEmpty()) {
+            throw LexerFinalError("There are some lexical errors collected while lexing: ", errors = emittedErrors)
+        }
+
+        return emittedTokens
     }
 
     private fun next() {
         val startSymbol = get()
 
-        if (startSymbol == '\"') {
-            getAndMove() // consume open "
-            emitStringLiteral()
-            getAndMove() // consume close "
-            skipSpaces()
-            return
-        }
+        if (startSymbol == '\"') emitStringLiteral()
 
-        if (startSymbol.isDigit()) {
-            emitNumberLiteral()
-            skipSpaces()
-            return
-        }
+        if (startSymbol.isDigit()) emitNumberLiteral()
 
-        if (startSymbol == '/' && currentIndex + 1 < source.length && source[currentIndex + 1] == '/') {
+        if (startSymbol == '/' && canMoveAndGet && source[currentIndex + 1] == '/') {
             skipLine()
+            skipSpaces()
             return
         }
 
         val simpleMatch = simpleMatchToken()
-        if (simpleMatch != null) {
-            emitSimpleMatchToken(simpleMatch)
-            return
-        }
+        if (simpleMatch != null) emitSimpleMatchToken(simpleMatch)
 
         val word = nextWord()
         skipSpaces()
         val wordToken = wordTokensMap[word]
         if (wordToken != null) {
-            resultTokens.add(wordToken.withPlace())
-            return
+            emitToken(wordToken.withPlace())
         }
 
-        resultTokens.add(Token.Identifier(word).withPlace())
-        return
+        emitToken(Token.Identifier(word).withPlace())
     }
 
     private fun simpleMatchToken(): Token? {
@@ -90,8 +89,8 @@ class Lexer(private val source: String) {
             '.' -> Token.DotOperator
             ',' -> Token.CommaOperator
             '=' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
-                    currentIndex++
+                if (canMoveAndGet && source[currentIndex + 1] == '=') {
+                    getAndMove()
                     Token.EqualOperator
                 } else {
                     Token.AssignOperator
@@ -104,35 +103,40 @@ class Lexer(private val source: String) {
             '/' -> Token.DivideOperator
             '%' -> Token.ModuloOperator
             '<' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                if (canMoveAndGet && source[currentIndex + 1] == '=') {
+                    getAndMove()
                     Token.LessOrEqualOperator
                 } else {
                     Token.LessOperator
                 }
             }
             '>' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                if (canMoveAndGet && source[currentIndex + 1] == '=') {
+                    getAndMove()
                     Token.GreaterOrEqualOperator
                 } else {
                     Token.GreaterOperator
                 }
             }
             '!' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '=') {
+                if (canMoveAndGet && source[currentIndex + 1] == '=') {
+                    getAndMove()
                     Token.NotEqualOperator
                 } else {
                     Token.NotOperator
                 }
             }
             '&' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '&') {
+                if (canMoveAndGet && source[currentIndex + 1] == '&') {
+                    getAndMove()
                     Token.AndOperator
                 } else {
                     null
                 }
             }
             '|' -> {
-                if (currentIndex + 1 < source.length && source[currentIndex + 1] == '|') {
+                if (canMoveAndGet && source[currentIndex + 1] == '|') {
+                    getAndMove()
                     Token.OrOperator
                 } else {
                     Token.VerticalBar
@@ -142,73 +146,78 @@ class Lexer(private val source: String) {
         }
     }
 
-    private fun emitSimpleMatchToken(token: Token) {
+    private fun emitSimpleMatchToken(token: Token): Nothing {
         getAndMove()
-        when (token) {
-            is Token.LessOrEqualOperator -> getAndMove()
-            is Token.GreaterOrEqualOperator -> getAndMove()
-            is Token.EqualOperator -> getAndMove()
-            is Token.NotEqualOperator -> getAndMove()
-            is Token.AndOperator -> getAndMove()
-            is Token.OrOperator -> getAndMove()
-            else -> Unit
-        }
         skipSpaces()
-        resultTokens.add(token.withPlace())
+        emitToken(token.withPlace())
     }
 
-    private fun emitStringLiteral() {
-        val buffer = StringBuilder()
-        var read = get()
+    private fun emitStringLiteral(): Nothing {
+        assert(getAndMove() == '"') { "emitStringLiteral must be called only when lexer is currently on \" symbol" }
 
-        while (!ended && read != '"') {
-            if (read == '\\') {
-                when (val escapeCode = moveAndGet()) {
-                    'r' -> buffer.append('\r')
-                    'n' -> buffer.append('\n')
-                    't' -> buffer.append('\t')
-                    '\\' -> buffer.append('\\')
-                    '"' -> buffer.append('"')
-                    else -> throw IllegalStateException("Unknown escape code: $escapeCode")
+        val buffer = StringBuilder()
+
+        while (!ended) {
+            when (get()) {
+                '"' -> {
+                    getAndMove()
+                    skipSpaces()
+                    emitToken(Token.StringLiteral(buffer.toString()).withPlace())
                 }
-            } else {
-                buffer.append(read)
+                '\\' -> {
+                    if (!canMoveAndGet) emitError("Unexpected end of source in escape sequence.")
+                    when (val escapeCode = moveAndGet()) {
+                        'r' -> buffer.append('\r')
+                        'n' -> buffer.append('\n')
+                        't' -> buffer.append('\t')
+                        '\\' -> buffer.append('\\')
+                        '"' -> buffer.append('"')
+                        else -> emitError("Unknown escape code: $escapeCode.")
+                    }
+                    getAndMove() // Consume escape code
+                }
+                else -> buffer.append(getAndMove())
             }
-            read = moveAndGet()
         }
 
-        resultTokens.add(Token.StringLiteral(buffer.toString()).withPlace())
+        emitError("No closing quote found when lexing a string.")
     }
 
-    private fun emitNumberLiteral() {
+    private fun emitNumberLiteral(): Nothing {
         val buffer = StringBuilder()
-        var read = get()
-
-        while (!ended && read.isDigit()) {
-            buffer.append(read)
-            read = moveAndGet()
+        while (!ended) {
+            if (get().isDigit()) buffer.append(getAndMove())
+            else break
         }
 
-        if (read == '.' && currentIndex + 1 < source.length && source[currentIndex + 1].isDigit()) {
-            buffer.append(read)
-            read = moveAndGet()
-            while (!ended && read.isDigit()) {
-                buffer.append(read)
-                read = moveAndGet()
+        if (!ended && get() == '.' && canMoveAndGet && moveAndGet().isDigit()) {
+            buffer.append('.')
+            while (!ended) {
+                if (get().isDigit()) buffer.append(getAndMove())
+                else break
             }
-            resultTokens.add(Token.DoubleLiteral(buffer.toString().toDouble()).withPlace())
+
+            skipSpaces()
+            try {
+                emitToken(Token.DoubleLiteral(buffer.toString().toDouble()).withPlace())
+            } catch (e: NumberFormatException) {
+                emitError("Double literal isn't correct.")
+            }
         } else {
-            resultTokens.add(Token.IntLiteral(buffer.toString().toInt()).withPlace())
+            skipSpaces()
+            try {
+                emitToken(Token.IntLiteral(buffer.toString().toInt()).withPlace())
+            } catch (e: NumberFormatException) {
+                emitError("Int literal isn't correct.")
+            }
         }
     }
 
     private fun nextWord(): String {
         val buffer = StringBuilder()
-        var read = get()
-
-        while (!ended && !read.isWhitespace() && simpleMatchToken() == null) {
-            buffer.append(read)
-            read = moveAndGet()
+        while (!ended) {
+            if (get().isWhitespace() || simpleMatchToken() != null) break
+            else buffer.append(getAndMove())
         }
 
         return buffer.toString()
@@ -249,9 +258,26 @@ class Lexer(private val source: String) {
         return got
     }
 
+    private fun emitError(message: String): Nothing {
+        throw LexerErrorEmission(message, line, column)
+    }
+
+    private fun emitToken(vararg tokens: Token): Nothing {
+        throw TokenEmission(tokens)
+    }
+
     private fun Token.withPlace(): Token {
         this@withPlace.line = this@Lexer.line
         this@withPlace.column = this@Lexer.column
         return this
+    }
+
+    private class TokenEmission(val tokens: Array<out Token>): Throwable()
+    class LexerErrorEmission(message: String, val line: Int, val column: Int, cause: Throwable? = null): Throwable(message, cause)
+
+    class LexerFinalError(message: String, val errors: List<LexerErrorEmission> = emptyList(), cause: Throwable? = null): Throwable(message, cause) {
+        override fun toString(): String {
+            return errors.joinToString("\n\n") { it.message!! + " At (${it.line}, ${it.column})" }
+        }
     }
 }
