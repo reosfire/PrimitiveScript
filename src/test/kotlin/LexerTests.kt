@@ -1,5 +1,5 @@
-import parsing.Token
-import parsing.tokenize
+import lexing.Token
+import lexing.tokenize
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 

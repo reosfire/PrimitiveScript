@@ -26,7 +26,7 @@ Evaluable is either a compilation constant, a variable name, or a function call 
 - String `"Hello World!"` String literals support escape sequences like `\n`, `\t`, `\\`, `\"`
 
 ### Variable name
-Variables can be accessed by name. Value of variable will be searched at runtime first in **local** then in **global memory**
+Variables can be accessed by name. Value of variable will be searched at interpretation first in **local** then in **global memory**
 
 ### Function call
 Function call is a language construct started with dot followed by function name and ended with **evaluable** parameters in parentheses.
@@ -41,7 +41,7 @@ Then there is one of more **function call** chained.
 Each  _k_-th call except first will be called on _k - 1_-th call result. </br>
 `this.foo().bar()` </br>
 
-**this** variable name is provided by runtime, so it's like any other global variable.
+**this** variable name is provided by interpretation, so it's like any other global variable.
 currently there is also **new** variable name that is used to create new instances of CallableTypes. </br>
 However, **this** variable name can be inferred and omitted. For example this code is equivalent to the one above: </br>
 `foo().bar()`

@@ -1,4 +1,4 @@
-package treeBuilding
+package parsing
 
 interface Visitor<R> {
     fun visit(node: TreeNode.RootNode): R

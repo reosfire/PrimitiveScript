@@ -1,7 +1,7 @@
 package analyzes
 
-import treeBuilding.TreeNode
-import treeBuilding.Visitor
+import parsing.TreeNode
+import parsing.Visitor
 
 class LoopControlFlowAnalyzer: Visitor<Unit> {
     private var inLoop = false

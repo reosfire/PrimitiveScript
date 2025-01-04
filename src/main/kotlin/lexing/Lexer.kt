@@ -1,4 +1,4 @@
-package parsing
+package lexing
 
 private val wordTokensMap = mapOf(
     "true" to Token.TrueLiteral,

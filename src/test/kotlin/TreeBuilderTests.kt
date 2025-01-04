@@ -1,6 +1,6 @@
-import parsing.tokenize
-import treeBuilding.TreeNode
-import treeBuilding.buildTree
+import lexing.tokenize
+import parsing.TreeNode
+import parsing.buildTree
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

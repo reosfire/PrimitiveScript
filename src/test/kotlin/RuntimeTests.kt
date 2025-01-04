@@ -1,8 +1,8 @@
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
-import parsing.tokenize
-import runtime.*
-import treeBuilding.buildTree
+import lexing.tokenize
+import interpretation.*
+import parsing.buildTree
 import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.random.nextInt

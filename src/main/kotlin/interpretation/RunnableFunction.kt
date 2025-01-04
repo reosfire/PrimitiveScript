@@ -1,6 +1,6 @@
-package runtime
+package interpretation
 
-import treeBuilding.TreeNode
+import parsing.TreeNode
 
 typealias LateEvaluable = () -> CallableClass
 

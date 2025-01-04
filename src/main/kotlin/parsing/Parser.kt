@@ -1,6 +1,6 @@
-package treeBuilding
+package parsing
 
-import parsing.Token
+import lexing.Token
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 

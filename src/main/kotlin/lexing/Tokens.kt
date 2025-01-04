@@ -1,4 +1,4 @@
-package parsing
+package lexing
 
 sealed class Token {
     var line: Int = 0

@@ -1,4 +1,4 @@
-package runtime
+package interpretation
 
 class Memory private constructor(
     private val outer: Memory?,

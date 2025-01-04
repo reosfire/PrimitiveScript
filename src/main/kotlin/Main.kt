@@ -1,8 +1,8 @@
 import analyzes.LoopControlFlowAnalyzer
-import parsing.tokenize
-import runtime.*
-import treeBuilding.TreeNode
-import treeBuilding.buildTree
+import lexing.tokenize
+import interpretation.*
+import parsing.TreeNode
+import parsing.buildTree
 import java.io.File
 import kotlin.time.measureTime
 
