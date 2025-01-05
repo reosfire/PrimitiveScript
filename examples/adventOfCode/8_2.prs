@@ -1,13 +1,13 @@
 fun main() {
-    var lines = new.File("input.txt").readText().split("\r\n")
-    var n = lines.size()
-    var m = lines.get(0).size()
+    lines = new.File("input.txt").readText().split("\r\n")
+    n = lines.size()
+    m = lines.get(0).size()
 
-    var antinodes = new.array(n)
-    var i = 0
+    antinodes = new.array(n)
+    i = 0
     while (i.less(n)) {
-        var line = new.array(m)
-        var j = 0
+        line = new.array(m)
+        j = 0
         while (j.less(m)) {
             line.set(j, false)
             j.increment()
@@ -16,45 +16,45 @@ fun main() {
         i.increment()
     }
 
-    var i = 0
+    i = 0
     while (i.less(n)) {
-        var j = 0
+        j = 0
         while (j.less(m)) {
-            var first = lines.get(i).get(j)
+            first = lines.get(i).get(j)
             if (first.equal(".")) {
                 j.increment()
                 continue
             }
 
-            var k = 0
+            k = 0
             while (k.less(n)) {
-                var l = 0
+                l = 0
                 while (l.less(m)) {
                     if (k.equal(i).and(l.equal(j))) {
                         l.increment()
                         continue
                     }
 
-                    var second = lines.get(k).get(l)
+                    second = lines.get(k).get(l)
                     if (first.equal(second).not()) {
                         l.increment()
                         continue
                     }
 
-                    var dr = k.minus(i)
-                    var dc = l.minus(j)
+                    dr = k.minus(i)
+                    dc = l.minus(j)
 
 
-                    var r = new.int(i)
-                    var c = new.int(j)
+                    r = new.int(i)
+                    c = new.int(j)
                     while (inRange(r, 0, n).and(inRange(c, 0, m))) {
                         antinodes.get(r).set(c, true)
                         r.set(r.minus(dr))
                         c.set(c.minus(dc))
                     }
 
-                    var r = new.int(k)
-                    var c = new.int(l)
+                    r = new.int(k)
+                    c = new.int(l)
                     while (inRange(r, 0, n).and(inRange(c, 0, m)).not()) {
                         antinodes.get(r).set(c, true)
                         r.set(r.plus(dr))
@@ -71,10 +71,10 @@ fun main() {
         i.increment()
     }
 
-    var result = 0
-    var i = 0
+    result = 0
+    i = 0
     while (i.less(n)) {
-        var j = 0
+        j = 0
         while (j.less(m)) {
             if (antinodes.get(i).get(j)) {
                 result.increment()

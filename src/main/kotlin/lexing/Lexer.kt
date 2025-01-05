@@ -5,7 +5,6 @@ private val wordTokensMap = mapOf(
     "false" to Token.FalseLiteral,
 
     "fun" to Token.Fun,
-    "var" to Token.Var,
     "if" to Token.If,
     "else" to Token.Else,
     "while" to Token.While,

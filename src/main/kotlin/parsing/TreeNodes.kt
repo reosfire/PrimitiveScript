@@ -50,7 +50,7 @@ class PrettyPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.VariableDeclarationNode): String {
-        return "var ${node.name} = ${node.initialValue.accept(this)}"
+        return "${node.name} = ${node.initialValue.accept(this)}"
     }
 
     override fun visit(node: TreeNode.ReturnNode): String {

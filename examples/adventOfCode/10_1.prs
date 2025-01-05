@@ -1,11 +1,11 @@
 fun main() {
-    var input = new.File("input.txt").readText().split("\r\n")
-    var matrix = new.array(input.size())
-    var i = 0
+    input = new.File("input.txt").readText().split("\r\n")
+    matrix = new.array(input.size())
+    i = 0
     while (i < input.size()) {
-        var line = input[i]
-        var matrixLine = new.array(line.size())
-        var j = 0
+        line = input[i]
+        matrixLine = new.array(line.size())
+        j = 0
         while (j < line.size()) {
             matrixLine.set(j, new.int(line[j]))
             j.increment()
@@ -14,14 +14,14 @@ fun main() {
         i.increment()
     }
 
-    var result = 0
+    result = 0
 
-    var i = 0
+    i = 0
     while (i < matrix.size()) {
-        var j = 0
+        j = 0
         while (j < matrix[0].size()) {
             if (matrix[i][j] == 0) {
-                var goodPositions = new.list()
+                goodPositions = new.list()
                 fillGoodPositions(matrix, i, j, goodPositions)
                 result.plusAssign(goodPositions.size())
             }
@@ -34,15 +34,15 @@ fun main() {
 }
 
 fun fillGoodPositions(matrix, row, col, goodPositions) {
-    var current = matrix[row][col]
+    current = matrix[row][col]
     if (current == 9) {
-        var newPosition = newPosition(row, col)
+        newPosition = newPosition(row, col)
         if (!containsPosition(goodPositions, newPosition))
             goodPositions.add(newPosition)
         return void
     }
 
-    var next = current + 1
+    next = current + 1
 
     if (validCoordinates(matrix, row - 1, col))
         if (matrix[row - 1][col] == next)
@@ -68,7 +68,7 @@ fun inRange(i, min, max)
     return i >= min && i < max
 
 fun containsPosition(list, position) {
-    var i = 0
+    i = 0
     while (i < list.size()) {
         if (positionsEqual(list[i], position)) return true
         i.increment()
@@ -80,7 +80,7 @@ fun positionsEqual(a, b)
     return a[0] == b[0] && a[1] == b[1]
 
 fun newPosition(row, col) {
-    var res = new.array(2)
+    res = new.array(2)
     res.set(0, row)
     res.set(1, col)
     return res

@@ -1,14 +1,14 @@
 fun main() {
-    var inputText = new.File("input.txt").readText()
-    var inputLines = inputText.split("\r\n")
-    var n = inputLines.size()
-    var m = inputLines.get(0).size()
+    inputText = new.File("input.txt").readText()
+    inputLines = inputText.split("\r\n")
+    n = inputLines.size()
+    m = inputLines.get(0).size()
 
-    var result = 0
+    result = 0
 
-    var obstacleRow = 0
+    obstacleRow = 0
     while (obstacleRow.less(n)) {
-        var obstacleCol = 0
+        obstacleCol = 0
         while (obstacleCol.less(m)) {
             if (inputLines.get(obstacleRow).get(obstacleCol).equal("#")) {
                  obstacleCol.increment()
@@ -35,21 +35,21 @@ fun main() {
 }
 
 fun isStuck(inputText, obstacleRow, obstacleCol) {
-    var inputLines = inputText.split("\n")
+    inputLines = inputText.split("\n")
     inputLines.get(obstacleRow).replaceAt(obstacleCol, "#")
 
-    var n = inputLines.size()
-    var m = inputLines.get(0).size()
+    n = inputLines.size()
+    m = inputLines.get(0).size()
 
-    var currentRow = 0
-    var currentCol = 0
+    currentRow = 0
+    currentCol = 0
 
-    var i = 0
+    i = 0
     while (i.less(inputLines.size())) {
-        var line = inputLines.get(i)
-        var j = 0
+        line = inputLines.get(i)
+        j = 0
         while (j.less(line.size())) {
-            var char = line.get(j)
+            char = line.get(j)
             if (char.equal("^")) {
                 currentRow.set(i)
                 currentCol.set(j)
@@ -59,20 +59,20 @@ fun isStuck(inputText, obstacleRow, obstacleCol) {
         i.increment()
     }
 
-    var directionRow = -1
-    var directionCol = 0
+    directionRow = -1
+    directionCol = 0
 
-    var count = 0
+    count = 0
     while (count.less(20000)) {
-        var nextRow = currentRow.plus(directionRow)
-        var nextCol = currentCol.plus(directionCol)
+        nextRow = currentRow.plus(directionRow)
+        nextCol = currentCol.plus(directionCol)
 
         if (nextRow.less(0).or(nextRow.greaterOrEqual(n)).or(nextCol.less(0)).or(nextCol.greaterOrEqual(m))) {
             return false
         }
         while (inputLines.get(nextRow).get(nextCol).equal("#")) {
-            var newDirectionRow = rotateDirectionRow(directionRow, directionCol)
-            var newDirectionCol = rotateDirectionCol(directionCol, directionRow)
+            newDirectionRow = rotateDirectionRow(directionRow, directionCol)
+            newDirectionCol = rotateDirectionCol(directionCol, directionRow)
             directionRow.set(newDirectionRow)
             directionCol.set(newDirectionCol)
             nextRow.set(currentRow.plus(directionRow))

@@ -1,11 +1,11 @@
 fun main() {
-    var input = new.File("input.txt").readText()
+    input = new.File("input.txt").readText()
 
-    var decompressed = new.list()
+    decompressed = new.list()
 
-    var i = 0
+    i = 0
     while (i.less(input.size())) {
-        var j = int(input.get(i))
+        j = int(input.get(i))
         while (j.greater(0)) {
             decompressed.add(i.divide(2))
             j.decrement()
@@ -17,7 +17,7 @@ fun main() {
             break
         }
 
-        var j = int(input.get(i))
+        j = int(input.get(i))
         while (j.greater(0)) {
             decompressed.add(-1)
             j.decrement()
@@ -28,16 +28,16 @@ fun main() {
 
     println(decompressed.size())
 
-    var lastNonNegativeIndex = decompressed.size().minus(1)
-    var firstNegativeIndex = 0
+    lastNonNegativeIndex = decompressed.size().minus(1)
+    firstNegativeIndex = 0
 
     while (true) {
-        var lastNonNegativeIndex = findLastNonNegativeIndex(decompressed, lastNonNegativeIndex)
+        lastNonNegativeIndex = findLastNonNegativeIndex(decompressed, lastNonNegativeIndex)
         if (lastNonNegativeIndex.equal(-1)) {
             break
         }
 
-        var firstNegativeIndex = findFirstNegativeIndex(decompressed, firstNegativeIndex)
+        firstNegativeIndex = findFirstNegativeIndex(decompressed, firstNegativeIndex)
         if (firstNegativeIndex.equal(-1)) {
             break
         }
@@ -49,14 +49,14 @@ fun main() {
         swap(decompressed, lastNonNegativeIndex, firstNegativeIndex)
     }
 
-    var checksum = new.long(0)
+    checksum = new.long(0)
 
-    var i = 0
+    i = 0
     while (i.less(decompressed.size())) {
         if (decompressed.get(i).less(0)) {
             break
         }
-        var current = new.long(decompressed.get(i).multiply(i))
+        current = new.long(decompressed.get(i).multiply(i))
         checksum.set(checksum.plus(current))
         i.increment()
     }
@@ -65,7 +65,7 @@ fun main() {
 }
 
 fun findLastNonNegativeIndex(list, start) {
-    var i = new.int(start)
+    i = new.int(start)
     while (i.greaterOrEqual(0)) {
         if (list.get(i).greaterOrEqual(0)) {
             return i
@@ -77,7 +77,7 @@ fun findLastNonNegativeIndex(list, start) {
 }
 
 fun findFirstNegativeIndex(list, start) {
-    var i = new.int(start)
+    i = new.int(start)
     while (i.less(list.size())) {
         if (list.get(i).less(0)) {
             return i
@@ -89,7 +89,7 @@ fun findFirstNegativeIndex(list, start) {
 }
 
 fun swap(list, i, j) {
-    var temp = list.get(i)
+    temp = list.get(i)
     list.set(i, list.get(j))
     list.set(j, temp)
 }

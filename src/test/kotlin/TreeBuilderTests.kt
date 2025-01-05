@@ -143,7 +143,7 @@ class TreeBuilderTests {
                             ),
                             TreeNode.VariableDeclarationNode(
                                 "stringWithLanguageTokens",
-                                TreeNode.Evaluable.CompilationConstant.StringNode(".=(){} var fun while if return true false void 1 -10")
+                                TreeNode.Evaluable.CompilationConstant.StringNode("true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! \"str\" 123 1.23 identifier")
                             ),
                             TreeNode.VariableDeclarationNode(
                                 "escapedString",

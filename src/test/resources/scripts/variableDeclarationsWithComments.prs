@@ -1,22 +1,22 @@
 // Comment at the very beginning of the file
 
 fun main() { // Comment after function declaration
-    var int = 1 //This is an integer
-    var negativeInt = -10 // This is a negative integer
-    var word = "string" //      This is a string
-    var emptyString = "" // This is an empty string
-    var spaceString = " "
+    int = 1 //This is an integer
+    negativeInt = -10 // This is a negative integer
+    word = "string" //      This is a string
+    emptyString = "" // This is an empty string
+    spaceString = " "
     // This is a string with spaces
-    var spacesAroundString = "  string  "
+    spacesAroundString = "  string  "
     //This is a string with language tokens
-    // .=(){} var fun while if return true false void 1 -10
-    var stringWithLanguageTokens = ".=(){} var fun while if return true false void 1 -10"
+    // true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! "str" 123 1.23 identifier
+    stringWithLanguageTokens = "true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! \"str\" 123 1.23 identifier"
     // This is an escaped string
-    var escapedString = "\r\n\t\\\""
+    escapedString = "\r\n\t\\\""
     // This is a string with a comment inside
-    var stringWithCommentInside = " This is a string with // a comment inside "
+    stringWithCommentInside = " This is a string with // a comment inside "
 //Ugly Comment
-    var trueBoolean = true
+    trueBoolean = true
 
 
              //Randomly placed comment
@@ -25,10 +25,10 @@ fun main() { // Comment after function declaration
 
 
 
-    var falseBoolean = false
+    falseBoolean = false
 
     // This is a special void value
-    var voidSpecial = void
+    voidSpecial = void
 } // comment at the end of the function
 
 // Comment at the end of the file

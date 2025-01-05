@@ -14,7 +14,6 @@ sealed class Token {
     data object VoidLiteral : Token()
 
     data object Fun : Token()
-    data object Var : Token()
     data object If : Token()
     data object Else : Token()
     data object While : Token()

@@ -91,64 +91,52 @@ class LexerTests {
                 Token.ClosedRoundBracket,
                 Token.OpenCurlyBracket,
 
-                Token.Var,
                 Token.Identifier("int"),
                 Token.AssignOperator,
                 Token.IntLiteral(1),
 
-                Token.Var,
                 Token.Identifier("negativeInt"),
                 Token.AssignOperator,
                 Token.MinusOperator,
                 Token.IntLiteral(10),
 
-                Token.Var,
                 Token.Identifier("double"),
                 Token.AssignOperator,
                 Token.MinusOperator,
                 Token.DoubleLiteral(12345.67890),
 
-                Token.Var,
                 Token.Identifier("word"),
                 Token.AssignOperator,
                 Token.StringLiteral("string"),
 
-                Token.Var,
                 Token.Identifier("emptyString"),
                 Token.AssignOperator,
                 Token.StringLiteral(""),
 
-                Token.Var,
                 Token.Identifier("spaceString"),
                 Token.AssignOperator,
                 Token.StringLiteral(" "),
 
-                Token.Var,
                 Token.Identifier("spacesAroundString"),
                 Token.AssignOperator,
                 Token.StringLiteral("  string  "),
 
-                Token.Var,
                 Token.Identifier("stringWithLanguageTokens"),
                 Token.AssignOperator,
-                Token.StringLiteral(".=(){} var fun while if return true false void 1 -10"),
+                Token.StringLiteral("true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! \"str\" 123 1.23 identifier"),
 
-                Token.Var,
                 Token.Identifier("escapedString"),
                 Token.AssignOperator,
                 Token.StringLiteral("\r\n\t\\\""),
 
-                Token.Var,
                 Token.Identifier("trueBoolean"),
                 Token.AssignOperator,
                 Token.TrueLiteral,
 
-                Token.Var,
                 Token.Identifier("falseBoolean"),
                 Token.AssignOperator,
                 Token.FalseLiteral,
 
-                Token.Var,
                 Token.Identifier("voidSpecial"),
                 Token.AssignOperator,
                 Token.VoidLiteral,
@@ -271,63 +259,51 @@ class LexerTests {
                 Token.ClosedRoundBracket,
                 Token.OpenCurlyBracket,
 
-                Token.Var,
                 Token.Identifier("int"),
                 Token.AssignOperator,
                 Token.IntLiteral(1),
 
-                Token.Var,
                 Token.Identifier("negativeInt"),
                 Token.AssignOperator,
                 Token.MinusOperator,
                 Token.IntLiteral(10),
 
-                Token.Var,
                 Token.Identifier("word"),
                 Token.AssignOperator,
                 Token.StringLiteral("string"),
 
-                Token.Var,
                 Token.Identifier("emptyString"),
                 Token.AssignOperator,
                 Token.StringLiteral(""),
 
-                Token.Var,
                 Token.Identifier("spaceString"),
                 Token.AssignOperator,
                 Token.StringLiteral(" "),
 
-                Token.Var,
                 Token.Identifier("spacesAroundString"),
                 Token.AssignOperator,
                 Token.StringLiteral("  string  "),
 
-                Token.Var,
                 Token.Identifier("stringWithLanguageTokens"),
                 Token.AssignOperator,
-                Token.StringLiteral(".=(){} var fun while if return true false void 1 -10"),
+                Token.StringLiteral("true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! \"str\" 123 1.23 identifier"),
 
-                Token.Var,
                 Token.Identifier("escapedString"),
                 Token.AssignOperator,
                 Token.StringLiteral("\r\n\t\\\""),
 
-                Token.Var,
                 Token.Identifier("stringWithCommentInside"),
                 Token.AssignOperator,
                 Token.StringLiteral(" This is a string with // a comment inside "),
 
-                Token.Var,
                 Token.Identifier("trueBoolean"),
                 Token.AssignOperator,
                 Token.TrueLiteral,
 
-                Token.Var,
                 Token.Identifier("falseBoolean"),
                 Token.AssignOperator,
                 Token.FalseLiteral,
 
-                Token.Var,
                 Token.Identifier("voidSpecial"),
                 Token.AssignOperator,
                 Token.VoidLiteral,
@@ -542,7 +518,7 @@ class LexerTests {
     fun allTokensInARowTest() {
         val lexingResult = tokenize(
             """
-                true false void fun var if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! "str" 123 1.23 identifier
+                true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! "str" 123 1.23 identifier
             """.trimIndent()
         )
 
@@ -552,7 +528,6 @@ class LexerTests {
                 Token.FalseLiteral,
                 Token.VoidLiteral,
                 Token.Fun,
-                Token.Var,
                 Token.If,
                 Token.Else,
                 Token.While,

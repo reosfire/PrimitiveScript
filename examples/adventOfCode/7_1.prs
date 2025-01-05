@@ -1,25 +1,25 @@
 fun main() {
-    var file = new.File("input.txt")
-    var text = file.readText()
-    var lines = text.split("\r\n")
+    file = new.File("input.txt")
+    text = file.readText()
+    lines = text.split("\r\n")
 
-    var result = new.long(0)
+    result = new.long(0)
 
-    var i = 0
+    i = 0
     while (i.less(lines.size())) {
-        var tokens = lines.get(i).split(": ")
-        var target = new.long(tokens.get(0))
-        var numbers = tokens.get(1).split(" ")
+        tokens = lines.get(i).split(": ")
+        target = new.long(tokens.get(0))
+        numbers = tokens.get(1).split(" ")
 
-        var numbersCast = new.list()
+        numbersCast = new.list()
 
-        var j = 0
+        j = 0
         while (j.less(numbers.size())) {
             numbersCast.add(new.long(numbers.get(j)))
             j.increment()
         }
 
-        var isPossible = solve(numbersCast.get(0), 1, numbersCast, target)
+        isPossible = solve(numbersCast.get(0), 1, numbersCast, target)
         if (isPossible) {
             result.set(result.plus(target))
         }

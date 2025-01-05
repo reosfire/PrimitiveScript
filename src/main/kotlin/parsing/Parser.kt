@@ -93,7 +93,6 @@ class Parser(
         return when (token) {
             Token.If -> buildIf()
             Token.While -> buildWhile()
-            Token.Var -> buildVariableDeclaration()
             Token.Return -> buildReturn()
             Token.Break -> buildBreak()
             Token.Continue -> buildContinue()
@@ -162,12 +161,6 @@ class Parser(
     }
 
     private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
-        when (val token = tokens[index]) {
-            is Token.Var -> index++
-            is Token.Identifier -> Unit
-            else -> error("Unexpected first token in variable declaration. Expected var keyword or variable name, got $token")
-        }
-
         val name = tokens[index++]
         name.expectType<Token.Identifier>()
 
