@@ -44,6 +44,7 @@ sealed class FlowControl {
 }
 
 private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
+    val memory = memory.derive()
     body.children.forEach {
         when (it) {
             is TreeNode.Evaluable.FunctionCallNode -> runFunctionCall(it, memory)

@@ -1,4 +1,5 @@
 import analyzes.LoopControlFlowAnalyzer
+import analyzes.NamesResolver
 import lexing.tokenize
 import interpretation.*
 import parsing.TreeNode
@@ -23,6 +24,10 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
     println(tree)
 
     LoopControlFlowAnalyzer().visit(tree)
+    val namesResolver = NamesResolver()
+    namesResolver.visit(tree)
+    println(namesResolver.index)
+
 
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())

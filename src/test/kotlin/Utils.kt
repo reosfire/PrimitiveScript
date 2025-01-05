@@ -1,3 +1,5 @@
+import analyzes.LoopControlFlowAnalyzer
+import analyzes.NamesResolver
 import lexing.tokenize
 import interpretation.*
 import parsing.buildTree
@@ -14,6 +16,9 @@ fun runTestScript(
     val script = getTestScript(name)
     val tokens = tokenize(script)
     val tree = buildTree(tokens)
+
+    LoopControlFlowAnalyzer().visit(tree)
+    NamesResolver().visit(tree)
 
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())

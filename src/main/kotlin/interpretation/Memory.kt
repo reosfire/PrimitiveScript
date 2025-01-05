@@ -16,7 +16,18 @@ class Memory private constructor(
     }
 
     operator fun set(key: String, value: CallableClass) {
-        content[key] = value
+        if (!setRecursively(key, value)) {
+            content[key] = value
+        }
+    }
+
+    private fun setRecursively(key: String, value: CallableClass): Boolean {
+        if (content.containsKey(key)) {
+            content[key] = value
+            return true
+        }
+
+        return outer?.setRecursively(key, value) ?: false
     }
 
     fun derive() = Memory(this)
