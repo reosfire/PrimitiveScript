@@ -338,7 +338,7 @@ class Parser(
                 index++
 
                 val right = buildUnary()
-                result = TreeNode.Evaluable.FunctionCallNode(result, "modulo", listOf(right))
+                result = TreeNode.Evaluable.FunctionCallNode(result, "mod", listOf(right))
             } else {
                 break
             }

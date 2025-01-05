@@ -122,4 +122,52 @@ class RuntimeTests {
             result.items.map { (it as IntHandle).value }
         )
     }
+
+    @Test
+    fun randomMatrixDetTest() {
+        val random = Random(42)
+
+        val script = getTestScript("quickSort")
+        val tokens = tokenize(script)
+        val tree = buildTree(tokens)
+        val functionsMap = tree.createFunctionsMap()
+        val constructorHandle = ConstructorHandle()
+
+        repeat(100) {
+            val globalMemory = Memory()
+            val thisHandle = ThisHandle(functionsMap)
+            globalMemory["this"] = thisHandle
+            globalMemory["new"] = constructorHandle
+
+            val n = random.nextInt(3..5)
+            val matrix = List(n) { List(n) { random.nextInt(-10..10)} }
+            val matrixHandle = matrix.toHandle()
+
+            val result = runTestScript(
+                "matrixDeterminant",
+                arrayOf({ matrixHandle }),
+                "det"
+            )
+
+            assertIs<IntHandle>(result)
+            assertEquals(det(matrix), result.value)
+        }
+    }
+
+    private fun List<List<Int>>.toHandle(): ListHandle {
+        return ListHandle( map { line -> ListHandle(line.map { element -> IntHandle(element) }.toMutableList()) }.toMutableList() )
+    }
+
+    private fun det(matrix: List<List<Int>>): Int {
+        if (matrix.size == 1) return matrix[0][0]
+        if (matrix.size == 2) return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
+        var result = 0
+        for (i in matrix.indices) {
+            val sign = if (i % 2 == 0) 1 else -1
+            val subMatrix = matrix.drop(1).map { it.filterIndexed { index, _ -> index != i } }
+            result += sign * matrix[0][i] * det(subMatrix)
+        }
+
+        return result
+    }
 }
