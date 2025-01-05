@@ -429,7 +429,14 @@ class Parser(
                 val closedBracket = tokens[index++]
                 closedBracket.expectType<Token.ClosedSquareBracket>()
 
-                TreeNode.Evaluable.FunctionCallNode(callable, "get", listOf(indexExpression))
+                val possibleAssignmentOperator = tokens[index]
+                if (possibleAssignmentOperator is Token.AssignOperator) {
+                    index++
+                    val right = buildExpression()
+                    TreeNode.Evaluable.FunctionCallNode(callable, "set", listOf(indexExpression, right))
+                } else {
+                    TreeNode.Evaluable.FunctionCallNode(callable, "get", listOf(indexExpression))
+                }
             } else {
                 break
             }

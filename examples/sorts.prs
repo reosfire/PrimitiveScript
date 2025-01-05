@@ -49,8 +49,8 @@ fun bubbleSort(numbers) {
         while (j < n - i - 1) {
             if (numbers[j] > numbers[j + 1]) {
                 temp = numbers[j]
-                numbers.set(j, numbers[j + 1])
-                numbers.set(j + 1, temp)
+                numbers[j] = numbers[j + 1]
+                numbers[j + 1] = temp
             }
             j.increment()
         }
@@ -75,15 +75,15 @@ fun partition(numbers, left, right) {
         if (numbers[j] <= pivot) {
             i.increment()
             temp = numbers[i]
-            numbers.set(i, numbers[j])
-            numbers.set(j, temp)
+            numbers[i] = numbers[j]
+            numbers[j] = temp
         }
         j.increment()
     }
 
     temp = numbers[i + 1]
-    numbers.set(i + 1, numbers[right])
-    numbers.set(right, temp)
+    numbers[i + 1] = numbers[right]
+    numbers[right] = temp
 
     return i + 1
 }
