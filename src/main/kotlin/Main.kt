@@ -32,16 +32,49 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
     val globalMemory = Memory()
     val thisHandle = ThisHandle(tree.createFunctionsMap())
     globalMemory["this"] = thisHandle
-    globalMemory["new"] = ConstructorHandle()
+    globalMemory["new"] = ConstructorHandle(tree.createInitializers(globalMemory))
 
     thisHandle.call(startFunction, args, globalMemory)
 }
 
+fun TreeNode.RootNode.createInitializers(globalMemory: Memory): Map<String, (Array<LateEvaluable>) -> UserDefinedClass> {
+    val result = mutableMapOf<String, (Array<LateEvaluable>) -> UserDefinedClass>()
+
+    for (declaration in declarations) {
+        if (declaration !is TreeNode.DeclarationNode.ClassNode) continue
+
+        result[declaration.name] = { args ->
+            val classMemory = globalMemory.derive()
+            val classMethods = mutableMapOf<String, RunnableFunction>()
+            val definedClass = UserDefinedClass(classMethods, classMemory)
+
+            classMemory["self"] = definedClass
+
+            for (method in declaration.functions) {
+                if (method.name == "init") {
+                    if (method.parameters.size != args.size) continue
+                    val initializerMemory = classMemory.derive()
+                    initializerMemory.applyValues(method.parameters, args.unwrap())
+                    RunnableFunction(method).run(initializerMemory)
+                    continue
+                }
+                classMethods[method.name] = RunnableFunction(method)
+            }
+
+            definedClass
+        }
+    }
+
+    return result
+}
+
+
 fun TreeNode.RootNode.createFunctionsMap(): Map<String, RunnableFunction> {
     val result = mutableMapOf<String, RunnableFunction>()
 
-    for (functionNode in functions) {
-        result[functionNode.name] = RunnableFunction(functionNode)
+    for (declaration in declarations) {
+        if (declaration !is TreeNode.DeclarationNode.FunctionNode) continue
+        result[declaration.name] = RunnableFunction(declaration)
     }
 
     return result

@@ -13,6 +13,7 @@ sealed class Token {
 
     data object VoidLiteral : Token()
 
+    data object Class : Token()
     data object Fun : Token()
     data object If : Token()
     data object Else : Token()

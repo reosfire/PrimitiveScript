@@ -340,8 +340,41 @@ class ThisHandle(
     }
 }
 
-class ConstructorHandle : CallableClass {
+class UserDefinedClass(
+    val methods: MutableMap<String, RunnableFunction> = mutableMapOf(),
+    val localMemory: Memory = Memory()
+) : CallableClass {
+    val fields = mutableMapOf<String, CallableClass>()
+
     override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        if (functionName.startsWith("get_")) {
+            val fieldName = functionName.substring(4)
+            return fields[fieldName] ?: error("Field \"$fieldName\" not found")
+        }
+
+        if (functionName.startsWith("set_")) {
+            val fieldName = functionName.substring(4)
+            fields[fieldName] = args[0]()
+            return VoidHandle
+        }
+
+        val method = methods[functionName] ?: error("function \"$functionName\" not found")
+
+        val methodMemory = localMemory.derive()
+        methodMemory.applyValues(method.node.parameters, args.unwrap())
+        return method.run(methodMemory)
+    }
+}
+
+class ConstructorHandle(
+    val initializers: Map<String, (Array<LateEvaluable>) -> UserDefinedClass> = mutableMapOf()
+) : CallableClass {
+    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        val initializer = initializers[functionName]
+        if (initializer != null) {
+            return initializer(args)
+        }
+
         val args = args.unwrap()
         return when (functionName) {
             "list" -> ListHandle(args.toMutableList())
@@ -376,7 +409,7 @@ class ConstructorHandle : CallableClass {
             "string" -> StringHandle(args[0].toString())
             "File" -> FileHandle((args[0] as StringHandle).value)
 
-            else -> error("function \"this::$functionName\" not found")
+            else -> error("function \"new::$functionName\" not found")
         }
     }
 }

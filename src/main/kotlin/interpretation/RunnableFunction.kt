@@ -4,7 +4,7 @@ import parsing.TreeNode
 
 typealias LateEvaluable = () -> CallableClass
 
-class RunnableFunction(val node: TreeNode.FunctionNode) {
+class RunnableFunction(val node: TreeNode.DeclarationNode.FunctionNode) {
 
     fun run(memory: Memory): CallableClass {
         return when (val flowControl = runBody(node.body, memory)) {

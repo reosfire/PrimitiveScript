@@ -13,7 +13,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "emptyFunction",
                     listOf(),
                     TreeNode.BodyNode(
@@ -33,14 +33,14 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "first",
                     listOf(),
                     TreeNode.BodyNode(
                         listOf()
                     )
                 ),
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "second",
                     listOf(),
                     TreeNode.BodyNode(
@@ -60,7 +60,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "oneArgumentFunction",
                     listOf("argument"),
                     TreeNode.BodyNode(
@@ -80,7 +80,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "threeArgumentsFunction",
                     listOf("a", "b", "c"),
                     TreeNode.BodyNode(
@@ -100,7 +100,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "main",
                     listOf(),
                     TreeNode.BodyNode(
@@ -177,7 +177,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "main",
                     listOf(),
                     TreeNode.BodyNode(
@@ -279,7 +279,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "main",
                     listOf(),
                     TreeNode.BodyNode(
@@ -381,7 +381,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "main",
                     listOf(),
                     TreeNode.BodyNode(
@@ -451,7 +451,7 @@ class TreeBuilderTests {
 
         val expectedTree = TreeNode.RootNode(
             listOf(
-                TreeNode.FunctionNode(
+                TreeNode.DeclarationNode.FunctionNode(
                     "main",
                     listOf(),
                     TreeNode.BodyNode(

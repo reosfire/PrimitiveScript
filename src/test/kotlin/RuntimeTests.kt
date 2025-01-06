@@ -1,3 +1,5 @@
+import analyzes.LoopControlFlowAnalyzer
+import analyzes.NamesResolver
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import lexing.tokenize
@@ -169,5 +171,47 @@ class RuntimeTests {
         }
 
         return result
+    }
+
+    @Test
+    fun userDefinedVectorRandomTest() {
+        val random = Random(42)
+
+        val script = getTestScript("userDefinedVector")
+        val tokens = tokenize(script)
+        val tree = buildTree(tokens)
+
+        LoopControlFlowAnalyzer().visit(tree)
+        val namesResolver = NamesResolver()
+        namesResolver.visit(tree)
+
+        val functionsMap = tree.createFunctionsMap()
+        val globalMemory = Memory()
+        val constructorHandle = ConstructorHandle(tree.createInitializers(globalMemory))
+
+        val thisHandle = ThisHandle(functionsMap)
+        globalMemory["this"] = thisHandle
+        globalMemory["new"] = constructorHandle
+
+        repeat(1000) {
+            val x1Handle = IntHandle(random.nextInt(-100..100))
+            val y1Handle = IntHandle(random.nextInt(-100..100))
+
+            val x2Handle = IntHandle(random.nextInt(-100..100))
+            val y2Handle = IntHandle(random.nextInt(-100..100))
+
+            val result = thisHandle.call("main", arrayOf({ x1Handle }, { y1Handle }, { x2Handle }, { y2Handle }), globalMemory)
+
+            assertIs<UserDefinedClass>(result)
+
+            val x = result.fields["x"]
+            assertIs<IntHandle>(x)
+
+            val y = result.fields["y"]
+            assertIs<IntHandle>(y)
+
+            assertEquals(x1Handle.value + x2Handle.value, x.value)
+            assertEquals(y1Handle.value + y2Handle.value, y.value)
+        }
     }
 }

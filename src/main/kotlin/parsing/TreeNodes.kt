@@ -2,7 +2,8 @@ package parsing
 
 interface Visitor<R> {
     fun visit(node: TreeNode.RootNode): R
-    fun visit(node: TreeNode.FunctionNode): R
+    fun visit(node: TreeNode.DeclarationNode.ClassNode): R
+    fun visit(node: TreeNode.DeclarationNode.FunctionNode): R
     fun visit(node: TreeNode.BodyNode): R
     fun visit(node: TreeNode.IfBranch): R
     fun visit(node: TreeNode.IfNode): R
@@ -23,10 +24,14 @@ interface Visitor<R> {
 
 class PrettyPrinter: Visitor<String> {
     override fun visit(node: TreeNode.RootNode): String {
-        return node.functions.joinToString(" ") { it.accept(this) }
+        return node.declarations.joinToString(" ") { it.accept(this) }
     }
 
-    override fun visit(node: TreeNode.FunctionNode): String {
+    override fun visit(node: TreeNode.DeclarationNode.ClassNode): String {
+        return "class ${node.name} { ${node.functions.joinToString(" ") { it.accept(this) }} }"
+    }
+
+    override fun visit(node: TreeNode.DeclarationNode.FunctionNode): String {
         return "fun ${node.name}(${node.parameters.joinToString(", ")}) ${node.body.accept(this)}"
     }
 
@@ -105,17 +110,28 @@ class PrettyPrinter: Visitor<String> {
 sealed class TreeNode {
     abstract fun <T> accept(visitor: Visitor<T>): T
 
-    data class RootNode(val functions: List<FunctionNode>): TreeNode() {
+    data class RootNode(val declarations: List<DeclarationNode>): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
         override fun toString() = accept(PrettyPrinter())
     }
-    data class FunctionNode(
-        val name: String,
-        val parameters: List<String>,
-        val body: BodyNode,
-    ): TreeNode() {
-        override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+
+    sealed class DeclarationNode: TreeNode() {
+        data class ClassNode(
+            val name: String,
+            val functions : List<FunctionNode>,
+        ): DeclarationNode() {
+            override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
+            override fun toString() = accept(PrettyPrinter())
+        }
+
+        data class FunctionNode(
+            val name: String,
+            val parameters: List<String>,
+            val body: BodyNode,
+        ): DeclarationNode() {
+            override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
+            override fun toString() = accept(PrettyPrinter())
+        }
     }
 
     data class BodyNode(

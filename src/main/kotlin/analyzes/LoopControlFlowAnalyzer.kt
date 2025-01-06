@@ -7,10 +7,14 @@ class LoopControlFlowAnalyzer: Visitor<Unit> {
     private var inLoop = false
 
     override fun visit(node: TreeNode.RootNode) {
+        node.declarations.forEach { it.accept(this) }
+    }
+
+    override fun visit(node: TreeNode.DeclarationNode.ClassNode) {
         node.functions.forEach { it.accept(this) }
     }
 
-    override fun visit(node: TreeNode.FunctionNode) {
+    override fun visit(node: TreeNode.DeclarationNode.FunctionNode) {
         node.body.accept(this)
     }
 

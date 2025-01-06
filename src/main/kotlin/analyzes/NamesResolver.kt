@@ -40,10 +40,17 @@ class NamesResolver: Visitor<Unit> {
     }
 
     override fun visit(node: TreeNode.RootNode) {
-        node.functions.forEach { it.accept(this) }
+        node.declarations.forEach { it.accept(this) }
     }
 
-    override fun visit(node: TreeNode.FunctionNode) {
+    override fun visit(node: TreeNode.DeclarationNode.ClassNode) {
+        beginScope()
+        declare("self")
+        node.functions.forEach { it.accept(this) }
+        endScope()
+    }
+
+    override fun visit(node: TreeNode.DeclarationNode.FunctionNode) {
         beginScope()
         node.parameters.forEach { declare(it) }
         node.body.accept(this)

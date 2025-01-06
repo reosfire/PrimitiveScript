@@ -4,6 +4,7 @@ private val wordTokensMap = mapOf(
     "true" to Token.TrueLiteral,
     "false" to Token.FalseLiteral,
 
+    "class" to Token.Class,
     "fun" to Token.Fun,
     "if" to Token.If,
     "else" to Token.Else,

@@ -41,17 +41,51 @@ class Parser(
     fun buildTree(): TreeNode.RootNode {
         index = 0
 
-        val functions = mutableListOf<TreeNode.FunctionNode>()
+        val declarations = mutableListOf<TreeNode.DeclarationNode>()
 
         while (index < tokens.size) {
-            val builtFunction = buildFunction()
-            functions.add(builtFunction)
+            val currentToken = tokens[index]
+            val builtDeclaration = when (currentToken) {
+                is Token.Class -> buildClass()
+                is Token.Fun -> buildFunction()
+                else -> error("Unexpected token at the beginning of the file")
+            }
+
+            declarations.add(builtDeclaration)
         }
 
-        return TreeNode.RootNode(functions)
+        return TreeNode.RootNode(declarations)
     }
 
-    private fun buildFunction(): TreeNode.FunctionNode {
+    private fun buildClass(): TreeNode.DeclarationNode.ClassNode {
+        val classKeyword = tokens[index++]
+        classKeyword.expectType<Token.Class>()
+
+        val name = tokens[index++]
+        name.expectType<Token.Identifier>()
+
+        val openCurlyBracket = tokens[index++]
+        openCurlyBracket.expectType<Token.OpenCurlyBracket>()
+
+        val functions = mutableListOf<TreeNode.DeclarationNode.FunctionNode>()
+
+        while (true) {
+            when (tokens[index]) {
+                is Token.ClosedCurlyBracket -> {
+                    index++
+                    break
+                }
+                is Token.Fun -> {
+                    functions.add(buildFunction())
+                }
+                else -> error("Unexpected token in the class body")
+            }
+        }
+
+        return TreeNode.DeclarationNode.ClassNode(name.value, functions)
+    }
+
+    private fun buildFunction(): TreeNode.DeclarationNode.FunctionNode {
         val functionKeyword = tokens[index++]
         functionKeyword.expectType<Token.Fun>()
 
@@ -60,7 +94,7 @@ class Parser(
 
         val parameters = buildFunctionParameters()
 
-        return TreeNode.FunctionNode(name.value, parameters, buildBody())
+        return TreeNode.DeclarationNode.FunctionNode(name.value, parameters, buildBody())
     }
 
     private fun buildFunctionParameters(): List<String> {
