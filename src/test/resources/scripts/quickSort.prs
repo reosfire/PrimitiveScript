@@ -1,5 +1,5 @@
 fun main(numbers) {
-    quickSort(numbers, 0, numbers.size() - 1)
+    quickSort(numbers, 0, numbers.size - 1)
 }
 
 fun quickSort(numbers, left, right) {

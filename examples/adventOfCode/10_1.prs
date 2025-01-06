@@ -1,12 +1,12 @@
 fun main() {
     input = new.File("input.txt").readText().split("\r\n")
-    matrix = new.array(input.size())
+    matrix = new.array(input.size)
     i = 0
-    while (i < input.size()) {
+    while (i < input.size) {
         line = input[i]
-        matrixLine = new.array(line.size())
+        matrixLine = new.array(line.size)
         j = 0
-        while (j < line.size()) {
+        while (j < line.size) {
             matrixLine.set(j, new.int(line[j]))
             j.increment()
         }
@@ -17,13 +17,13 @@ fun main() {
     result = 0
 
     i = 0
-    while (i < matrix.size()) {
+    while (i < matrix.size) {
         j = 0
-        while (j < matrix[0].size()) {
+        while (j < matrix[0].size) {
             if (matrix[i][j] == 0) {
                 goodPositions = new.list()
                 fillGoodPositions(matrix, i, j, goodPositions)
-                result.plusAssign(goodPositions.size())
+                result.plusAssign(goodPositions.size)
             }
             j.increment()
         }
@@ -62,14 +62,14 @@ fun fillGoodPositions(matrix, row, col, goodPositions) {
 }
 
 fun validCoordinates(matrix, row, col)
-    return inRange(row, 0, matrix.size()) && inRange(col, 0, matrix[0].size())
+    return inRange(row, 0, matrix.size) && inRange(col, 0, matrix[0].size)
 
 fun inRange(i, min, max)
     return i >= min && i < max
 
 fun containsPosition(list, position) {
     i = 0
-    while (i < list.size()) {
+    while (i < list.size) {
         if (positionsEqual(list[i], position)) return true
         i.increment()
     }

@@ -1,12 +1,12 @@
 fun main() {
     input = new.File("input.txt").readText().split("\r\n")
-    matrix = new.array(input.size())
+    matrix = new.array(input.size)
     i = 0
-    while (i.less(input.size())) {
+    while (i.less(input.size)) {
         line = input.get(i)
-        matrixLine = new.array(line.size())
+        matrixLine = new.array(line.size)
         j = 0
-        while (j.less(line.size())) {
+        while (j.less(line.size)) {
             matrixLine.set(j, new.int(line.get(j)))
             j.increment()
         }
@@ -17,9 +17,9 @@ fun main() {
     result = 0
 
     i = 0
-    while (i.less(matrix.size())) {
+    while (i.less(matrix.size)) {
         j = 0
-        while (j.less(matrix.get(0).size())) {
+        while (j.less(matrix.get(0).size)) {
             if (matrix.get(i).get(j).equal(0)) {
                 result.plusAssign(getScore(matrix, i, j))
             }
@@ -66,7 +66,7 @@ fun getScore(matrix, row, col) {
 }
 
 fun validCoordinates(matrix, row, col) {
-    return inRange(row, 0, matrix.size()).and(inRange(col, 0, matrix.get(0).size()))
+    return inRange(row, 0, matrix.size).and(inRange(col, 0, matrix.get(0).size))
 }
 
 fun inRange(i, min, max) {

@@ -1,7 +1,7 @@
 fun main() {
     lines = new.File("input.txt").readText().split("\r\n")
-    n = lines.size()
-    m = lines.get(0).size()
+    n = lines.size
+    m = lines.get(0).size
 
     antinodes = new.array(n)
     i = 0

@@ -6,7 +6,7 @@ fun main() {
     result = new.long(0)
 
     i = 0
-    while (i.less(lines.size())) {
+    while (i.less(lines.size)) {
         tokens = lines.get(i).split(": ")
         target = new.long(tokens.get(0))
         numbers = tokens.get(1).split(" ")
@@ -14,7 +14,7 @@ fun main() {
         numbersCast = new.list()
 
         j = 0
-        while (j.less(numbers.size())) {
+        while (j.less(numbers.size)) {
             numbersCast.add(new.long(numbers.get(j)))
             j.increment()
         }
@@ -31,7 +31,7 @@ fun main() {
 }
 
 fun solve(current, idx, numbers, target) {
-    if (idx.equal(numbers.size())) {
+    if (idx.equal(numbers.size)) {
         return current.equal(target)
     }
 

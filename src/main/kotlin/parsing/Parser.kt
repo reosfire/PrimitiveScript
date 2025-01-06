@@ -368,12 +368,6 @@ class Parser(
         var callable: TreeNode.Evaluable = if (startToken is Token.Identifier && nextToken is Token.OpenRoundBracket) {
             inferredThisCall = true
             TreeNode.Evaluable.VariableNameNode("this")
-        } else if (startToken is Token.Identifier && nextToken is Token.DotOperator) {
-            index++
-            TreeNode.Evaluable.VariableNameNode(startToken.value)
-        } else if (startToken is Token.Identifier && nextToken is Token.OpenSquareBracket) {
-            index++
-            TreeNode.Evaluable.VariableNameNode(startToken.value)
         } else {
             buildPrimary()
         }
@@ -419,9 +413,20 @@ class Parser(
                 val functionName = tokens[index++]
                 functionName.expectType<Token.Identifier>()
 
-                val arguments = buildArguments()
-
-                TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
+                when (tokens[index]) {
+                    is Token.OpenRoundBracket -> {
+                        val arguments = buildArguments()
+                        TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
+                    }
+                    is Token.AssignOperator -> {
+                        index++
+                        val argument = buildExpression()
+                        TreeNode.Evaluable.FunctionCallNode(callable, "set_${functionName.value}", listOf(argument))
+                    }
+                    else -> {
+                        TreeNode.Evaluable.FunctionCallNode(callable, "get_${functionName.value}", listOf())
+                    }
+                }
             } else if (currentToken is Token.OpenSquareBracket) {
                 index++
                 val indexExpression = buildExpression()

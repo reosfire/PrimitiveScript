@@ -219,7 +219,7 @@ class StringHandle(
             "split" ->
                 ListHandle(value.split((args[0] as StringHandle).value).map { StringHandle(it) }.toMutableList())
 
-            "size" -> IntHandle(value.length)
+            "get_size" -> IntHandle(value.length)
             "equal" -> BoolHandle(value == (args[0] as StringHandle).value)
             "plus" -> StringHandle(value + args[0].toString())
 
@@ -259,7 +259,7 @@ class ListHandle(
                 VoidHandle
             }
 
-            "size" -> IntHandle(items.size)
+            "get_size" -> IntHandle(items.size)
             "remove" -> {
                 val index = (args[0] as IntHandle).value
                 if (index < 0 || index >= items.size) {
@@ -300,7 +300,7 @@ class ArrayHandle(
                 VoidHandle
             }
 
-            "size" -> IntHandle(items.size)
+            "get_size" -> IntHandle(items.size)
             else -> error("function \"ArrayHandle::$functionName\" not found")
         }
     }

@@ -15,9 +15,9 @@ fun main() {
     }
 
     println("Sorted numbers using quick sort: ")
-    quickSort(numbersQuick, 0, numbersQuick.size() - 1)
+    quickSort(numbersQuick, 0, numbersQuick.size - 1)
     j = 0
-    while (j < numbersQuick.size()) {
+    while (j < numbersQuick.size) {
         println(numbersQuick[j])
         j.increment()
     }
@@ -25,14 +25,14 @@ fun main() {
     println("Sorted numbers using bubble sort:")
     bubbleSort(numbersBubble)
     k = 0
-    while (k < numbersBubble.size()) {
+    while (k < numbersBubble.size) {
         println(numbersBubble[k])
         k.increment()
     }
 
     println("Enter number to binary search: ")
     target = int(readln())
-    result = binarySearch(numbersBubble, 0, numbersBubble.size() - 1, target)
+    result = binarySearch(numbersBubble, 0, numbersBubble.size - 1, target)
     if (result == -1) {
         println("Number not found.")
     } else {
@@ -42,7 +42,7 @@ fun main() {
 }
 
 fun bubbleSort(numbers) {
-    n = numbers.size()
+    n = numbers.size
     i = 0
     while (i < n) {
         j = 0

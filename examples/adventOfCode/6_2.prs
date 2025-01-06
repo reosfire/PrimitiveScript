@@ -1,8 +1,8 @@
 fun main() {
     inputText = new.File("input.txt").readText()
     inputLines = inputText.split("\r\n")
-    n = inputLines.size()
-    m = inputLines.get(0).size()
+    n = inputLines.size
+    m = inputLines.get(0).size
 
     result = 0
 
@@ -38,17 +38,17 @@ fun isStuck(inputText, obstacleRow, obstacleCol) {
     inputLines = inputText.split("\n")
     inputLines.get(obstacleRow).replaceAt(obstacleCol, "#")
 
-    n = inputLines.size()
-    m = inputLines.get(0).size()
+    n = inputLines.size
+    m = inputLines.get(0).size
 
     currentRow = 0
     currentCol = 0
 
     i = 0
-    while (i.less(inputLines.size())) {
+    while (i.less(inputLines.size)) {
         line = inputLines.get(i)
         j = 0
-        while (j.less(line.size())) {
+        while (j.less(line.size)) {
             char = line.get(j)
             if (char.equal("^")) {
                 currentRow.set(i)

@@ -4,7 +4,7 @@ fun main() {
     decompressed = new.list()
 
     i = 0
-    while (i.less(input.size())) {
+    while (i.less(input.size)) {
         j = int(input.get(i))
         while (j.greater(0)) {
             decompressed.add(i.divide(2))
@@ -13,7 +13,7 @@ fun main() {
 
         i.increment()
 
-        if (i.greaterOrEqual(input.size())) {
+        if (i.greaterOrEqual(input.size)) {
             break
         }
 
@@ -26,9 +26,9 @@ fun main() {
         i.increment()
     }
 
-    println(decompressed.size())
+    println(decompressed.size)
 
-    lastNonNegativeIndex = decompressed.size().minus(1)
+    lastNonNegativeIndex = decompressed.size.minus(1)
     firstNegativeIndex = 0
 
     while (true) {
@@ -52,7 +52,7 @@ fun main() {
     checksum = new.long(0)
 
     i = 0
-    while (i.less(decompressed.size())) {
+    while (i.less(decompressed.size)) {
         if (decompressed.get(i).less(0)) {
             break
         }
@@ -78,7 +78,7 @@ fun findLastNonNegativeIndex(list, start) {
 
 fun findFirstNegativeIndex(list, start) {
     i = new.int(start)
-    while (i.less(list.size())) {
+    while (i.less(list.size)) {
         if (list.get(i).less(0)) {
             return i
         }
