@@ -28,7 +28,8 @@ class PrettyPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.DeclarationNode.ClassNode): String {
-        return "class ${node.name} { ${node.functions.joinToString(" ") { it.accept(this) }} }"
+        val superClass = node.superClass?.let { " : $it" } ?: ""
+        return "class ${node.name}$superClass { ${node.functions.joinToString(" ") { it.accept(this) }} }"
     }
 
     override fun visit(node: TreeNode.DeclarationNode.FunctionNode): String {
@@ -118,6 +119,7 @@ sealed class TreeNode {
     sealed class DeclarationNode: TreeNode() {
         data class ClassNode(
             val name: String,
+            val superClass: String?,
             val functions : List<FunctionNode>,
         ): DeclarationNode() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)

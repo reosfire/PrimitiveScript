@@ -64,8 +64,19 @@ class Parser(
         val name = tokens[index++]
         name.expectType<Token.Identifier>()
 
-        val openCurlyBracket = tokens[index++]
-        openCurlyBracket.expectType<Token.OpenCurlyBracket>()
+        val openCurlyOrColonBracket = tokens[index++]
+        val superClassName = if (openCurlyOrColonBracket is Token.ColonOperator) {
+            val superClassName = tokens[index++]
+            superClassName.expectType<Token.Identifier>()
+
+            val openCurlyBracket = tokens[index++]
+            openCurlyBracket.expectType<Token.OpenCurlyBracket>()
+
+            superClassName.value
+        } else {
+            openCurlyOrColonBracket.expectType<Token.OpenCurlyBracket>()
+            null
+        }
 
         val functions = mutableListOf<TreeNode.DeclarationNode.FunctionNode>()
 
@@ -82,7 +93,7 @@ class Parser(
             }
         }
 
-        return TreeNode.DeclarationNode.ClassNode(name.value, functions)
+        return TreeNode.DeclarationNode.ClassNode(name.value, superClassName, functions)
     }
 
     private fun buildFunction(): TreeNode.DeclarationNode.FunctionNode {

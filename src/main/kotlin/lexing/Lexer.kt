@@ -97,6 +97,8 @@ class Lexer(private val source: String) {
                 }
             }
 
+            ':' -> Token.ColonOperator
+
             '+' -> Token.PlusOperator
             '-' -> Token.MinusOperator
             '*' -> Token.MultiplyOperator

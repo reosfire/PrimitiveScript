@@ -46,6 +46,7 @@ class NamesResolver: Visitor<Unit> {
     override fun visit(node: TreeNode.DeclarationNode.ClassNode) {
         beginScope()
         declare("self")
+        if (node.superClass != null) declare("super")
         node.functions.forEach { it.accept(this) }
         endScope()
     }

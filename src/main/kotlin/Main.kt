@@ -11,6 +11,7 @@ fun main() {
     val time = measureTime {
         runSingleScript("./examples/sorts.prs", "main", arrayOf())
     }
+    println()
     println("Time: $time")
     //runSingleScript("./examples/sorts.psc", "main", arrayOf())
 }
@@ -34,6 +35,8 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
     globalMemory["this"] = thisHandle
     globalMemory["new"] = ConstructorHandle(tree.createInitializers(globalMemory))
 
+    println()
+    println("Program output:")
     thisHandle.call(startFunction, args, globalMemory)
 }
 
@@ -46,9 +49,11 @@ fun TreeNode.RootNode.createInitializers(globalMemory: Memory): Map<String, (Arr
         result[declaration.name] = { args ->
             val classMemory = globalMemory.derive()
             val classMethods = mutableMapOf<String, RunnableFunction>()
-            val definedClass = UserDefinedClass(classMethods, classMemory)
+            val superClass = declaration.superClass?.let { result[it] }?.invoke(args)
+            val definedClass = UserDefinedClass(classMethods, classMemory, superClass)
 
             classMemory["self"] = definedClass
+            superClass?.let { classMemory["super"] = it }
 
             for (method in declaration.functions) {
                 if (method.name == "init") {

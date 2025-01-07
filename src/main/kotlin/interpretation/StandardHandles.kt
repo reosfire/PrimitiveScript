@@ -342,14 +342,22 @@ class ThisHandle(
 
 class UserDefinedClass(
     val methods: MutableMap<String, RunnableFunction> = mutableMapOf(),
-    val localMemory: Memory = Memory()
+    val localMemory: Memory = Memory(),
+    val superClass: UserDefinedClass?,
 ) : CallableClass {
     val fields = mutableMapOf<String, CallableClass>()
 
     override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        val method = methods[functionName]
+        if (method != null) {
+            val methodMemory = localMemory.derive()
+            methodMemory.applyValues(method.node.parameters, args.unwrap())
+            return method.run(methodMemory)
+        }
+
         if (functionName.startsWith("get_")) {
             val fieldName = functionName.substring(4)
-            return fields[fieldName] ?: error("Field \"$fieldName\" not found")
+            fields[fieldName]?.let { return it }
         }
 
         if (functionName.startsWith("set_")) {
@@ -358,11 +366,7 @@ class UserDefinedClass(
             return VoidHandle
         }
 
-        val method = methods[functionName] ?: error("function \"$functionName\" not found")
-
-        val methodMemory = localMemory.derive()
-        methodMemory.applyValues(method.node.parameters, args.unwrap())
-        return method.run(methodMemory)
+        return superClass?.call(functionName, args, memory) ?: error("Method \"$functionName\" not found")
     }
 }
 

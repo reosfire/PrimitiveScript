@@ -44,6 +44,9 @@ sealed class Token {
     data object VerticalBar: Token() {
         override fun toString() = "|"
     }
+    data object ColonOperator: Token() {
+        override fun toString() = ":"
+    }
 
     data object DotOperator: Token() {
         override fun toString() = "."
