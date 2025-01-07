@@ -47,6 +47,7 @@ private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
     val memory = memory.derive()
     body.children.forEach {
         when (it) {
+            is TreeNode.BodyNode -> runBody(it, memory)
             is TreeNode.Evaluable.FunctionCallNode -> runFunctionCall(it, memory)
             is TreeNode.IfNode -> {
                 val flowControl = runIf(it, memory)

@@ -269,7 +269,28 @@ class ListHandle(
                 VoidHandle
             }
 
+            "getIterator" -> IteratorHandle(this)
+
             else -> error("function \"ListHandle::$functionName\" not found")
+        }
+    }
+
+    class IteratorHandle(
+        val list: ListHandle,
+        var index: Int = 0
+    ) : CallableClass {
+
+        override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+            return when (functionName) {
+                "hasNext" -> BoolHandle(index < list.items.size)
+                "moveNext" -> {
+                    val item = list.items[index]
+                    index++
+                    item
+                }
+                
+                else -> error("function \"IteratorHandle::$functionName\" not found")
+            }
         }
     }
 

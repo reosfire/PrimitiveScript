@@ -18,6 +18,7 @@ sealed class Token {
     data object If : Token()
     data object Else : Token()
     data object While : Token()
+    data object For: Token()
     data object Return : Token()
     data object Break : Token()
     data object Continue : Token()

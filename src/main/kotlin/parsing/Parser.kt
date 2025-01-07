@@ -30,6 +30,10 @@ data class DesugaringSettings(
     val getPropertyMethodPrefix: String = "get_",
     val setAtMethodName: String = "set",
     val getAtMethodName: String = "get",
+    val iteratorLocalVariableName: String = "iterator",
+    val getIteratorMethodName: String = "getIterator",
+    val hasNextMethodName: String = "hasNext",
+    val moveNextMethodName: String = "moveNext",
 )
 
 class Parser(
@@ -58,21 +62,15 @@ class Parser(
     }
 
     private fun buildClass(): TreeNode.DeclarationNode.ClassNode {
-        val classKeyword = tokens[index++]
-        classKeyword.expectType<Token.Class>()
-
-        val name = tokens[index++]
-        name.expectType<Token.Identifier>()
+        consumeExpectedToken<Token.Class>()
+        val name = consumeExpectedToken<Token.Identifier>()
 
         val openCurlyOrColonBracket = tokens[index++]
         val superClassName = if (openCurlyOrColonBracket is Token.ColonOperator) {
-            val superClassName = tokens[index++]
-            superClassName.expectType<Token.Identifier>()
+            val superClassNameToken = consumeExpectedToken<Token.Identifier>()
+            consumeExpectedToken<Token.OpenCurlyBracket>()
 
-            val openCurlyBracket = tokens[index++]
-            openCurlyBracket.expectType<Token.OpenCurlyBracket>()
-
-            superClassName.value
+            superClassNameToken.value
         } else {
             openCurlyOrColonBracket.expectType<Token.OpenCurlyBracket>()
             null
@@ -86,9 +84,11 @@ class Parser(
                     index++
                     break
                 }
+
                 is Token.Fun -> {
                     functions.add(buildFunction())
                 }
+
                 else -> error("Unexpected token in the class body")
             }
         }
@@ -97,11 +97,8 @@ class Parser(
     }
 
     private fun buildFunction(): TreeNode.DeclarationNode.FunctionNode {
-        val functionKeyword = tokens[index++]
-        functionKeyword.expectType<Token.Fun>()
-
-        val name = tokens[index++]
-        name.expectType<Token.Identifier>()
+        consumeExpectedToken<Token.Fun>()
+        val name = consumeExpectedToken<Token.Identifier>()
 
         val parameters = buildFunctionParameters()
 
@@ -109,8 +106,7 @@ class Parser(
     }
 
     private fun buildFunctionParameters(): List<String> {
-        val openBracket = tokens[index++]
-        openBracket.expectType<Token.OpenRoundBracket>()
+        consumeExpectedToken<Token.OpenRoundBracket>()
 
         val parameters = mutableListOf<String>()
         val possibleClosedBracket = tokens[index]
@@ -120,8 +116,7 @@ class Parser(
         }
 
         while (true) {
-            val parameterName = tokens[index++]
-            parameterName.expectType<Token.Identifier>()
+            val parameterName = consumeExpectedToken<Token.Identifier>()
 
             parameters.add(parameterName.value)
 
@@ -162,6 +157,7 @@ class Parser(
         return when (token) {
             Token.If -> buildIf()
             Token.While -> buildWhile()
+            Token.For -> buildFor()
             Token.Return -> buildReturn()
             Token.Break -> buildBreak()
             Token.Continue -> buildContinue()
@@ -196,16 +192,12 @@ class Parser(
     }
 
     private fun buildIfBranch(): TreeNode.IfBranch {
-        val ifKeyword = tokens[index++]
-        ifKeyword.expectType<Token.If>()
-
-        val openBracket = tokens[index++]
-        openBracket.expectType<Token.OpenRoundBracket>()
+        consumeExpectedToken<Token.If>()
+        consumeExpectedToken<Token.OpenRoundBracket>()
 
         val condition = buildExpression()
 
-        val closedBracket = tokens[index++]
-        closedBracket.expectType<Token.ClosedRoundBracket>()
+        consumeExpectedToken<Token.ClosedRoundBracket>()
 
         val body = buildBody()
 
@@ -213,52 +205,89 @@ class Parser(
     }
 
     private fun buildWhile(): TreeNode.WhileNode {
-        val whileKeyword = tokens[index++]
-        whileKeyword.expectType<Token.While>()
-
-        val openBracket = tokens[index++]
-        openBracket.expectType<Token.OpenRoundBracket>()
+        consumeExpectedToken<Token.While>()
+        consumeExpectedToken<Token.OpenRoundBracket>()
 
         val condition = buildExpression()
 
-        val closedBracket = tokens[index++]
-        closedBracket.expectType<Token.ClosedRoundBracket>()
+        consumeExpectedToken<Token.ClosedRoundBracket>()
 
         val body = buildBody()
 
         return TreeNode.WhileNode(condition, body)
     }
 
-    private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
-        val name = tokens[index++]
-        name.expectType<Token.Identifier>()
+    private fun buildFor(): TreeNode {
+        consumeExpectedToken<Token.For>()
+        consumeExpectedToken<Token.OpenRoundBracket>()
 
-        val assign = tokens[index++]
-        assign.expectType<Token.AssignOperator>()
+        val indexer = consumeExpectedToken<Token.Identifier>()
+
+        consumeExpectedToken<Token.ColonOperator>()
+
+        val iteratorProvider = buildExpression()
+
+        consumeExpectedToken<Token.ClosedRoundBracket>()
+
+        val forBody = buildBody()
+
+        return TreeNode.BodyNode(
+            listOf(
+                TreeNode.VariableDeclarationNode(
+                    desugaringSettings.iteratorLocalVariableName,
+                    TreeNode.Evaluable.FunctionCallNode(
+                        iteratorProvider,
+                        desugaringSettings.getIteratorMethodName,
+                        listOf()
+                    )
+                ),
+                TreeNode.WhileNode(
+                    TreeNode.Evaluable.FunctionCallNode(
+                        TreeNode.Evaluable.VariableNameNode(desugaringSettings.iteratorLocalVariableName),
+                        desugaringSettings.hasNextMethodName,
+                        listOf()
+                    ),
+                    TreeNode.BodyNode(
+                        listOf(
+                            TreeNode.VariableDeclarationNode(
+                                indexer.value,
+                                TreeNode.Evaluable.FunctionCallNode(
+                                    TreeNode.Evaluable.VariableNameNode(desugaringSettings.iteratorLocalVariableName),
+                                    desugaringSettings.moveNextMethodName,
+                                    listOf()
+                                )
+                            ),
+                            forBody
+                        )
+                    )
+                ),
+            )
+        )
+    }
+
+    private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
+        val name = consumeExpectedToken<Token.Identifier>()
+        consumeExpectedToken<Token.AssignOperator>()
 
         val evaluable = buildExpression()
         return TreeNode.VariableDeclarationNode(name.value, evaluable)
     }
 
     private fun buildReturn(): TreeNode.ReturnNode {
-        val returnKeyword = tokens[index++]
-        returnKeyword.expectType<Token.Return>()
-
+        consumeExpectedToken<Token.Return>()
         val expression = buildExpression()
 
         return TreeNode.ReturnNode(expression)
     }
 
     private fun buildBreak(): TreeNode.BreakNode {
-        val breakKeyword = tokens[index++]
-        breakKeyword.expectType<Token.Break>()
+        consumeExpectedToken<Token.Break>()
 
         return TreeNode.BreakNode
     }
 
     private fun buildContinue(): TreeNode.ContinueNode {
-        val continueKeyword = tokens[index++]
-        continueKeyword.expectType<Token.Continue>()
+        consumeExpectedToken<Token.Continue>()
 
         return TreeNode.ContinueNode
     }
@@ -320,7 +349,8 @@ class Parser(
                 index++
 
                 val right = buildComparison()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.notEqualMethodName, listOf(right))
+                result =
+                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.notEqualMethodName, listOf(right))
             } else {
                 break
             }
@@ -344,17 +374,23 @@ class Parser(
                 index++
 
                 val right = buildSum()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessOrEqualMethodName, listOf(right))
+                result =
+                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessOrEqualMethodName, listOf(right))
             } else if (currentToken is Token.GreaterOperator) {
                 index++
 
                 val right = buildSum()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.greaterMethodName, listOf(right))
+                result =
+                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.greaterMethodName, listOf(right))
             } else if (currentToken is Token.GreaterOrEqualOperator) {
                 index++
 
                 val right = buildSum()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.greaterOrEqualMethodName, listOf(right))
+                result = TreeNode.Evaluable.FunctionCallNode(
+                    result,
+                    desugaringSettings.greaterOrEqualMethodName,
+                    listOf(right)
+                )
             } else {
                 break
             }
@@ -397,7 +433,8 @@ class Parser(
                 index++
 
                 val right = buildUnary()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.multiplyMethodName, listOf(right))
+                result =
+                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.multiplyMethodName, listOf(right))
             } else if (currentToken is Token.DivideOperator) {
                 index++
 
@@ -421,7 +458,7 @@ class Parser(
             index++
             val right = buildUnary()
             TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.notMethodName, listOf())
-        } else if(tokens[index] is Token.MinusOperator) {
+        } else if (tokens[index] is Token.MinusOperator) {
             index++
             val right = buildUnary()
             TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.negateMethodName, listOf())
@@ -442,8 +479,7 @@ class Parser(
         }
 
         fun buildArguments(): List<TreeNode.Evaluable> {
-            val openBracket = tokens[index++]
-            openBracket.expectType<Token.OpenRoundBracket>()
+            consumeExpectedToken<Token.OpenRoundBracket>()
 
             val arguments = mutableListOf<TreeNode.Evaluable>()
 
@@ -465,9 +501,7 @@ class Parser(
         }
 
         if (inferredThisCall) {
-            val functionName = tokens[index++]
-            functionName.expectType<Token.Identifier>()
-
+            val functionName = consumeExpectedToken<Token.Identifier>()
             val arguments = buildArguments()
 
             callable = TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
@@ -479,14 +513,14 @@ class Parser(
 
             callable = if (currentToken is Token.DotOperator) {
                 index++
-                val functionName = tokens[index++]
-                functionName.expectType<Token.Identifier>()
+                val functionName = consumeExpectedToken<Token.Identifier>()
 
                 when (tokens[index]) {
                     is Token.OpenRoundBracket -> {
                         val arguments = buildArguments()
                         TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
                     }
+
                     is Token.AssignOperator -> {
                         index++
                         val argument = buildExpression()
@@ -496,6 +530,7 @@ class Parser(
                             listOf(argument)
                         )
                     }
+
                     else -> {
                         TreeNode.Evaluable.FunctionCallNode(
                             callable,
@@ -508,16 +543,23 @@ class Parser(
                 index++
                 val indexExpression = buildExpression()
 
-                val closedBracket = tokens[index++]
-                closedBracket.expectType<Token.ClosedSquareBracket>()
+                consumeExpectedToken<Token.ClosedSquareBracket>()
 
                 val possibleAssignmentOperator = tokens[index]
                 if (possibleAssignmentOperator is Token.AssignOperator) {
                     index++
                     val right = buildExpression()
-                    TreeNode.Evaluable.FunctionCallNode(callable, desugaringSettings.setAtMethodName, listOf(indexExpression, right))
+                    TreeNode.Evaluable.FunctionCallNode(
+                        callable,
+                        desugaringSettings.setAtMethodName,
+                        listOf(indexExpression, right)
+                    )
                 } else {
-                    TreeNode.Evaluable.FunctionCallNode(callable, desugaringSettings.getAtMethodName, listOf(indexExpression))
+                    TreeNode.Evaluable.FunctionCallNode(
+                        callable,
+                        desugaringSettings.getAtMethodName,
+                        listOf(indexExpression)
+                    )
                 }
             } else {
                 break
@@ -528,8 +570,7 @@ class Parser(
     }
 
     private fun buildLambdaParameters(): List<String> {
-        val openBracket = tokens[index++]
-        openBracket.expectType<Token.VerticalBar>()
+        consumeExpectedToken<Token.VerticalBar>()
 
         val parameters = mutableListOf<String>()
         val possibleVerticalBar = tokens[index]
@@ -539,9 +580,7 @@ class Parser(
         }
 
         while (true) {
-            val parameterName = tokens[index++]
-            parameterName.expectType<Token.Identifier>()
-
+            val parameterName = consumeExpectedToken<Token.Identifier>()
             parameters.add(parameterName.value)
 
             val commaOrVerticalBar = tokens[index++]
@@ -560,60 +599,76 @@ class Parser(
 
                 TreeNode.Evaluable.AnonymousFunctionNode(listOf(), body)
             }
+
             is Token.VerticalBar -> {
                 val parameters = buildLambdaParameters()
                 val body = buildBody()
 
                 TreeNode.Evaluable.AnonymousFunctionNode(parameters, body)
             }
+
             is Token.OrOperator -> {
                 index++
                 val body = buildBody()
 
                 TreeNode.Evaluable.AnonymousFunctionNode(listOf(), body)
             }
+
             is Token.OpenRoundBracket -> {
                 index++
                 val result = buildExpression()
-                val closedBracket = tokens[index++]
-                closedBracket.expectType<Token.ClosedRoundBracket>()
+                consumeExpectedToken<Token.ClosedRoundBracket>()
                 result
             }
+
             is Token.Identifier -> {
                 index++
                 TreeNode.Evaluable.VariableNameNode(currentToken.value)
             }
+
             is Token.TrueLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.BoolNode(true)
             }
+
             is Token.FalseLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.BoolNode(false)
             }
+
             is Token.VoidLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.VoidNode
             }
+
             is Token.IntLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.IntNode(currentToken.value)
             }
+
             is Token.DoubleLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.DoubleNode(currentToken.value)
             }
+
             is Token.StringLiteral -> {
                 index++
                 TreeNode.Evaluable.CompilationConstant.StringNode(currentToken.value)
             }
+
             else -> error("Unexpected token at the beginning of the expression. At (${currentToken.line} ${currentToken.column})")
         }
+    }
+
+    private inline fun <reified T : Token> consumeExpectedToken(): T {
+        val token = tokens[index++]
+        token.expectType<T>()
+        return token
     }
 }
 
 @OptIn(ExperimentalContracts::class)
-private inline fun <reified T: Token> Token.expectType() {
+private inline fun <reified T : Token> Token.expectType() {
     contract {
         returns() implies (this@expectType is T)
     }

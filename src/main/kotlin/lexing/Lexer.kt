@@ -9,6 +9,7 @@ private val wordTokensMap = mapOf(
     "if" to Token.If,
     "else" to Token.Else,
     "while" to Token.While,
+    "for" to Token.For,
     "return" to Token.Return,
     "void" to Token.VoidLiteral,
     "break" to Token.Break,
