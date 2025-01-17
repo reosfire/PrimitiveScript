@@ -1,19 +1,19 @@
 package lexing
 
-private val wordTokensMap = mapOf(
-    "true" to Token.TrueLiteral,
-    "false" to Token.FalseLiteral,
+private val wordTokenFactoriesMap = mapOf(
+    "class" to { line: Int, column: Int -> Token.Class(line, column) },
+    "fun" to { line: Int, column: Int -> Token.Fun(line, column) },
+    "if" to { line: Int, column: Int -> Token.If(line, column) },
+    "else" to { line: Int, column: Int -> Token.Else(line, column) },
+    "while" to { line: Int, column: Int -> Token.While(line, column) },
+    "for" to { line: Int, column: Int -> Token.For(line, column) },
+    "return" to { line: Int, column: Int -> Token.Return(line, column) },
+    "break" to { line: Int, column: Int -> Token.Break(line, column) },
+    "continue" to { line: Int, column: Int -> Token.Continue(line, column) },
 
-    "class" to Token.Class,
-    "fun" to Token.Fun,
-    "if" to Token.If,
-    "else" to Token.Else,
-    "while" to Token.While,
-    "for" to Token.For,
-    "return" to Token.Return,
-    "void" to Token.VoidLiteral,
-    "break" to Token.Break,
-    "continue" to Token.Continue,
+    "true" to { line: Int, column: Int -> Token.TrueLiteral(line, column) },
+    "false" to { line: Int, column: Int -> Token.FalseLiteral(line, column) },
+    "void" to { line: Int, column: Int -> Token.VoidLiteral(line, column) },
 )
 
 fun tokenize(source: String): List<Token> {
@@ -26,8 +26,10 @@ class Lexer(private val source: String) {
 
     private var currentIndex = 0
 
-    private var line = 0
-    private var column = 0
+    private var line = 1
+    private var column = 1
+    private var tokenStartLine = 1
+    private var tokenStartColumn = 1
 
     fun run(): MutableList<Token> {
         val emittedTokens = mutableListOf<Token>()
@@ -35,9 +37,11 @@ class Lexer(private val source: String) {
 
         while (!ended) {
             try {
+                tokenStartLine = line
+                tokenStartColumn = column
                 next()
             } catch (tokenEmission: TokenEmission) {
-                emittedTokens.addAll(tokenEmission.tokens)
+                emittedTokens.add(tokenEmission.token)
             } catch (errorEmission: LexerErrorEmission) {
                 emittedErrors.add(errorEmission)
             } catch (error: Throwable) {
@@ -70,69 +74,68 @@ class Lexer(private val source: String) {
 
         val word = nextWord()
         skipSpaces()
-        val wordToken = wordTokensMap[word]
-        if (wordToken != null) {
-            emitToken(wordToken.withPlace())
+        val wordTokenFactory = wordTokenFactoriesMap[word]
+        if (wordTokenFactory != null) {
+            emitToken(wordTokenFactory(tokenStartLine, tokenStartColumn))
         }
 
-        emitToken(Token.Identifier(word).withPlace())
+        emitToken(Token.Identifier(word, tokenStartLine, tokenStartColumn))
     }
 
     private fun simpleMatchToken(): Token? {
         return when(get()) {
-            '(' -> Token.OpenRoundBracket
-            ')' -> Token.ClosedRoundBracket
-            '{' -> Token.OpenCurlyBracket
-            '}' -> Token.ClosedCurlyBracket
-            '[' -> Token.OpenSquareBracket
-            ']' -> Token.ClosedSquareBracket
+            '(' -> Token.OpenRoundBracket(tokenStartLine, tokenStartColumn)
+            ')' -> Token.ClosedRoundBracket(tokenStartLine, tokenStartColumn)
+            '{' -> Token.OpenCurlyBracket(tokenStartLine, tokenStartColumn)
+            '}' -> Token.ClosedCurlyBracket(tokenStartLine, tokenStartColumn)
+            '[' -> Token.OpenSquareBracket(tokenStartLine, tokenStartColumn)
+            ']' -> Token.ClosedSquareBracket(tokenStartLine, tokenStartColumn)
 
-            '.' -> Token.DotOperator
-            ',' -> Token.CommaOperator
+            '.' -> Token.Dot(tokenStartLine, tokenStartColumn)
+            ',' -> Token.Comma(tokenStartLine, tokenStartColumn)
             '=' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.EqualOperator
+                    Token.Equal(tokenStartLine, tokenStartColumn)
                 } else {
-                    Token.AssignOperator
+                    Token.Assign(tokenStartLine, tokenStartColumn)
                 }
             }
+            ':' -> Token.Colon(tokenStartLine, tokenStartColumn)
 
-            ':' -> Token.ColonOperator
-
-            '+' -> Token.PlusOperator
-            '-' -> Token.MinusOperator
-            '*' -> Token.MultiplyOperator
-            '/' -> Token.DivideOperator
-            '%' -> Token.ModuloOperator
+            '+' -> Token.Plus(tokenStartLine, tokenStartColumn)
+            '-' -> Token.Minus(tokenStartLine, tokenStartColumn)
+            '*' -> Token.Multiply(tokenStartLine, tokenStartColumn)
+            '/' -> Token.Divide(tokenStartLine, tokenStartColumn)
+            '%' -> Token.Modulo(tokenStartLine, tokenStartColumn)
             '<' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.LessOrEqualOperator
+                    Token.LessOrEqual(tokenStartLine, tokenStartColumn)
                 } else {
-                    Token.LessOperator
+                    Token.Less(tokenStartLine, tokenStartColumn)
                 }
             }
             '>' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.GreaterOrEqualOperator
+                    Token.GreaterOrEqual(tokenStartLine, tokenStartColumn)
                 } else {
-                    Token.GreaterOperator
+                    Token.Greater(tokenStartLine, tokenStartColumn)
                 }
             }
             '!' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.NotEqualOperator
+                    Token.NotEqual(tokenStartLine, tokenStartColumn)
                 } else {
-                    Token.NotOperator
+                    Token.Not(tokenStartLine, tokenStartColumn)
                 }
             }
             '&' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '&') {
                     getAndMove()
-                    Token.AndOperator
+                    Token.And(tokenStartLine, tokenStartColumn)
                 } else {
                     null
                 }
@@ -140,9 +143,9 @@ class Lexer(private val source: String) {
             '|' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '|') {
                     getAndMove()
-                    Token.OrOperator
+                    Token.Or(tokenStartLine, tokenStartColumn)
                 } else {
-                    Token.VerticalBar
+                    Token.VerticalBar(tokenStartLine, tokenStartColumn)
                 }
             }
             else -> null
@@ -152,7 +155,7 @@ class Lexer(private val source: String) {
     private fun emitSimpleMatchToken(token: Token): Nothing {
         getAndMove()
         skipSpaces()
-        emitToken(token.withPlace())
+        emitToken(token)
     }
 
     private fun emitStringLiteral(): Nothing {
@@ -165,7 +168,7 @@ class Lexer(private val source: String) {
                 '"' -> {
                     getAndMove()
                     skipSpaces()
-                    emitToken(Token.StringLiteral(buffer.toString()).withPlace())
+                    emitToken(Token.StringLiteral(buffer.toString(), tokenStartLine, tokenStartColumn))
                 }
                 '\\' -> {
                     if (!canMoveAndGet) emitError("Unexpected end of source in escape sequence.")
@@ -202,14 +205,14 @@ class Lexer(private val source: String) {
 
             skipSpaces()
             try {
-                emitToken(Token.DoubleLiteral(buffer.toString().toDouble()).withPlace())
+                emitToken(Token.DoubleLiteral(buffer.toString().toDouble(), tokenStartLine, tokenStartColumn))
             } catch (e: NumberFormatException) {
                 emitError("Double literal isn't correct.")
             }
         } else {
             skipSpaces()
             try {
-                emitToken(Token.IntLiteral(buffer.toString().toInt()).withPlace())
+                emitToken(Token.IntLiteral(buffer.toString().toInt(), tokenStartLine, tokenStartColumn))
             } catch (e: NumberFormatException) {
                 emitError("Int literal isn't correct.")
             }
@@ -245,7 +248,7 @@ class Lexer(private val source: String) {
         val got = source[currentIndex++]
         column++
         if (got == '\n') {
-            column = 0
+            column = 1
             line++
         }
         return got
@@ -255,32 +258,26 @@ class Lexer(private val source: String) {
         val got = source[++currentIndex]
         column++
         if (got == '\n') {
-            column = 0
+            column = 1
             line++
         }
         return got
     }
 
     private fun emitError(message: String): Nothing {
-        throw LexerErrorEmission(message, line, column)
+        throw LexerErrorEmission(message, tokenStartLine, tokenStartColumn)
     }
 
-    private fun emitToken(vararg tokens: Token): Nothing {
+    private fun emitToken(tokens: Token): Nothing {
         throw TokenEmission(tokens)
     }
 
-    private fun Token.withPlace(): Token {
-        this@withPlace.line = this@Lexer.line
-        this@withPlace.column = this@Lexer.column
-        return this
-    }
-
-    private class TokenEmission(val tokens: Array<out Token>): Throwable()
+    private class TokenEmission(val token: Token): Throwable()
     class LexerErrorEmission(message: String, val line: Int, val column: Int, cause: Throwable? = null): Throwable(message, cause)
 
-    class LexerFinalError(message: String, val errors: List<LexerErrorEmission> = emptyList(), cause: Throwable? = null): Throwable(message, cause) {
+    class LexerFinalError(message: String, val errors: List<LexerErrorEmission> = listOf(), cause: Throwable? = null): Throwable(message, cause) {
         override fun toString(): String {
-            return errors.joinToString("\n\n") { it.message!! + " At (${it.line}, ${it.column})" }
+            return "$message \n" + errors.joinToString("\n\n") { it.message!! + " At token $it(${it.line}, ${it.column})" } + "\n"
         }
     }
 }

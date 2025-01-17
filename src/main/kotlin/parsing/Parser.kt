@@ -1,8 +1,7 @@
 package parsing
 
 import lexing.Token
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
+import lexing.TokenType
 
 fun buildTree(tokens: List<Token>): TreeNode.RootNode {
     val parser = Parser(tokens)
@@ -46,16 +45,22 @@ class Parser(
         index = 0
 
         val declarations = mutableListOf<TreeNode.DeclarationNode>()
+        val collectedErrors = mutableListOf<ParsingErrorEmission>()
 
         while (index < tokens.size) {
-            val currentToken = tokens[index]
-            val builtDeclaration = when (currentToken) {
-                is Token.Class -> buildClass()
-                is Token.Fun -> buildFunction()
-                else -> error("Unexpected token at the beginning of the file")
-            }
+            try {
+                runSynchronizing(collectedErrors, TokenType.CLASS, TokenType.FUN) {
+                    val builtDeclaration = when (currentToken()) {
+                        is Token.Class -> buildClass()
+                        is Token.Fun -> buildFunction()
+                        else -> parsingError { "Unexpected token at the beginning of the declaration" }
+                    }
 
-            declarations.add(builtDeclaration)
+                    declarations.add(builtDeclaration)
+                }
+            } catch (emissions: ParsingErrorsCollection) {
+                throw ParsingFinalError("There are some lexical errors collected while parsing: ", errors = collectedErrors)
+            }
         }
 
         return TreeNode.RootNode(declarations)
@@ -65,8 +70,8 @@ class Parser(
         consumeExpectedToken<Token.Class>()
         val name = consumeExpectedToken<Token.Identifier>()
 
-        val openCurlyOrColonBracket = tokens[index++]
-        val superClassName = if (openCurlyOrColonBracket is Token.ColonOperator) {
+        val openCurlyOrColonBracket = consumeToken()
+        val superClassName = if (openCurlyOrColonBracket is Token.Colon) {
             val superClassNameToken = consumeExpectedToken<Token.Identifier>()
             consumeExpectedToken<Token.OpenCurlyBracket>()
 
@@ -77,19 +82,23 @@ class Parser(
         }
 
         val functions = mutableListOf<TreeNode.DeclarationNode.FunctionNode>()
+        val collectedErrors = mutableListOf<ParsingErrorEmission>()
 
-        while (true) {
-            when (tokens[index]) {
-                is Token.ClosedCurlyBracket -> {
-                    index++
-                    break
+        var classOpened = true
+        while (classOpened) {
+            runSynchronizing(collectedErrors, TokenType.FUN) {
+                when (currentToken()) {
+                    is Token.ClosedCurlyBracket -> {
+                        index++
+                        classOpened = false
+                    }
+
+                    is Token.Fun -> {
+                        functions.add(buildFunction())
+                    }
+
+                    else -> parsingError { "Unexpected token at the end of the class declaration" }
                 }
-
-                is Token.Fun -> {
-                    functions.add(buildFunction())
-                }
-
-                else -> error("Unexpected token in the class body")
             }
         }
 
@@ -109,9 +118,7 @@ class Parser(
         consumeExpectedToken<Token.OpenRoundBracket>()
 
         val parameters = mutableListOf<String>()
-        val possibleClosedBracket = tokens[index]
-        if (possibleClosedBracket is Token.ClosedRoundBracket) {
-            index++
+        consumeAndRunIfMatch<Token.ClosedRoundBracket> {
             return parameters
         }
 
@@ -120,28 +127,36 @@ class Parser(
 
             parameters.add(parameterName.value)
 
-            val commaOrBracket = tokens[index++]
-            if (commaOrBracket is Token.CommaOperator) continue
+            val commaOrBracket = consumeToken()
+            if (commaOrBracket is Token.Comma) continue
             else if (commaOrBracket is Token.ClosedRoundBracket) break
-            else error("Unexpected token at the end of the function parameter")
+            else parsingError { "Unexpected token at the end of the function parameters list" }
         }
 
         return parameters
     }
 
     private fun buildBody(): TreeNode.BodyNode {
-        val bodyOpen = tokens[index]
+        val bodyOpen = currentToken()
         if (bodyOpen is Token.OpenCurlyBracket) {
             index++
 
             val childrenNodes = mutableListOf<TreeNode>()
-            while (true) {
-                val token = tokens[index]
-                if (token is Token.ClosedCurlyBracket) break
+            val collectedErrors = mutableListOf<ParsingErrorEmission>()
 
-                val nextStatement = buildStatement()
+            var bodyOpened = true
+            while (bodyOpened) {
+                runSynchronizing(collectedErrors, TokenType.IF, TokenType.WHILE, TokenType.FOR, TokenType.RETURN, TokenType.BREAK, TokenType.CONTINUE) {
+                    val token = currentToken()
+                    if (token is Token.ClosedCurlyBracket) {
+                        bodyOpened = false
+                        return@runSynchronizing
+                    }
 
-                childrenNodes.add(nextStatement)
+                    val nextStatement = buildStatement()
+
+                    childrenNodes.add(nextStatement)
+                }
             }
 
             index++
@@ -153,17 +168,16 @@ class Parser(
     }
 
     private fun buildStatement(): TreeNode {
-        val token = tokens[index]
+        val token = currentToken()
         return when (token) {
-            Token.If -> buildIf()
-            Token.While -> buildWhile()
-            Token.For -> buildFor()
-            Token.Return -> buildReturn()
-            Token.Break -> buildBreak()
-            Token.Continue -> buildContinue()
+            is Token.If -> buildIf()
+            is Token.While -> buildWhile()
+            is Token.For -> buildFor()
+            is Token.Return -> buildReturn()
+            is Token.Break -> buildBreak()
+            is Token.Continue -> buildContinue()
             else -> {
-                val nextToken = tokens[index + 1]
-                if (nextToken == Token.AssignOperator) {
+                if (matchNext<Token.Assign>()) {
                     buildVariableDeclaration()
                 } else {
                     buildFunctionCall()
@@ -176,11 +190,11 @@ class Parser(
         val branches = mutableListOf(buildIfBranch())
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
             if (currentToken !is Token.Else) break
             index++
 
-            if (tokens[index] is Token.If) {
+            if (currentToken() is Token.If) {
                 branches.add(buildIfBranch())
             } else {
                 val elseBody = buildBody()
@@ -223,7 +237,7 @@ class Parser(
 
         val indexer = consumeExpectedToken<Token.Identifier>()
 
-        consumeExpectedToken<Token.ColonOperator>()
+        consumeExpectedToken<Token.Colon>()
 
         val iteratorProvider = buildExpression()
 
@@ -267,7 +281,7 @@ class Parser(
 
     private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
         val name = consumeExpectedToken<Token.Identifier>()
-        consumeExpectedToken<Token.AssignOperator>()
+        consumeExpectedToken<Token.Assign>()
 
         val evaluable = buildExpression()
         return TreeNode.VariableDeclarationNode(name.value, evaluable)
@@ -300,9 +314,9 @@ class Parser(
         var result = buildAnd()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.OrOperator) {
+            if (currentToken is Token.Or) {
                 index++
 
                 val right = buildAnd()
@@ -319,9 +333,9 @@ class Parser(
         var result = buildEquality()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.AndOperator) {
+            if (currentToken is Token.And) {
                 index++
 
                 val right = buildEquality()
@@ -338,14 +352,14 @@ class Parser(
         var result = buildComparison()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.EqualOperator) {
+            if (currentToken is Token.Equal) {
                 index++
 
                 val right = buildComparison()
                 result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.equalMethodName, listOf(right))
-            } else if (currentToken is Token.NotEqualOperator) {
+            } else if (currentToken is Token.NotEqual) {
                 index++
 
                 val right = buildComparison()
@@ -363,26 +377,26 @@ class Parser(
         var result = buildSum()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.LessOperator) {
+            if (currentToken is Token.Less) {
                 index++
 
                 val right = buildSum()
                 result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessMethodName, listOf(right))
-            } else if (currentToken is Token.LessOrEqualOperator) {
+            } else if (currentToken is Token.LessOrEqual) {
                 index++
 
                 val right = buildSum()
                 result =
                     TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessOrEqualMethodName, listOf(right))
-            } else if (currentToken is Token.GreaterOperator) {
+            } else if (currentToken is Token.Greater) {
                 index++
 
                 val right = buildSum()
                 result =
                     TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.greaterMethodName, listOf(right))
-            } else if (currentToken is Token.GreaterOrEqualOperator) {
+            } else if (currentToken is Token.GreaterOrEqual) {
                 index++
 
                 val right = buildSum()
@@ -403,14 +417,14 @@ class Parser(
         var result = buildFactor()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.PlusOperator) {
+            if (currentToken is Token.Plus) {
                 index++
 
                 val right = buildFactor()
                 result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.plusMethodName, listOf(right))
-            } else if (currentToken is Token.MinusOperator) {
+            } else if (currentToken is Token.Minus) {
                 index++
 
                 val right = buildFactor()
@@ -427,20 +441,20 @@ class Parser(
         var result = buildUnary()
 
         while (true) {
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            if (currentToken is Token.MultiplyOperator) {
+            if (currentToken is Token.Multiply) {
                 index++
 
                 val right = buildUnary()
                 result =
                     TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.multiplyMethodName, listOf(right))
-            } else if (currentToken is Token.DivideOperator) {
+            } else if (currentToken is Token.Divide) {
                 index++
 
                 val right = buildUnary()
                 result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.divideMethodName, listOf(right))
-            } else if (currentToken is Token.ModuloOperator) {
+            } else if (currentToken is Token.Modulo) {
                 index++
 
                 val right = buildUnary()
@@ -454,11 +468,11 @@ class Parser(
     }
 
     private fun buildUnary(): TreeNode.Evaluable {
-        return if (tokens[index] is Token.NotOperator) {
+        return if (currentToken() is Token.Not) {
             index++
             val right = buildUnary()
             TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.notMethodName, listOf())
-        } else if (tokens[index] is Token.MinusOperator) {
+        } else if (currentToken() is Token.Minus) {
             index++
             val right = buildUnary()
             TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.negateMethodName, listOf())
@@ -468,10 +482,9 @@ class Parser(
     }
 
     private fun buildFunctionCall(): TreeNode.Evaluable {
-        val startToken = tokens[index]
-        val nextToken = tokens[index + 1]
+        val startToken = currentToken()
         var inferredThisCall = false
-        var callable: TreeNode.Evaluable = if (startToken is Token.Identifier && nextToken is Token.OpenRoundBracket) {
+        var callable: TreeNode.Evaluable = if (startToken is Token.Identifier && matchNext<Token.OpenRoundBracket>()) {
             inferredThisCall = true
             TreeNode.Evaluable.VariableNameNode(desugaringSettings.thisKeyword)
         } else {
@@ -483,7 +496,7 @@ class Parser(
 
             val arguments = mutableListOf<TreeNode.Evaluable>()
 
-            if (tokens[index] is Token.ClosedRoundBracket) {
+            if (currentToken() is Token.ClosedRoundBracket) {
                 index++
                 return arguments
             }
@@ -491,10 +504,10 @@ class Parser(
             while (true) {
                 arguments.add(buildExpression())
 
-                val commaOrBracket = tokens[index++]
-                if (commaOrBracket is Token.CommaOperator) continue
+                val commaOrBracket = consumeToken()
+                if (commaOrBracket is Token.Comma) continue
                 else if (commaOrBracket is Token.ClosedRoundBracket) break
-                else error("Unexpected token after function call argument. Expected comma or bracket")
+                else parsingError { "Unexpected token at the end of the function call arguments" }
             }
 
             return arguments
@@ -509,19 +522,19 @@ class Parser(
 
         while (true) {
             if (index >= tokens.size) break
-            val currentToken = tokens[index]
+            val currentToken = currentToken()
 
-            callable = if (currentToken is Token.DotOperator) {
+            callable = if (currentToken is Token.Dot) {
                 index++
                 val functionName = consumeExpectedToken<Token.Identifier>()
 
-                when (tokens[index]) {
+                when (currentToken()) {
                     is Token.OpenRoundBracket -> {
                         val arguments = buildArguments()
                         TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
                     }
 
-                    is Token.AssignOperator -> {
+                    is Token.Assign -> {
                         index++
                         val argument = buildExpression()
                         TreeNode.Evaluable.FunctionCallNode(
@@ -545,8 +558,8 @@ class Parser(
 
                 consumeExpectedToken<Token.ClosedSquareBracket>()
 
-                val possibleAssignmentOperator = tokens[index]
-                if (possibleAssignmentOperator is Token.AssignOperator) {
+                val possibleAssignmentOperator = currentToken()
+                if (possibleAssignmentOperator is Token.Assign) {
                     index++
                     val right = buildExpression()
                     TreeNode.Evaluable.FunctionCallNode(
@@ -573,9 +586,7 @@ class Parser(
         consumeExpectedToken<Token.VerticalBar>()
 
         val parameters = mutableListOf<String>()
-        val possibleVerticalBar = tokens[index]
-        if (possibleVerticalBar is Token.VerticalBar) {
-            index++
+        consumeAndRunIfMatch<Token.VerticalBar> {
             return parameters
         }
 
@@ -583,17 +594,17 @@ class Parser(
             val parameterName = consumeExpectedToken<Token.Identifier>()
             parameters.add(parameterName.value)
 
-            val commaOrVerticalBar = tokens[index++]
-            if (commaOrVerticalBar is Token.CommaOperator) continue
+            val commaOrVerticalBar = consumeToken()
+            if (commaOrVerticalBar is Token.Comma) continue
             else if (commaOrVerticalBar is Token.VerticalBar) break
-            else error("Unexpected token at the end of the function parameter")
+            else parsingError { "Unexpected token at the end of the lambda parameter list" }
         }
 
         return parameters
     }
 
     private fun buildPrimary(): TreeNode.Evaluable {
-        return when (val currentToken = tokens[index]) {
+        return when (val currentToken = currentToken()) {
             is Token.OpenCurlyBracket -> {
                 val body = buildBody()
 
@@ -607,7 +618,7 @@ class Parser(
                 TreeNode.Evaluable.AnonymousFunctionNode(parameters, body)
             }
 
-            is Token.OrOperator -> {
+            is Token.Or -> {
                 index++
                 val body = buildBody()
 
@@ -656,21 +667,84 @@ class Parser(
                 TreeNode.Evaluable.CompilationConstant.StringNode(currentToken.value)
             }
 
-            else -> error("Unexpected token at the beginning of the expression. At (${currentToken.line} ${currentToken.column})")
+            else -> parsingError { "Unexpected token where primary expression is expected." }
+        }
+    }
+
+    private inline fun parsingError(token: Token? = currentToken(), lazyMessage: () -> String): Nothing {
+        throw ParsingErrorEmission(lazyMessage(), token)
+    }
+
+    private inline fun <reified T: Token> consumeAndRunIfMatch(block: (T) -> Unit) {
+        val currentToken = currentToken()
+        if (currentToken is T) {
+            index++
+            block(currentToken)
         }
     }
 
     private inline fun <reified T : Token> consumeExpectedToken(): T {
-        val token = tokens[index++]
-        token.expectType<T>()
+        val token = consumeToken()
+        if (token !is T) parsingError { "Expected token with type ${T::class.simpleName} but found $this" }
         return token
     }
-}
 
-@OptIn(ExperimentalContracts::class)
-private inline fun <reified T : Token> Token.expectType() {
-    contract {
-        returns() implies (this@expectType is T)
+    private fun currentToken(): Token {
+        if (index >= tokens.size) parsingError(token = null) { "Unexpected end of tokens" }
+        return tokens[index]
     }
-    if (this !is T) error("Expected token with type ${T::class.simpleName} but found ${this::class.simpleName}. At ($line $column)")
+
+    private inline fun <reified T: Token> matchNext(): Boolean {
+        if (index + 1 >= tokens.size) return false
+        return tokens[index + 1] is T
+    }
+
+    private fun consumeToken(): Token {
+        if (index >= tokens.size) parsingError (token = null) { "Unexpected end of tokens" }
+        return tokens[index++]
+    }
+
+    private inline fun <reified T : Token> Token.expectType() {
+        if (this !is T) parsingError { "Expected token with type ${T::class.simpleName} but found $this" }
+    }
+
+    private inline fun runSynchronizing(
+        errorsContainer: MutableList<ParsingErrorEmission>,
+        vararg synchronizationTokens: TokenType,
+        block: () -> Unit
+    ) {
+        try {
+            block()
+        } catch (emission: ParsingErrorEmission) {
+            errorsContainer.add(emission)
+            synchronizeOrThrow(errorsContainer, synchronizationTokens)
+        } catch (emissions: ParsingErrorsCollection) {
+            errorsContainer.addAll(emissions.errors)
+            synchronizeOrThrow(errorsContainer, synchronizationTokens)
+        } catch (exception: Exception) {
+            throw ParsingFinalError("Fatal error while parsing", cause = exception)
+        }
+    }
+
+    private fun synchronizeOrThrow(errors: List<ParsingErrorEmission>, synchronizationTokens: Array<out TokenType>) {
+        var i = index
+        while (i < tokens.size) {
+            if (tokens[i].type in synchronizationTokens) {
+                index = i
+                return
+            }
+            i++
+        }
+        throw ParsingErrorsCollection(errors)
+    }
+
+    class ParsingErrorEmission(message: String, val token: Token? = null): Throwable(message)
+    class ParsingErrorsCollection(val errors: List<ParsingErrorEmission>): Throwable()
+    class ParsingFinalError(message: String, val errors: List<ParsingErrorEmission> = listOf(), cause: Throwable? = null): Throwable(message, cause) {
+        override fun toString(): String {
+            return "$message \n\n" + errors.joinToString("\n\n") {
+                it.message + (it.token?.let { token -> " At token $token(${token.line}, ${token.column})"  } ?: "")
+            } + "\n"
+        }
+    }
 }
