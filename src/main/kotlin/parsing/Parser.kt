@@ -8,36 +8,9 @@ fun buildTree(tokens: List<Token>): TreeNode.RootNode {
     return parser.buildTree()
 }
 
-data class DesugaringSettings(
-    val thisKeyword: String = "this",
-    val orMethodName: String = "or",
-    val andMethodName: String = "and",
-    val notMethodName: String = "not",
-    val lessMethodName: String = "less",
-    val lessOrEqualMethodName: String = "lessOrEqual",
-    val greaterMethodName: String = "greater",
-    val greaterOrEqualMethodName: String = "greaterOrEqual",
-    val equalMethodName: String = "equal",
-    val notEqualMethodName: String = "notEqual",
-    val plusMethodName: String = "plus",
-    val minusMethodName: String = "minus",
-    val multiplyMethodName: String = "multiply",
-    val divideMethodName: String = "divide",
-    val modMethodName: String = "mod",
-    val negateMethodName: String = "negate",
-    val setPropertyMethodPrefix: String = "set_",
-    val getPropertyMethodPrefix: String = "get_",
-    val setAtMethodName: String = "set",
-    val getAtMethodName: String = "get",
-    val iteratorLocalVariableName: String = "iterator",
-    val getIteratorMethodName: String = "getIterator",
-    val hasNextMethodName: String = "hasNext",
-    val moveNextMethodName: String = "moveNext",
-)
-
 class Parser(
     private val tokens: List<Token>,
-    private val desugaringSettings: DesugaringSettings = DesugaringSettings(),
+    private val desugarer: Desugarer = Desugarer(),
 ) {
     private var index = 0
 
@@ -75,7 +48,7 @@ class Parser(
             val superClassNameToken = consumeExpectedToken<Token.Identifier>()
             consumeExpectedToken<Token.OpenCurlyBracket>()
 
-            superClassNameToken.value
+            superClassNameToken
         } else {
             openCurlyOrColonBracket.expectType<Token.OpenCurlyBracket>()
             null
@@ -102,7 +75,7 @@ class Parser(
             }
         }
 
-        return TreeNode.DeclarationNode.ClassNode(name.value, superClassName, functions)
+        return TreeNode.DeclarationNode.ClassNode(name, superClassName, functions)
     }
 
     private fun buildFunction(): TreeNode.DeclarationNode.FunctionNode {
@@ -111,13 +84,13 @@ class Parser(
 
         val parameters = buildFunctionParameters()
 
-        return TreeNode.DeclarationNode.FunctionNode(name.value, parameters, buildBody())
+        return TreeNode.DeclarationNode.FunctionNode(name, parameters, buildBody())
     }
 
-    private fun buildFunctionParameters(): List<String> {
+    private fun buildFunctionParameters(): List<Token.Identifier> {
         consumeExpectedToken<Token.OpenRoundBracket>()
 
-        val parameters = mutableListOf<String>()
+        val parameters = mutableListOf<Token.Identifier>()
         consumeAndRunIfMatch<Token.ClosedRoundBracket> {
             return parameters
         }
@@ -125,7 +98,7 @@ class Parser(
         while (true) {
             val parameterName = consumeExpectedToken<Token.Identifier>()
 
-            parameters.add(parameterName.value)
+            parameters.add(parameterName)
 
             val commaOrBracket = consumeToken()
             if (commaOrBracket is Token.Comma) continue
@@ -232,7 +205,7 @@ class Parser(
     }
 
     private fun buildFor(): TreeNode {
-        consumeExpectedToken<Token.For>()
+        val forKeyword = consumeExpectedToken<Token.For>()
         consumeExpectedToken<Token.OpenRoundBracket>()
 
         val indexer = consumeExpectedToken<Token.Identifier>()
@@ -245,38 +218,7 @@ class Parser(
 
         val forBody = buildBody()
 
-        return TreeNode.BodyNode(
-            listOf(
-                TreeNode.VariableDeclarationNode(
-                    desugaringSettings.iteratorLocalVariableName,
-                    TreeNode.Evaluable.FunctionCallNode(
-                        iteratorProvider,
-                        desugaringSettings.getIteratorMethodName,
-                        listOf()
-                    )
-                ),
-                TreeNode.WhileNode(
-                    TreeNode.Evaluable.FunctionCallNode(
-                        TreeNode.Evaluable.VariableNameNode(desugaringSettings.iteratorLocalVariableName),
-                        desugaringSettings.hasNextMethodName,
-                        listOf()
-                    ),
-                    TreeNode.BodyNode(
-                        listOf(
-                            TreeNode.VariableDeclarationNode(
-                                indexer.value,
-                                TreeNode.Evaluable.FunctionCallNode(
-                                    TreeNode.Evaluable.VariableNameNode(desugaringSettings.iteratorLocalVariableName),
-                                    desugaringSettings.moveNextMethodName,
-                                    listOf()
-                                )
-                            ),
-                            forBody
-                        )
-                    )
-                ),
-            )
-        )
+        return desugarer.desugarFor(forKeyword, iteratorProvider, indexer, forBody)
     }
 
     private fun buildVariableDeclaration(): TreeNode.VariableDeclarationNode {
@@ -284,7 +226,7 @@ class Parser(
         consumeExpectedToken<Token.Assign>()
 
         val evaluable = buildExpression()
-        return TreeNode.VariableDeclarationNode(name.value, evaluable)
+        return TreeNode.VariableDeclarationNode(name, evaluable)
     }
 
     private fun buildReturn(): TreeNode.ReturnNode {
@@ -314,15 +256,12 @@ class Parser(
         var result = buildAnd()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.Or) {
-                index++
-
-                val right = buildAnd()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.orMethodName, listOf(right))
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.Or -> {
+                    index++
+                    desugarer.desugarOr(result, currentToken, buildAnd())
+                }
+                else -> break
             }
         }
 
@@ -333,15 +272,12 @@ class Parser(
         var result = buildEquality()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.And) {
-                index++
-
-                val right = buildEquality()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.andMethodName, listOf(right))
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.And -> {
+                    index++
+                    desugarer.desugarAnd(result, currentToken, buildEquality())
+                }
+                else -> break
             }
         }
 
@@ -352,21 +288,16 @@ class Parser(
         var result = buildComparison()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.Equal) {
-                index++
-
-                val right = buildComparison()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.equalMethodName, listOf(right))
-            } else if (currentToken is Token.NotEqual) {
-                index++
-
-                val right = buildComparison()
-                result =
-                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.notEqualMethodName, listOf(right))
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.Equal -> {
+                    index++
+                    desugarer.desugarEqual(result, currentToken, buildComparison())
+                }
+                is Token.NotEqual -> {
+                    index++
+                    desugarer.desugarNotEqual(result, currentToken, buildComparison())
+                }
+                else -> break
             }
         }
 
@@ -377,36 +308,24 @@ class Parser(
         var result = buildSum()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.Less) {
-                index++
-
-                val right = buildSum()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessMethodName, listOf(right))
-            } else if (currentToken is Token.LessOrEqual) {
-                index++
-
-                val right = buildSum()
-                result =
-                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.lessOrEqualMethodName, listOf(right))
-            } else if (currentToken is Token.Greater) {
-                index++
-
-                val right = buildSum()
-                result =
-                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.greaterMethodName, listOf(right))
-            } else if (currentToken is Token.GreaterOrEqual) {
-                index++
-
-                val right = buildSum()
-                result = TreeNode.Evaluable.FunctionCallNode(
-                    result,
-                    desugaringSettings.greaterOrEqualMethodName,
-                    listOf(right)
-                )
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.Less -> {
+                    index++
+                    desugarer.desugarLess(result, currentToken, buildSum())
+                }
+                is Token.LessOrEqual -> {
+                    index++
+                    desugarer.desugarLessOrEqual(result, currentToken, buildSum())
+                }
+                is Token.Greater -> {
+                    index++
+                    desugarer.desugarGreater(result, currentToken, buildSum())
+                }
+                is Token.GreaterOrEqual -> {
+                    index++
+                    desugarer.desugarGreaterOrEqual(result, currentToken, buildSum())
+                }
+                else -> break
             }
         }
 
@@ -417,20 +336,16 @@ class Parser(
         var result = buildFactor()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.Plus) {
-                index++
-
-                val right = buildFactor()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.plusMethodName, listOf(right))
-            } else if (currentToken is Token.Minus) {
-                index++
-
-                val right = buildFactor()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.minusMethodName, listOf(right))
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.Plus -> {
+                    index++
+                    desugarer.desugarPlus(result, currentToken, buildFactor())
+                }
+                is Token.Minus -> {
+                    index++
+                    desugarer.desugarMinus(result, currentToken, buildFactor())
+                }
+                else -> break
             }
         }
 
@@ -441,26 +356,20 @@ class Parser(
         var result = buildUnary()
 
         while (true) {
-            val currentToken = currentToken()
-
-            if (currentToken is Token.Multiply) {
-                index++
-
-                val right = buildUnary()
-                result =
-                    TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.multiplyMethodName, listOf(right))
-            } else if (currentToken is Token.Divide) {
-                index++
-
-                val right = buildUnary()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.divideMethodName, listOf(right))
-            } else if (currentToken is Token.Modulo) {
-                index++
-
-                val right = buildUnary()
-                result = TreeNode.Evaluable.FunctionCallNode(result, desugaringSettings.modMethodName, listOf(right))
-            } else {
-                break
+            result = when (val currentToken = currentToken()) {
+                is Token.Multiply -> {
+                    index++
+                    desugarer.desugarMultiply(result, currentToken, buildUnary())
+                }
+                is Token.Divide -> {
+                    index++
+                    desugarer.desugarDivide(result, currentToken, buildUnary())
+                }
+                is Token.Modulo -> {
+                    index++
+                    desugarer.desugarModulo(result, currentToken, buildUnary())
+                }
+                else -> break
             }
         }
 
@@ -468,16 +377,16 @@ class Parser(
     }
 
     private fun buildUnary(): TreeNode.Evaluable {
-        return if (currentToken() is Token.Not) {
-            index++
-            val right = buildUnary()
-            TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.notMethodName, listOf())
-        } else if (currentToken() is Token.Minus) {
-            index++
-            val right = buildUnary()
-            TreeNode.Evaluable.FunctionCallNode(right, desugaringSettings.negateMethodName, listOf())
-        } else {
-            buildFunctionCall()
+        return when (val currentToken = currentToken()) {
+            is Token.Not -> {
+                index++
+                desugarer.desugarNot(currentToken, buildUnary())
+            }
+            is Token.Minus -> {
+                index++
+                desugarer.desugarNegate(currentToken, buildUnary())
+            }
+            else -> buildFunctionCall()
         }
     }
 
@@ -486,7 +395,7 @@ class Parser(
         var inferredThisCall = false
         var callable: TreeNode.Evaluable = if (startToken is Token.Identifier && matchNext<Token.OpenRoundBracket>()) {
             inferredThisCall = true
-            TreeNode.Evaluable.VariableNameNode(desugaringSettings.thisKeyword)
+            desugarer.desugarThis(startToken)
         } else {
             buildPrimary()
         }
@@ -517,7 +426,7 @@ class Parser(
             val functionName = consumeExpectedToken<Token.Identifier>()
             val arguments = buildArguments()
 
-            callable = TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
+            callable = TreeNode.Evaluable.FunctionCallNode(callable, functionName, arguments)
         }
 
         while (true) {
@@ -530,27 +439,15 @@ class Parser(
 
                 when (currentToken()) {
                     is Token.OpenRoundBracket -> {
-                        val arguments = buildArguments()
-                        TreeNode.Evaluable.FunctionCallNode(callable, functionName.value, arguments)
+                        TreeNode.Evaluable.FunctionCallNode(callable, functionName, buildArguments())
                     }
 
                     is Token.Assign -> {
                         index++
-                        val argument = buildExpression()
-                        TreeNode.Evaluable.FunctionCallNode(
-                            callable,
-                            "${desugaringSettings.setPropertyMethodPrefix}${functionName.value}",
-                            listOf(argument)
-                        )
+                        desugarer.desugarPropertySetter(callable, functionName, buildExpression())
                     }
 
-                    else -> {
-                        TreeNode.Evaluable.FunctionCallNode(
-                            callable,
-                            "${desugaringSettings.getPropertyMethodPrefix}${functionName.value}",
-                            listOf()
-                        )
-                    }
+                    else -> desugarer.desugarPropertyGetter(callable, functionName)
                 }
             } else if (currentToken is Token.OpenSquareBracket) {
                 index++
@@ -561,18 +458,9 @@ class Parser(
                 val possibleAssignmentOperator = currentToken()
                 if (possibleAssignmentOperator is Token.Assign) {
                     index++
-                    val right = buildExpression()
-                    TreeNode.Evaluable.FunctionCallNode(
-                        callable,
-                        desugaringSettings.setAtMethodName,
-                        listOf(indexExpression, right)
-                    )
+                    desugarer.desugarSetAt(callable, indexExpression, buildExpression(), currentToken)
                 } else {
-                    TreeNode.Evaluable.FunctionCallNode(
-                        callable,
-                        desugaringSettings.getAtMethodName,
-                        listOf(indexExpression)
-                    )
+                    desugarer.desugarGetAt(callable, indexExpression, currentToken)
                 }
             } else {
                 break
@@ -582,17 +470,17 @@ class Parser(
         return callable
     }
 
-    private fun buildLambdaParameters(): List<String> {
+    private fun buildLambdaParameters(): List<Token.Identifier> {
         consumeExpectedToken<Token.VerticalBar>()
 
-        val parameters = mutableListOf<String>()
+        val parameters = mutableListOf<Token.Identifier>()
         consumeAndRunIfMatch<Token.VerticalBar> {
             return parameters
         }
 
         while (true) {
             val parameterName = consumeExpectedToken<Token.Identifier>()
-            parameters.add(parameterName.value)
+            parameters.add(parameterName)
 
             val commaOrVerticalBar = consumeToken()
             if (commaOrVerticalBar is Token.Comma) continue
@@ -634,7 +522,7 @@ class Parser(
 
             is Token.Identifier -> {
                 index++
-                TreeNode.Evaluable.VariableNameNode(currentToken.value)
+                TreeNode.Evaluable.VariableNameNode(currentToken)
             }
 
             is Token.TrueLiteral -> {

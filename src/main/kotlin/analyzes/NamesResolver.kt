@@ -53,7 +53,7 @@ class NamesResolver: Visitor<Unit> {
 
     override fun visit(node: TreeNode.DeclarationNode.FunctionNode) {
         beginScope()
-        node.parameters.forEach { declare(it) }
+        node.parameters.forEach { declare(it.value) }
         node.body.accept(this)
         endScope()
     }
@@ -81,7 +81,7 @@ class NamesResolver: Visitor<Unit> {
     override fun visit(node: TreeNode.VariableDeclarationNode) {
         node.initialValue.accept(this)
 
-        declare(node.name)
+        declare(node.name.value)
     }
 
     override fun visit(node: TreeNode.ReturnNode) {
@@ -98,14 +98,14 @@ class NamesResolver: Visitor<Unit> {
     }
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode) {
-        val declarationOffset = getDeclarationOffset(node.name)
+        val declarationOffset = getDeclarationOffset(node.name.value)
         if (declarationOffset == -1) error("Variable \"${node.name}\" is not declared")
         index[node] = MemoryIndex(declarationOffset, -1)
     }
 
     override fun visit(node: TreeNode.Evaluable.AnonymousFunctionNode) {
         beginScope()
-        node.parameters.forEach { declare(it) }
+        node.parameters.forEach { declare(it.value) }
         node.body.accept(this)
         endScope()
     }

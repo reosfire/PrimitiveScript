@@ -1,12 +1,13 @@
 package interpretation
 
+import lexing.Token
 import java.io.File
 
 class FileHandle(
     val path: String
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-        return when (functionName) {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        return when (functionName.value) {
             "readText" -> StringHandle(File(path).readText())
             else -> error("function \"FileHandle::$functionName\" not found")
         }
@@ -16,8 +17,8 @@ class FileHandle(
 class BoolHandle(
     var value: Boolean
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-        return when (functionName) {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        return when (functionName.value) {
             "set" -> {
                 value = (args[0]() as BoolHandle).value
                 VoidHandle
@@ -42,9 +43,9 @@ class BoolHandle(
 class IntHandle(
     var value: Int
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "set" -> {
                 value = (args[0] as IntHandle).value
                 VoidHandle
@@ -107,9 +108,9 @@ class IntHandle(
 class DoubleHandle(
     var value: Double
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "set" -> {
                 value = (args[0] as DoubleHandle).value
                 VoidHandle
@@ -142,7 +143,7 @@ class DoubleHandle(
                 DoubleHandle(-value)
             }
 
-            else -> error("function \"IntHandle::$functionName\" not found")
+            else -> error("function \"DoubleHandle::$functionName\" not found")
         }
     }
 
@@ -152,9 +153,9 @@ class DoubleHandle(
 class LongHandle(
     var value: Long
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when(functionName) {
+        return when(functionName.value) {
             "set" -> {
                 value = (args[0] as LongHandle).value
                 VoidHandle
@@ -187,7 +188,7 @@ class LongHandle(
                 LongHandle(-value)
             }
 
-            else -> error("function \"IntHandle::$functionName\" not found")
+            else -> error("function \"LongHandle::$functionName\" not found")
         }
     }
 
@@ -197,9 +198,9 @@ class LongHandle(
 class StringHandle(
     var value: String
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "set" -> {
                 value = (args[0] as StringHandle).value
                 VoidHandle
@@ -234,9 +235,9 @@ class ListHandle(
     val items: MutableList<CallableClass> = mutableListOf()
 ) : CallableClass {
 
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "add" -> {
                 items.add(args[0])
                 VoidHandle
@@ -280,8 +281,8 @@ class ListHandle(
         var index: Int = 0
     ) : CallableClass {
 
-        override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-            return when (functionName) {
+        override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+            return when (functionName.value) {
                 "hasNext" -> BoolHandle(index < list.items.size)
                 "moveNext" -> {
                     val item = list.items[index]
@@ -301,9 +302,9 @@ class ArrayHandle(
     private val items: Array<CallableClass>
 ) : CallableClass {
 
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "get" -> {
                 val index = (args[0] as IntHandle).value
                 if (index < 0 || index >= items.size) {
@@ -333,16 +334,16 @@ class ThisHandle(
     val loadedFunctions: Map<String, RunnableFunction>
 ) : CallableClass {
 
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         val args = args.unwrap()
-        val loadedFunction = loadedFunctions[functionName]
+        val loadedFunction = loadedFunctions[functionName.value]
         if (loadedFunction != null) {
             val functionMemory = memory.root.derive()
             functionMemory.applyValues(loadedFunction.node.parameters, args)
             return loadedFunction.run(functionMemory)
         }
 
-        return when (functionName) {
+        return when (functionName.value) {
             "println" -> {
                 println(args.joinToString(" "))
                 VoidHandle
@@ -356,52 +357,53 @@ class ThisHandle(
             "readln" -> StringHandle(readln())
             "int" -> IntHandle((args[0] as StringHandle).value.toInt())
 
-            else -> error("function \"this::$functionName\" not found")
+            else -> error("function \"This::$functionName\" not found")
         }
     }
 }
 
 class UserDefinedClass(
+    val name: Token.Identifier,
     val methods: MutableMap<String, RunnableFunction> = mutableMapOf(),
     val localMemory: Memory = Memory(),
     val superClass: UserDefinedClass?,
 ) : CallableClass {
     val fields = mutableMapOf<String, CallableClass>()
 
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-        val method = methods[functionName]
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        val method = methods[functionName.value]
         if (method != null) {
             val methodMemory = localMemory.derive()
             methodMemory.applyValues(method.node.parameters, args.unwrap())
             return method.run(methodMemory)
         }
 
-        if (functionName.startsWith("get_")) {
-            val fieldName = functionName.substring(4)
+        if (functionName.value.startsWith("get_")) {
+            val fieldName = functionName.value.substring(4)
             fields[fieldName]?.let { return it }
         }
 
-        if (functionName.startsWith("set_")) {
-            val fieldName = functionName.substring(4)
+        if (functionName.value.startsWith("set_")) {
+            val fieldName = functionName.value.substring(4)
             fields[fieldName] = args[0]()
             return VoidHandle
         }
 
-        return superClass?.call(functionName, args, memory) ?: error("Method \"$functionName\" not found")
+        return superClass?.call(functionName, args, memory) ?: error("Method $name::\"$functionName\" not found")
     }
 }
 
 class ConstructorHandle(
     val initializers: Map<String, (Array<LateEvaluable>) -> UserDefinedClass> = mutableMapOf()
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-        val initializer = initializers[functionName]
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        val initializer = initializers[functionName.value]
         if (initializer != null) {
             return initializer(args)
         }
 
         val args = args.unwrap()
-        return when (functionName) {
+        return when (functionName.value) {
             "list" -> ListHandle(args.toMutableList())
             "array" -> ArrayHandle(Array((args[0] as IntHandle).value) { VoidHandle })
             "int" -> {
@@ -434,7 +436,7 @@ class ConstructorHandle(
             "string" -> StringHandle(args[0].toString())
             "File" -> FileHandle((args[0] as StringHandle).value)
 
-            else -> error("function \"new::$functionName\" not found")
+            else -> error("function \"ConstructorHandle::$functionName\" not found")
         }
     }
 }
@@ -443,8 +445,8 @@ class LambdaHandle(
     val runnable: RunnableAnonymousFunction,
     val context: Memory,
 ) : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
-        return when (functionName) {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+        return when (functionName.value) {
             "invoke" -> {
                 val lambdaMemory = context.derive()
                 lambdaMemory.applyValues(runnable.node.parameters, args.unwrap())
@@ -456,11 +458,11 @@ class LambdaHandle(
 }
 
 interface CallableClass {
-    fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass
+    fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass
 }
 
 object VoidHandle : CallableClass {
-    override fun call(functionName: String, args: Array<LateEvaluable>, memory: Memory): CallableClass {
+    override fun call(functionName: Token.Identifier, args: Array<LateEvaluable>, memory: Memory): CallableClass {
         error("Cannot call method \"$functionName\" on void")
     }
 }

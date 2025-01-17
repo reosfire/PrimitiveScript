@@ -1,5 +1,7 @@
 package parsing
 
+import lexing.Token
+
 interface Visitor<R> {
     fun visit(node: TreeNode.RootNode): R
     fun visit(node: TreeNode.DeclarationNode.ClassNode): R
@@ -76,7 +78,7 @@ class PrettyPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode): String {
-        return node.name
+        return node.name.value
     }
 
     override fun visit(node: TreeNode.Evaluable.AnonymousFunctionNode): String {
@@ -118,8 +120,8 @@ sealed class TreeNode {
 
     sealed class DeclarationNode: TreeNode() {
         data class ClassNode(
-            val name: String,
-            val superClass: String?,
+            val name: Token.Identifier,
+            val superClass: Token.Identifier?,
             val functions : List<FunctionNode>,
         ): DeclarationNode() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
@@ -127,8 +129,8 @@ sealed class TreeNode {
         }
 
         data class FunctionNode(
-            val name: String,
-            val parameters: List<String>,
+            val name: Token.Identifier,
+            val parameters: List<Token.Identifier>,
             val body: BodyNode,
         ): DeclarationNode() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
@@ -168,7 +170,7 @@ sealed class TreeNode {
     }
 
     data class VariableDeclarationNode(
-        val name: String,
+        val name: Token.Identifier,
         val initialValue: Evaluable,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
@@ -195,7 +197,7 @@ sealed class TreeNode {
     sealed class Evaluable: TreeNode() {
         data class FunctionCallNode(
             val callable: Evaluable,
-            val functionName: String,
+            val functionName: Token.Identifier,
             val parameters: List<Evaluable>,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
@@ -203,14 +205,14 @@ sealed class TreeNode {
         }
 
         data class VariableNameNode(
-            val name: String,
+            val name: Token.Identifier,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
             override fun toString() = accept(PrettyPrinter())
         }
 
         data class AnonymousFunctionNode(
-            val parameters: List<String>,
+            val parameters: List<Token.Identifier>,
             val body: BodyNode,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)

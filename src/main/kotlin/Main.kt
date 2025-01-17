@@ -2,6 +2,7 @@ import analyzes.LoopControlFlowAnalyzer
 import analyzes.NamesResolver
 import lexing.tokenize
 import interpretation.*
+import lexing.Token
 import parsing.TreeNode
 import parsing.buildTree
 import java.io.File
@@ -37,7 +38,7 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
 
     println()
     println("Program output:")
-    thisHandle.call(startFunction, args, globalMemory)
+    thisHandle.call(Token.Identifier(startFunction, -1, -1), args, globalMemory)
 }
 
 fun TreeNode.RootNode.createInitializers(globalMemory: Memory): Map<String, (Array<LateEvaluable>) -> UserDefinedClass> {
@@ -46,24 +47,24 @@ fun TreeNode.RootNode.createInitializers(globalMemory: Memory): Map<String, (Arr
     for (declaration in declarations) {
         if (declaration !is TreeNode.DeclarationNode.ClassNode) continue
 
-        result[declaration.name] = { args ->
+        result[declaration.name.value] = { args ->
             val classMemory = globalMemory.derive()
             val classMethods = mutableMapOf<String, RunnableFunction>()
-            val superClass = declaration.superClass?.let { result[it] }?.invoke(args)
-            val definedClass = UserDefinedClass(classMethods, classMemory, superClass)
+            val superClass = declaration.superClass?.let { result[it.value] }?.invoke(args)
+            val definedClass = UserDefinedClass(declaration.name, classMethods, classMemory, superClass)
 
             classMemory["self"] = definedClass
             superClass?.let { classMemory["super"] = it }
 
             for (method in declaration.functions) {
-                if (method.name == "init") {
+                if (method.name.value == "init") {
                     if (method.parameters.size != args.size) continue
                     val initializerMemory = classMemory.derive()
                     initializerMemory.applyValues(method.parameters, args.unwrap())
                     RunnableFunction(method).run(initializerMemory)
                     continue
                 }
-                classMethods[method.name] = RunnableFunction(method)
+                classMethods[method.name.value] = RunnableFunction(method)
             }
 
             definedClass
@@ -79,7 +80,7 @@ fun TreeNode.RootNode.createFunctionsMap(): Map<String, RunnableFunction> {
 
     for (declaration in declarations) {
         if (declaration !is TreeNode.DeclarationNode.FunctionNode) continue
-        result[declaration.name] = RunnableFunction(declaration)
+        result[declaration.name.value] = RunnableFunction(declaration)
     }
 
     return result

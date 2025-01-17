@@ -1,5 +1,7 @@
 package interpretation
 
+import lexing.Token
+
 class Memory private constructor(
     private val outer: Memory?,
     private val content: MutableMap<String, CallableClass> = mutableMapOf(),
@@ -32,11 +34,11 @@ class Memory private constructor(
 
     fun derive() = Memory(this)
 
-    fun applyValues(keys: List<String>, values: Array<CallableClass>) {
+    fun applyValues(keys: List<Token.Identifier>, values: Array<CallableClass>) {
         if (keys.size != values.size) error("Keys and values size mismatch")
 
         for (i in keys.indices) {
-            set(keys[i], values[i])
+            set(keys[i].value, values[i])
         }
     }
 }

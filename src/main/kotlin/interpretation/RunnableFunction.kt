@@ -114,12 +114,12 @@ private fun runWhile(whileNode: TreeNode.WhileNode, memory: Memory): FlowControl
 }
 
 private fun runVariableAllocation(variableDeclaration: TreeNode.VariableDeclarationNode, memory: Memory) {
-    memory[variableDeclaration.name] = runEvaluable(variableDeclaration.initialValue, memory)
+    memory[variableDeclaration.name.value] = runEvaluable(variableDeclaration.initialValue, memory)
 }
 
 private fun runEvaluable(evaluable: TreeNode.Evaluable, memory: Memory): CallableClass {
      return when (evaluable) {
-         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name] ?: error("variable \"${evaluable.name}\" not found")
+         is TreeNode.Evaluable.VariableNameNode -> memory[evaluable.name.value] ?: error("variable \"${evaluable.name}\" not found")
 
          is TreeNode.Evaluable.CompilationConstant.IntNode -> IntHandle(evaluable.value)
          is TreeNode.Evaluable.CompilationConstant.DoubleNode -> DoubleHandle(evaluable.value)
