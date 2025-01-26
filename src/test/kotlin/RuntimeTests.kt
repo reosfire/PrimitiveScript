@@ -219,4 +219,45 @@ class RuntimeTests {
             assertEquals(y1Handle.value + y2Handle.value, y.value)
         }
     }
+
+    @Test
+    fun classesWithClosuresTest() {
+        val random = Random(42)
+
+        val script = getTestScript("classesWithClosures")
+        val tokens = tokenize(script)
+        val tree = buildTree(tokens)
+
+        LoopControlFlowAnalyzer().visit(tree)
+        val namesResolver = NamesResolver()
+        namesResolver.visit(tree)
+
+        val functionsMap = tree.createFunctionsMap()
+        val globalMemory = Memory()
+        val constructorHandle = ConstructorHandle(tree.createInitializers(globalMemory))
+
+        val thisHandle = ThisHandle(functionsMap)
+        globalMemory["this"] = thisHandle
+        globalMemory["new"] = constructorHandle
+
+        repeat(1000) {
+            val x1Handle = IntHandle(random.nextInt(-100..100))
+            val y1Handle = IntHandle(random.nextInt(-100..100))
+
+            val x2Handle = IntHandle(random.nextInt(-100..100))
+            val y2Handle = IntHandle(random.nextInt(-100..100))
+
+            val resXHandle = IntHandle(0)
+            val resYHandle = IntHandle(0)
+
+            thisHandle.call(
+                Token.Identifier("main", -1, -1),
+                arrayOf({ x1Handle }, { y1Handle }, { x2Handle }, { y2Handle }, { resXHandle }, { resYHandle }),
+                globalMemory
+            )
+
+            assertEquals(x1Handle.value + x2Handle.value, resXHandle.value)
+            assertEquals(y1Handle.value + y2Handle.value, resYHandle.value)
+        }
+    }
 }

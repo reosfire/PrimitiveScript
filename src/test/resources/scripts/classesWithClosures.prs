@@ -1,0 +1,16 @@
+fun vec(x, y) {
+    return |method| {
+        if (method == "getX") return { return x }
+        else if (method == "getY") return { return y }
+        else if (method == "plus") return |other| { return vec(other.invoke("getX").invoke() + x, other.invoke("getY").invoke() + y) }
+        else if (method == "print") return { print("" + x + " " + y) }
+    }
+}
+
+fun main(x1, y1, x2, y2, xRes, yRes) {
+    a = vec(x1, y1)
+    b = vec(x2, y2)
+    c = a.invoke("plus").invoke(b)
+    xRes.set(c.invoke("getX").invoke())
+    yRes.set(c.invoke("getY").invoke())
+}
