@@ -94,7 +94,7 @@ class NamesResolver: Visitor<Unit> {
 
     override fun visit(node: TreeNode.Evaluable.FunctionCallNode) {
         node.callable.accept(this)
-        node.parameters.forEach { it.accept(this) }
+        node.arguments.forEach { it.accept(this) }
     }
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode) {

@@ -1,3 +1,4 @@
+import lexing.Token
 import lexing.tokenize
 import parsing.TreeNode
 import parsing.buildTree
@@ -14,7 +15,7 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "emptyFunction",
+                    Token.Identifier("emptyFunction", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf()
@@ -34,14 +35,14 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "first",
+                    Token.Identifier("first", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf()
                     )
                 ),
                 TreeNode.DeclarationNode.FunctionNode(
-                    "second",
+                    Token.Identifier("second", 5, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf()
@@ -61,8 +62,8 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "oneArgumentFunction",
-                    listOf("argument"),
+                    Token.Identifier("oneArgumentFunction", 1, 5),
+                    listOf(Token.Identifier("argument", 1, 25)),
                     TreeNode.BodyNode(
                         listOf()
                     )
@@ -81,8 +82,8 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "threeArgumentsFunction",
-                    listOf("a", "b", "c"),
+                    Token.Identifier("threeArgumentsFunction", 1, 5),
+                    listOf(Token.Identifier("a", 1, 28), Token.Identifier("b", 1, 31), Token.Identifier("c", 1, 34)),
                     TreeNode.BodyNode(
                         listOf()
                     )
@@ -101,64 +102,64 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "main",
+                    Token.Identifier("main", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
                             TreeNode.VariableDeclarationNode(
-                                "int",
+                                Token.Identifier("int", 2, 5),
                                 TreeNode.Evaluable.CompilationConstant.IntNode(1)
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "negativeInt",
+                                Token.Identifier("negativeInt", 3, 5),
                                 TreeNode.Evaluable.FunctionCallNode(
                                     TreeNode.Evaluable.CompilationConstant.IntNode(10),
-                                    "negate",
+                                    Token.Identifier("negate", 3, 19),
                                     listOf()
                                 )
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "double",
+                                Token.Identifier("double", 4, 5),
                                 TreeNode.Evaluable.FunctionCallNode(
                                     TreeNode.Evaluable.CompilationConstant.DoubleNode(12345.67890),
-                                    "negate",
+                                    Token.Identifier("negate", 4, 14),
                                     listOf()
                                 )
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "word",
+                                Token.Identifier("word", 5, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode("string")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "emptyString",
+                                Token.Identifier("emptyString", 6, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode("")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "spaceString",
+                                Token.Identifier("spaceString", 7, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode(" ")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "spacesAroundString",
+                                Token.Identifier("spacesAroundString", 8, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode("  string  ")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "stringWithLanguageTokens",
+                                Token.Identifier("stringWithLanguageTokens", 9, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode("true false void fun if else while return break continue (){}[]|.,=+-*/%<<=>>===!=&&||! \"str\" 123 1.23 identifier")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "escapedString",
+                                Token.Identifier("escapedString", 10, 5),
                                 TreeNode.Evaluable.CompilationConstant.StringNode("\r\n\t\\\"")
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "trueBoolean",
+                                Token.Identifier("trueBoolean", 11, 5),
                                 TreeNode.Evaluable.CompilationConstant.BoolNode(true)
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "falseBoolean",
+                                Token.Identifier("falseBoolean", 12, 5),
                                 TreeNode.Evaluable.CompilationConstant.BoolNode(false)
                             ),
                             TreeNode.VariableDeclarationNode(
-                                "voidSpecial",
+                                Token.Identifier("voidSpecial", 13, 5),
                                 TreeNode.Evaluable.CompilationConstant.VoidNode
                             ),
                         )
@@ -178,86 +179,86 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "main",
+                    Token.Identifier("main", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 2, 5)),
+                                Token.Identifier("b", 2, 7),
                                 listOf()
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.FunctionCallNode(
-                                    TreeNode.Evaluable.VariableNameNode("a"),
-                                    "b",
+                                    TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 3, 5)),
+                                    Token.Identifier("b", 3, 7),
                                     listOf()
                                 ),
-                                "c",
+                                Token.Identifier("c", 3, 11),
                                 listOf()
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 4, 5)),
+                                Token.Identifier("b", 4, 7),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("a"),
-                                        "c",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 4, 9)),
+                                        Token.Identifier("c", 4, 11),
                                         listOf()
                                     )
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 5, 5)),
+                                Token.Identifier("b", 5, 7),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("a"),
-                                            "c",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 5, 9)),
+                                            Token.Identifier("c", 5, 11),
                                             listOf()
                                         ),
-                                        "d",
+                                        Token.Identifier("d", 5, 15),
                                         listOf()
                                     ),
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 6, 5)),
+                                Token.Identifier("b", 6, 7),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("a"),
-                                        "c",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 6, 9)),
+                                        Token.Identifier("c", 6, 11),
                                         listOf()
                                     ),
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("a"),
-                                        "d",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 6, 16)),
+                                        Token.Identifier("d", 6, 18),
                                         listOf()
                                     ),
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("a"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 7, 5)),
+                                Token.Identifier("b", 7, 7),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("a"),
-                                            "c",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 7, 9)),
+                                            Token.Identifier("c", 7, 11),
                                             listOf()
                                         ),
-                                        "d",
+                                        Token.Identifier("d", 7, 15),
                                         listOf()
                                     ),
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("a"),
-                                            "e",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 7, 20)),
+                                            Token.Identifier("e", 7, 22),
                                             listOf()
                                         ),
-                                        "f",
+                                        Token.Identifier("f", 7, 26),
                                         listOf()
                                     ),
                                 )
@@ -280,86 +281,86 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "main",
+                    Token.Identifier("main", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 2, 5)),
+                                Token.Identifier("b", 2, 5),
                                 listOf()
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.FunctionCallNode(
-                                    TreeNode.Evaluable.VariableNameNode("this"),
-                                    "b",
+                                    TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 3, 5)),
+                                    Token.Identifier("b", 3, 5),
                                     listOf()
                                 ),
-                                "c",
+                                Token.Identifier("c", 3, 9),
                                 listOf()
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 4, 5)),
+                                Token.Identifier("b", 4, 5),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("this"),
-                                        "c",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 4, 7)),
+                                        Token.Identifier("c", 4, 7),
                                         listOf()
                                     )
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 5, 5)),
+                                Token.Identifier("b", 5, 5),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("this"),
-                                            "c",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 5, 7)),
+                                            Token.Identifier("c", 5, 7),
                                             listOf()
                                         ),
-                                        "d",
+                                        Token.Identifier("d", 5, 11),
                                         listOf()
                                     ),
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 6, 5)),
+                                Token.Identifier("b", 6, 5),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("this"),
-                                        "c",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 6, 7)),
+                                        Token.Identifier("c", 6, 7),
                                         listOf()
                                     ),
                                     TreeNode.Evaluable.FunctionCallNode(
-                                        TreeNode.Evaluable.VariableNameNode("this"),
-                                        "d",
+                                        TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 6, 12)),
+                                        Token.Identifier("d", 6, 12),
                                         listOf()
                                     ),
                                 )
                             ),
                             TreeNode.Evaluable.FunctionCallNode(
-                                TreeNode.Evaluable.VariableNameNode("this"),
-                                "b",
+                                TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 7, 5)),
+                                Token.Identifier("b", 7, 5),
                                 listOf(
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("this"),
-                                            "c",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 7, 7)),
+                                            Token.Identifier("c", 7, 7),
                                             listOf()
                                         ),
-                                        "d",
+                                        Token.Identifier("d", 7, 11),
                                         listOf()
                                     ),
                                     TreeNode.Evaluable.FunctionCallNode(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("this"),
-                                            "e",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("this", 7, 16)),
+                                            Token.Identifier("e", 7, 16),
                                             listOf()
                                         ),
-                                        "f",
+                                        Token.Identifier("f", 7, 20),
                                         listOf()
                                     ),
                                 )
@@ -382,7 +383,7 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "main",
+                    Token.Identifier("main", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
@@ -420,8 +421,8 @@ class TreeBuilderTests {
                                 listOf(
                                     TreeNode.IfBranch(
                                         TreeNode.Evaluable.FunctionCallNode(
-                                            TreeNode.Evaluable.VariableNameNode("a"),
-                                            "b",
+                                            TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 8, 9)),
+                                            Token.Identifier("b", 8, 11),
                                             listOf(),
                                         ),
                                         TreeNode.BodyNode(
@@ -452,7 +453,7 @@ class TreeBuilderTests {
         val expectedTree = TreeNode.RootNode(
             listOf(
                 TreeNode.DeclarationNode.FunctionNode(
-                    "main",
+                    Token.Identifier("main", 1, 5),
                     listOf(),
                     TreeNode.BodyNode(
                         listOf(
@@ -470,8 +471,8 @@ class TreeBuilderTests {
                             ),
                             TreeNode.WhileNode(
                                 TreeNode.Evaluable.FunctionCallNode(
-                                    TreeNode.Evaluable.VariableNameNode("a"),
-                                    "b",
+                                    TreeNode.Evaluable.VariableNameNode(Token.Identifier("a", 8, 12)),
+                                    Token.Identifier("b", 8, 14),
                                     listOf(),
                                 ),
                                 TreeNode.BodyNode(

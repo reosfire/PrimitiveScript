@@ -70,9 +70,9 @@ private fun runBody(body: TreeNode.BodyNode, memory: Memory): FlowControl {
 
 private fun runFunctionCall(callNode: TreeNode.Evaluable.FunctionCallNode, memory: Memory): CallableClass {
     val objectToCall = runEvaluable(callNode.callable, memory)
-    val evaluatedParameters = Array(callNode.parameters.size) {
+    val evaluatedParameters = Array(callNode.arguments.size) {
         {
-            runEvaluable(callNode.parameters[it], memory)
+            runEvaluable(callNode.arguments[it], memory)
         }
     }
 

@@ -2,6 +2,7 @@ import analyzes.LoopControlFlowAnalyzer
 import analyzes.NamesResolver
 import lexing.tokenize
 import interpretation.*
+import lexing.Token
 import parsing.buildTree
 
 fun getTestScript(name: String): String {
@@ -25,5 +26,5 @@ fun runTestScript(
     globalMemory["this"] = thisHandle
     globalMemory["new"] = ConstructorHandle()
 
-    return thisHandle.call(initialFunctionName, args, globalMemory)
+    return thisHandle.call(Token.Identifier(initialFunctionName, -1, -1), args, globalMemory)
 }

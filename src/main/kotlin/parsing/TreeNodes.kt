@@ -24,7 +24,7 @@ interface Visitor<R> {
     fun visit(node: TreeNode.Evaluable.CompilationConstant.VoidNode): R
 }
 
-class PrettyPrinter: Visitor<String> {
+class RichPrinter: Visitor<String> {
     override fun visit(node: TreeNode.RootNode): String {
         return node.declarations.joinToString(" ") { it.accept(this) }
     }
@@ -66,19 +66,19 @@ class PrettyPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.BreakNode): String {
-        return "break"
+        return node.toString()
     }
 
     override fun visit(node: TreeNode.ContinueNode): String {
-        return "continue"
+        return node.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.FunctionCallNode): String {
-        return "${node.callable}.${node.functionName}(${node.parameters.joinToString(", ") { it.accept(this) }})"
+        return "${node.callable.accept(this)}.${node.functionName}(${node.arguments.joinToString(", ") { it.accept(this) }})"
     }
 
     override fun visit(node: TreeNode.Evaluable.VariableNameNode): String {
-        return node.name.value
+        return node.name.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.AnonymousFunctionNode): String {
@@ -86,15 +86,15 @@ class PrettyPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.IntNode): String {
-        return node.value.toString()
+        return node.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.DoubleNode): String {
-        return node.value.toString()
+        return node.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.BoolNode): String {
-        return node.value.toString()
+        return node.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.StringNode): String {
@@ -115,7 +115,7 @@ sealed class TreeNode {
 
     data class RootNode(val declarations: List<DeclarationNode>): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     sealed class DeclarationNode: TreeNode() {
@@ -125,7 +125,7 @@ sealed class TreeNode {
             val functions : List<FunctionNode>,
         ): DeclarationNode() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-            override fun toString() = accept(PrettyPrinter())
+            override fun toString() = accept(RichPrinter())
         }
 
         data class FunctionNode(
@@ -134,7 +134,7 @@ sealed class TreeNode {
             val body: BodyNode,
         ): DeclarationNode() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-            override fun toString() = accept(PrettyPrinter())
+            override fun toString() = accept(RichPrinter())
         }
     }
 
@@ -142,7 +142,7 @@ sealed class TreeNode {
         val children: List<TreeNode>,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data class IfBranch(
@@ -150,7 +150,7 @@ sealed class TreeNode {
         val body: BodyNode,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data class IfNode(
@@ -158,7 +158,7 @@ sealed class TreeNode {
         val elseBranch: BodyNode?,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data class WhileNode(
@@ -166,7 +166,7 @@ sealed class TreeNode {
         val body: BodyNode
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data class VariableDeclarationNode(
@@ -174,41 +174,41 @@ sealed class TreeNode {
         val initialValue: Evaluable,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data class ReturnNode(
         val expression: Evaluable,
     ): TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data object BreakNode: TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     data object ContinueNode: TreeNode() {
         override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-        override fun toString() = accept(PrettyPrinter())
+        override fun toString() = accept(RichPrinter())
     }
 
     sealed class Evaluable: TreeNode() {
         data class FunctionCallNode(
             val callable: Evaluable,
             val functionName: Token.Identifier,
-            val parameters: List<Evaluable>,
+            val arguments: List<Evaluable>,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-            override fun toString() = accept(PrettyPrinter())
+            override fun toString() = accept(RichPrinter())
         }
 
         data class VariableNameNode(
             val name: Token.Identifier,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-            override fun toString() = accept(PrettyPrinter())
+            override fun toString() = accept(RichPrinter())
         }
 
         data class AnonymousFunctionNode(
@@ -216,7 +216,7 @@ sealed class TreeNode {
             val body: BodyNode,
         ): Evaluable() {
             override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-            override fun toString() = accept(PrettyPrinter())
+            override fun toString() = accept(RichPrinter())
         }
 
         sealed class CompilationConstant: Evaluable() {
@@ -224,33 +224,33 @@ sealed class TreeNode {
                 val value: Int,
             ): CompilationConstant() {
                 override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-                override fun toString() = accept(PrettyPrinter())
+                override fun toString() = accept(RichPrinter())
             }
 
             data class DoubleNode(
                 val value: Double,
             ): CompilationConstant() {
                 override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-                override fun toString() = accept(PrettyPrinter())
+                override fun toString() = accept(RichPrinter())
             }
 
             data class BoolNode(
                 val value: Boolean,
             ): CompilationConstant() {
                 override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-                override fun toString() = accept(PrettyPrinter())
+                override fun toString() = accept(RichPrinter())
             }
 
             data class StringNode(
                 val value: String,
             ): CompilationConstant() {
                 override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-                override fun toString() = accept(PrettyPrinter())
+                override fun toString() = accept(RichPrinter())
             }
 
             data object VoidNode: CompilationConstant() {
                 override fun <T> accept(visitor: Visitor<T>) = visitor.visit(this)
-                override fun toString() = accept(PrettyPrinter())
+                override fun toString() = accept(RichPrinter())
             }
         }
     }

@@ -4,6 +4,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import lexing.tokenize
 import interpretation.*
+import lexing.Token
 import parsing.buildTree
 import kotlin.math.pow
 import kotlin.random.Random
@@ -78,7 +79,7 @@ class RuntimeTests {
 
             val testData = Array(random.nextInt(1..100)) { IntHandle(random.nextInt()) }.toMutableList<CallableClass>()
             val listHandle = ListHandle(testData)
-            thisHandle.call("main", arrayOf({ listHandle }), globalMemory)
+            thisHandle.call(Token.Identifier("main", -1, -1), arrayOf({ listHandle }), globalMemory)
 
             for (i in 1..<testData.size) {
                 val prev = testData[i - 1]
@@ -200,7 +201,11 @@ class RuntimeTests {
             val x2Handle = IntHandle(random.nextInt(-100..100))
             val y2Handle = IntHandle(random.nextInt(-100..100))
 
-            val result = thisHandle.call("main", arrayOf({ x1Handle }, { y1Handle }, { x2Handle }, { y2Handle }), globalMemory)
+            val result = thisHandle.call(
+                Token.Identifier("main", -1, -1),
+                arrayOf({ x1Handle }, { y1Handle }, { x2Handle }, { y2Handle }),
+                globalMemory
+            )
 
             assertIs<UserDefinedClass>(result)
 
