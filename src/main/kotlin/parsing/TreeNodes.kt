@@ -66,11 +66,11 @@ class RichPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.BreakNode): String {
-        return node.toString()
+        return "break"
     }
 
     override fun visit(node: TreeNode.ContinueNode): String {
-        return node.toString()
+        return "continue"
     }
 
     override fun visit(node: TreeNode.Evaluable.FunctionCallNode): String {
@@ -86,15 +86,15 @@ class RichPrinter: Visitor<String> {
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.IntNode): String {
-        return node.toString()
+        return node.value.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.DoubleNode): String {
-        return node.toString()
+        return node.value.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.BoolNode): String {
-        return node.toString()
+        return node.value.toString()
     }
 
     override fun visit(node: TreeNode.Evaluable.CompilationConstant.StringNode): String {
