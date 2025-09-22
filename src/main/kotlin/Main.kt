@@ -3,6 +3,8 @@ import analyzes.NamesResolver
 import lexing.tokenize
 import interpretation.*
 import lexing.Token
+import parsing.PrettyPrinter
+import parsing.RichPrinter
 import parsing.TreeNode
 import parsing.buildTree
 import java.io.File
@@ -24,6 +26,7 @@ fun runSingleScript(path: String, startFunction: String, args: Array<LateEvaluab
 
     val tree = buildTree(tokens)
     println(tree)
+    println(PrettyPrinter().visit(tree))
 
     LoopControlFlowAnalyzer().visit(tree)
     val namesResolver = NamesResolver()
