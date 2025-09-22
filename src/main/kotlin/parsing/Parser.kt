@@ -1,7 +1,11 @@
+@file:OptIn(ExperimentalContracts::class)
+
 package parsing
 
 import lexing.Token
 import lexing.TokenType
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 fun buildTree(tokens: List<Token>): TreeNode.RootNode {
     val parser = Parser(tokens)
@@ -573,7 +577,7 @@ class Parser(
 
     private inline fun <reified T : Token> consumeExpectedToken(): T {
         val token = consumeToken()
-        if (token !is T) parsingError { "Expected token with type ${T::class.simpleName} but found $this" }
+        token.expectType<T>()
         return token
     }
 
@@ -593,6 +597,9 @@ class Parser(
     }
 
     private inline fun <reified T : Token> Token.expectType() {
+        contract {
+            returns() implies (this@expectType is T)
+        }
         if (this !is T) parsingError { "Expected token with type ${T::class.simpleName} but found $this" }
     }
 
