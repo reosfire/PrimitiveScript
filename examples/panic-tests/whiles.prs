@@ -1,0 +1,6 @@
+fun main() {
+    while() {}
+    while {}
+    while(true) {}
+    while false {}
+}
