@@ -19,14 +19,14 @@ class Parser(
     private var index = 0
 
     fun buildTree(): TreeNode.RootNode {
-        index = 0
+        try {
+            index = 0
 
-        val declarations = mutableListOf<TreeNode.DeclarationNode>()
-        val collectedErrors = mutableListOf<ParsingErrorEmission>()
+            val declarations = mutableListOf<TreeNode.DeclarationNode>()
+            val collectedErrors = mutableListOf<ParsingErrorEmission>()
 
-        while (index < tokens.size) {
-            try {
-                runSynchronizing(collectedErrors, TokenType.CLASS, TokenType.FUN) {
+            while (index < tokens.size) {
+                val success = runSynchronizing(collectedErrors, TokenType.CLASS, TokenType.FUN) {
                     val builtDeclaration = when (currentToken()) {
                         is Token.Class -> buildClass()
                         is Token.Fun -> buildFunction()
@@ -35,12 +35,21 @@ class Parser(
 
                     declarations.add(builtDeclaration)
                 }
-            } catch (emissions: ParsingErrorsCollection) {
-                throw ParsingFinalError("There are some lexical errors collected while parsing: ", errors = collectedErrors)
+                if (!success) {
+                    throw ParsingFinalError("There are parsing errors collected while parsing: ", errors = collectedErrors)
+                }
             }
-        }
 
-        return TreeNode.RootNode(declarations)
+            if (collectedErrors.isNotEmpty()) {
+                throw ParsingFinalError("There are parsing errors collected while parsing: ", errors = collectedErrors)
+            }
+
+            return TreeNode.RootNode(declarations)
+        } catch (finalError: ParsingFinalError) {
+            throw finalError
+        } catch (exception: Throwable) {
+            throw ParsingFinalError("Fatal error while parsing", cause = exception)
+        }
     }
 
     private fun buildClass(): TreeNode.DeclarationNode.ClassNode {
@@ -63,7 +72,7 @@ class Parser(
 
         var classOpened = true
         while (classOpened) {
-            runSynchronizing(collectedErrors, TokenType.FUN) {
+            val success = runSynchronizing(collectedErrors, TokenType.FUN) {
                 when (currentToken()) {
                     is Token.ClosedCurlyBracket -> {
                         index++
@@ -77,6 +86,13 @@ class Parser(
                     else -> parsingError { "Unexpected token at the end of the class declaration" }
                 }
             }
+            if (!success) {
+                throw ParsingErrorsCollection(collectedErrors)
+            }
+        }
+
+        if (collectedErrors.isNotEmpty()) {
+            throw ParsingErrorsCollection(collectedErrors)
         }
 
         return TreeNode.DeclarationNode.ClassNode(name, superClassName, functions)
@@ -123,7 +139,7 @@ class Parser(
 
             var bodyOpened = true
             while (bodyOpened) {
-                runSynchronizing(collectedErrors, TokenType.IF, TokenType.WHILE, TokenType.FOR, TokenType.RETURN, TokenType.BREAK, TokenType.CONTINUE) {
+                val success = runSynchronizing(collectedErrors, TokenType.IF, TokenType.WHILE, TokenType.FOR, TokenType.RETURN, TokenType.BREAK, TokenType.CONTINUE) {
                     val token = currentToken()
                     if (token is Token.ClosedCurlyBracket) {
                         bodyOpened = false
@@ -134,9 +150,16 @@ class Parser(
 
                     childrenNodes.add(nextStatement)
                 }
+                if (!success) {
+                    throw ParsingErrorsCollection(collectedErrors)
+                }
             }
 
             index++
+
+            if (collectedErrors.isNotEmpty()) {
+                throw ParsingErrorsCollection(collectedErrors)
+            }
 
             return TreeNode.BodyNode(childrenNodes)
         } else {
@@ -603,34 +626,50 @@ class Parser(
         if (this !is T) parsingError { "Expected token with type ${T::class.simpleName} but found $this" }
     }
 
+    /**
+     * Runs the given block and catches any ParsingErrorEmission or ParsingErrorsCollection thrown during its execution.
+     * If an error is caught, it is added to the errorsContainer and the parser tries to synchronize to the next token
+     * of the given types. If synchronization fails, the function returns false.
+     * @return true if the block was executed without errors or if synchronization was successful after an error, false otherwise.
+     */
     private inline fun runSynchronizing(
         errorsContainer: MutableList<ParsingErrorEmission>,
         vararg synchronizationTokens: TokenType,
         block: () -> Unit
-    ) {
+    ): Boolean {
         try {
             block()
         } catch (emission: ParsingErrorEmission) {
             errorsContainer.add(emission)
-            synchronizeOrThrow(errorsContainer, synchronizationTokens)
+            if (!trySynchronize(synchronizationTokens)) {
+                return false
+            }
         } catch (emissions: ParsingErrorsCollection) {
             errorsContainer.addAll(emissions.errors)
-            synchronizeOrThrow(errorsContainer, synchronizationTokens)
-        } catch (exception: Exception) {
-            throw ParsingFinalError("Fatal error while parsing", cause = exception)
+            if (!trySynchronize(synchronizationTokens)) {
+                return false
+            }
         }
+
+        return true
     }
 
-    private fun synchronizeOrThrow(errors: List<ParsingErrorEmission>, synchronizationTokens: Array<out TokenType>) {
+    /**
+     * Tries to synchronize the parser by advancing the index to the next token of the given types.
+     * @return true if synchronization was successful, false otherwise.
+     * Note: if synchronization fails, the parser index remains unchanged.
+     */
+    private fun trySynchronize(synchronizationTokens: Array<out TokenType>): Boolean {
         var i = index
         while (i < tokens.size) {
             if (tokens[i].type in synchronizationTokens) {
                 index = i
-                return
+                return true
             }
             i++
         }
-        throw ParsingErrorsCollection(errors)
+
+        return false
     }
 
     class ParsingErrorEmission(message: String, val token: Token? = null): Throwable(message)

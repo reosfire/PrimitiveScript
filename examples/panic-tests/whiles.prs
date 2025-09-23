@@ -1,6 +1,13 @@
 fun main() {
     while() {}
     while {}
-    while(true) {}
+    while(true) {
+    	if (true) {
+    		break
+    	}
+    	if () {
+    		continue
+    	}
+    }
     while false {}
 }
