@@ -674,11 +674,13 @@ class Parser(
 
     class ParsingErrorEmission(message: String, val token: Token? = null): Throwable(message)
     class ParsingErrorsCollection(val errors: List<ParsingErrorEmission>): Throwable()
-    class ParsingFinalError(message: String, val errors: List<ParsingErrorEmission> = listOf(), cause: Throwable? = null): Throwable(message, cause) {
-        override fun toString(): String {
-            return "$message \n\n" + errors.joinToString("\n\n") {
-                it.message + (it.token?.let { token -> " At token $token(${token.line}, ${token.column})"  } ?: "")
+    class ParsingFinalError(val generalMessage: String, val errors: List<ParsingErrorEmission> = listOf(), cause: Throwable? = null): Throwable(cause) {
+        override val message: String
+            get() = "$generalMessage \n" + errors.joinToString("\n") {
+                it.message + (it.token?.let { token -> " At token $token"  } ?: "")
             } + "\n"
+        init {
+            printStackTrace()
         }
     }
 }

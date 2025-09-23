@@ -1,26 +1,28 @@
 package lexing
 
-private val wordTokenFactoriesMap = mapOf(
-    "class" to { line: Int, column: Int -> Token.Class(line, column) },
-    "fun" to { line: Int, column: Int -> Token.Fun(line, column) },
-    "if" to { line: Int, column: Int -> Token.If(line, column) },
-    "else" to { line: Int, column: Int -> Token.Else(line, column) },
-    "while" to { line: Int, column: Int -> Token.While(line, column) },
-    "for" to { line: Int, column: Int -> Token.For(line, column) },
-    "return" to { line: Int, column: Int -> Token.Return(line, column) },
-    "break" to { line: Int, column: Int -> Token.Break(line, column) },
-    "continue" to { line: Int, column: Int -> Token.Continue(line, column) },
+private fun wordTokenFactory(type: (Int, Int, String) -> Token, fileName: String): (Int, Int) -> Token =
+    { line, column -> type(line, column, fileName) }
 
-    "true" to { line: Int, column: Int -> Token.TrueLiteral(line, column) },
-    "false" to { line: Int, column: Int -> Token.FalseLiteral(line, column) },
-    "void" to { line: Int, column: Int -> Token.VoidLiteral(line, column) },
+private fun makeWordTokenFactoriesMap(fileName: String) = mapOf(
+    "class" to wordTokenFactory(Token::Class, fileName),
+    "fun" to wordTokenFactory(Token::Fun, fileName),
+    "if" to wordTokenFactory(Token::If, fileName),
+    "else" to wordTokenFactory(Token::Else, fileName),
+    "while" to wordTokenFactory(Token::While, fileName),
+    "for" to wordTokenFactory(Token::For, fileName),
+    "return" to wordTokenFactory(Token::Return, fileName),
+    "break" to wordTokenFactory(Token::Break, fileName),
+    "continue" to wordTokenFactory(Token::Continue, fileName),
+    "true" to wordTokenFactory(Token::TrueLiteral, fileName),
+    "false" to wordTokenFactory(Token::FalseLiteral, fileName),
+    "void" to wordTokenFactory(Token::VoidLiteral, fileName)
 )
 
-fun tokenize(source: String): List<Token> {
-    return Lexer(source.trim()).run()
+fun tokenize(source: String, fileName: String): List<Token> {
+    return Lexer(source.trim(), fileName).run()
 }
 
-class Lexer(private val source: String) {
+class Lexer(private val source: String, private val fileName: String) {
     private val ended: Boolean get() = currentIndex >= source.length
     private val canMoveAndGet: Boolean get() = currentIndex + 1 < source.length
 
@@ -30,6 +32,8 @@ class Lexer(private val source: String) {
     private var column = 1
     private var tokenStartLine = 1
     private var tokenStartColumn = 1
+
+    private val wordTokenFactoriesMap = makeWordTokenFactoriesMap(fileName)
 
     fun run(): MutableList<Token> {
         val emittedTokens = mutableListOf<Token>()
@@ -79,63 +83,63 @@ class Lexer(private val source: String) {
             emitToken(wordTokenFactory(tokenStartLine, tokenStartColumn))
         }
 
-        emitToken(Token.Identifier(word, tokenStartLine, tokenStartColumn))
+        emitToken(Token.Identifier(word, tokenStartLine, tokenStartColumn, fileName))
     }
 
     private fun simpleMatchToken(): Token? {
         return when(get()) {
-            '(' -> Token.OpenRoundBracket(tokenStartLine, tokenStartColumn)
-            ')' -> Token.ClosedRoundBracket(tokenStartLine, tokenStartColumn)
-            '{' -> Token.OpenCurlyBracket(tokenStartLine, tokenStartColumn)
-            '}' -> Token.ClosedCurlyBracket(tokenStartLine, tokenStartColumn)
-            '[' -> Token.OpenSquareBracket(tokenStartLine, tokenStartColumn)
-            ']' -> Token.ClosedSquareBracket(tokenStartLine, tokenStartColumn)
+            '(' -> Token.OpenRoundBracket(tokenStartLine, tokenStartColumn, fileName)
+            ')' -> Token.ClosedRoundBracket(tokenStartLine, tokenStartColumn, fileName)
+            '{' -> Token.OpenCurlyBracket(tokenStartLine, tokenStartColumn, fileName)
+            '}' -> Token.ClosedCurlyBracket(tokenStartLine, tokenStartColumn, fileName)
+            '[' -> Token.OpenSquareBracket(tokenStartLine, tokenStartColumn, fileName)
+            ']' -> Token.ClosedSquareBracket(tokenStartLine, tokenStartColumn, fileName)
 
-            '.' -> Token.Dot(tokenStartLine, tokenStartColumn)
-            ',' -> Token.Comma(tokenStartLine, tokenStartColumn)
+            '.' -> Token.Dot(tokenStartLine, tokenStartColumn, fileName)
+            ',' -> Token.Comma(tokenStartLine, tokenStartColumn, fileName)
             '=' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.Equal(tokenStartLine, tokenStartColumn)
+                    Token.Equal(tokenStartLine, tokenStartColumn, fileName)
                 } else {
-                    Token.Assign(tokenStartLine, tokenStartColumn)
+                    Token.Assign(tokenStartLine, tokenStartColumn, fileName)
                 }
             }
-            ':' -> Token.Colon(tokenStartLine, tokenStartColumn)
+            ':' -> Token.Colon(tokenStartLine, tokenStartColumn, fileName)
 
-            '+' -> Token.Plus(tokenStartLine, tokenStartColumn)
-            '-' -> Token.Minus(tokenStartLine, tokenStartColumn)
-            '*' -> Token.Multiply(tokenStartLine, tokenStartColumn)
-            '/' -> Token.Divide(tokenStartLine, tokenStartColumn)
-            '%' -> Token.Modulo(tokenStartLine, tokenStartColumn)
+            '+' -> Token.Plus(tokenStartLine, tokenStartColumn, fileName)
+            '-' -> Token.Minus(tokenStartLine, tokenStartColumn, fileName)
+            '*' -> Token.Multiply(tokenStartLine, tokenStartColumn, fileName)
+            '/' -> Token.Divide(tokenStartLine, tokenStartColumn, fileName)
+            '%' -> Token.Modulo(tokenStartLine, tokenStartColumn, fileName)
             '<' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.LessOrEqual(tokenStartLine, tokenStartColumn)
+                    Token.LessOrEqual(tokenStartLine, tokenStartColumn, fileName)
                 } else {
-                    Token.Less(tokenStartLine, tokenStartColumn)
+                    Token.Less(tokenStartLine, tokenStartColumn, fileName)
                 }
             }
             '>' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.GreaterOrEqual(tokenStartLine, tokenStartColumn)
+                    Token.GreaterOrEqual(tokenStartLine, tokenStartColumn, fileName)
                 } else {
-                    Token.Greater(tokenStartLine, tokenStartColumn)
+                    Token.Greater(tokenStartLine, tokenStartColumn, fileName)
                 }
             }
             '!' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '=') {
                     getAndMove()
-                    Token.NotEqual(tokenStartLine, tokenStartColumn)
+                    Token.NotEqual(tokenStartLine, tokenStartColumn, fileName)
                 } else {
-                    Token.Not(tokenStartLine, tokenStartColumn)
+                    Token.Not(tokenStartLine, tokenStartColumn, fileName)
                 }
             }
             '&' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '&') {
                     getAndMove()
-                    Token.And(tokenStartLine, tokenStartColumn)
+                    Token.And(tokenStartLine, tokenStartColumn, fileName)
                 } else {
                     null
                 }
@@ -143,9 +147,9 @@ class Lexer(private val source: String) {
             '|' -> {
                 if (canMoveAndGet && source[currentIndex + 1] == '|') {
                     getAndMove()
-                    Token.Or(tokenStartLine, tokenStartColumn)
+                    Token.Or(tokenStartLine, tokenStartColumn, fileName)
                 } else {
-                    Token.VerticalBar(tokenStartLine, tokenStartColumn)
+                    Token.VerticalBar(tokenStartLine, tokenStartColumn, fileName)
                 }
             }
             else -> null
@@ -168,7 +172,7 @@ class Lexer(private val source: String) {
                 '"' -> {
                     getAndMove()
                     skipSpaces()
-                    emitToken(Token.StringLiteral(buffer.toString(), tokenStartLine, tokenStartColumn))
+                    emitToken(Token.StringLiteral(buffer.toString(), tokenStartLine, tokenStartColumn, fileName))
                 }
                 '\\' -> {
                     if (!canMoveAndGet) emitError("Unexpected end of source in escape sequence.")
@@ -205,14 +209,14 @@ class Lexer(private val source: String) {
 
             skipSpaces()
             try {
-                emitToken(Token.DoubleLiteral(buffer.toString().toDouble(), tokenStartLine, tokenStartColumn))
+                emitToken(Token.DoubleLiteral(buffer.toString().toDouble(), tokenStartLine, tokenStartColumn, fileName))
             } catch (e: NumberFormatException) {
                 emitError("Double literal isn't correct.")
             }
         } else {
             skipSpaces()
             try {
-                emitToken(Token.IntLiteral(buffer.toString().toInt(), tokenStartLine, tokenStartColumn))
+                emitToken(Token.IntLiteral(buffer.toString().toInt(), tokenStartLine, tokenStartColumn, fileName))
             } catch (e: NumberFormatException) {
                 emitError("Int literal isn't correct.")
             }

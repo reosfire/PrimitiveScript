@@ -1,4 +1,5 @@
 fun main() {
+	b = 1
     while() {}
     while {}
     while(true) {
