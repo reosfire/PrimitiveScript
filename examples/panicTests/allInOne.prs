@@ -1,0 +1,14 @@
+fun main() {
+	b = 1
+    while() {}
+    while {}
+    while(true) {
+    	if (true) {
+    		break
+    	}
+    	if () {
+    		continue
+    	}
+    }
+    while false {}
+}

@@ -53,51 +53,52 @@ sealed class Token(
     val type: TokenType,
     val line: Int,
     val column: Int,
+    val fileName: String,
 ) {
-    class Class(line: Int, column: Int): Token(TokenType.CLASS, line, column)
-    class Fun(line: Int, column: Int): Token(TokenType.FUN, line, column)
-    class If(line: Int, column: Int): Token(TokenType.IF, line, column)
-    class Else(line: Int, column: Int): Token(TokenType.ELSE, line, column)
-    class While(line: Int, column: Int): Token(TokenType.WHILE, line, column)
-    class For(line: Int, column: Int): Token(TokenType.FOR, line, column)
-    class Return(line: Int, column: Int): Token(TokenType.RETURN, line, column)
-    class Break(line: Int, column: Int): Token(TokenType.BREAK, line, column)
-    class Continue(line: Int, column: Int): Token(TokenType.CONTINUE, line, column)
+    class Class(line: Int, column: Int, fileName: String): Token(TokenType.CLASS, line, column, fileName)
+    class Fun(line: Int, column: Int, fileName: String): Token(TokenType.FUN, line, column, fileName)
+    class If(line: Int, column: Int, fileName: String): Token(TokenType.IF, line, column, fileName)
+    class Else(line: Int, column: Int, fileName: String): Token(TokenType.ELSE, line, column, fileName)
+    class While(line: Int, column: Int, fileName: String): Token(TokenType.WHILE, line, column, fileName)
+    class For(line: Int, column: Int, fileName: String): Token(TokenType.FOR, line, column, fileName)
+    class Return(line: Int, column: Int, fileName: String): Token(TokenType.RETURN, line, column, fileName)
+    class Break(line: Int, column: Int, fileName: String): Token(TokenType.BREAK, line, column, fileName)
+    class Continue(line: Int, column: Int, fileName: String): Token(TokenType.CONTINUE, line, column, fileName)
 
-    class OpenRoundBracket(line: Int, column: Int): Token(TokenType.OPEN_ROUND_BRACKET, line, column)
-    class ClosedRoundBracket(line: Int, column: Int): Token(TokenType.CLOSED_ROUND_BRACKET, line, column)
-    class OpenCurlyBracket(line: Int, column: Int): Token(TokenType.OPEN_CURLY_BRACKET, line, column)
-    class ClosedCurlyBracket(line: Int, column: Int): Token(TokenType.CLOSED_CURLY_BRACKET, line, column)
-    class OpenSquareBracket(line: Int, column: Int): Token(TokenType.OPEN_SQUARE_BRACKET, line, column)
-    class ClosedSquareBracket(line: Int, column: Int): Token(TokenType.CLOSED_SQUARE_BRACKET, line, column)
+    class OpenRoundBracket(line: Int, column: Int, fileName: String): Token(TokenType.OPEN_ROUND_BRACKET, line, column, fileName)
+    class ClosedRoundBracket(line: Int, column: Int, fileName: String): Token(TokenType.CLOSED_ROUND_BRACKET, line, column, fileName)
+    class OpenCurlyBracket(line: Int, column: Int, fileName: String): Token(TokenType.OPEN_CURLY_BRACKET, line, column, fileName)
+    class ClosedCurlyBracket(line: Int, column: Int, fileName: String): Token(TokenType.CLOSED_CURLY_BRACKET, line, column, fileName)
+    class OpenSquareBracket(line: Int, column: Int, fileName: String): Token(TokenType.OPEN_SQUARE_BRACKET, line, column, fileName)
+    class ClosedSquareBracket(line: Int, column: Int, fileName: String): Token(TokenType.CLOSED_SQUARE_BRACKET, line, column, fileName)
 
-    class VerticalBar(line: Int, column: Int): Token(TokenType.VERTICAL_BAR, line, column)
-    class Colon(line: Int, column: Int): Token(TokenType.COLON, line, column)
-    class Dot(line: Int, column: Int): Token(TokenType.DOT, line, column)
-    class Comma(line: Int, column: Int): Token(TokenType.COMMA, line, column)
-    class Assign(line: Int, column: Int): Token(TokenType.ASSIGN, line, column)
+    class VerticalBar(line: Int, column: Int, fileName: String): Token(TokenType.VERTICAL_BAR, line, column, fileName)
+    class Colon(line: Int, column: Int, fileName: String): Token(TokenType.COLON, line, column, fileName)
+    class Dot(line: Int, column: Int, fileName: String): Token(TokenType.DOT, line, column, fileName)
+    class Comma(line: Int, column: Int, fileName: String): Token(TokenType.COMMA, line, column, fileName)
+    class Assign(line: Int, column: Int, fileName: String): Token(TokenType.ASSIGN, line, column, fileName)
 
-    class Plus(line: Int, column: Int): Token(TokenType.PLUS, line, column)
-    class Minus(line: Int, column: Int): Token(TokenType.MINUS, line, column)
-    class Multiply(line: Int, column: Int): Token(TokenType.MULTIPLY, line, column)
-    class Divide(line: Int, column: Int): Token(TokenType.DIVIDE, line, column)
-    class Modulo(line: Int, column: Int): Token(TokenType.MODULO, line, column)
-    class And(line: Int, column: Int): Token(TokenType.AND, line, column)
-    class Or(line: Int, column: Int): Token(TokenType.OR, line, column)
-    class Not(line: Int, column: Int): Token(TokenType.NOT, line, column)
+    class Plus(line: Int, column: Int, fileName: String): Token(TokenType.PLUS, line, column, fileName)
+    class Minus(line: Int, column: Int, fileName: String): Token(TokenType.MINUS, line, column, fileName)
+    class Multiply(line: Int, column: Int, fileName: String): Token(TokenType.MULTIPLY, line, column, fileName)
+    class Divide(line: Int, column: Int, fileName: String): Token(TokenType.DIVIDE, line, column, fileName)
+    class Modulo(line: Int, column: Int, fileName: String): Token(TokenType.MODULO, line, column, fileName)
+    class And(line: Int, column: Int, fileName: String): Token(TokenType.AND, line, column, fileName)
+    class Or(line: Int, column: Int, fileName: String): Token(TokenType.OR, line, column, fileName)
+    class Not(line: Int, column: Int, fileName: String): Token(TokenType.NOT, line, column, fileName)
 
-    class Less(line: Int, column: Int): Token(TokenType.LESS, line, column)
-    class LessOrEqual(line: Int, column: Int): Token(TokenType.LESS_OR_EQUAL, line, column)
-    class Greater(line: Int, column: Int): Token(TokenType.GREATER, line, column)
-    class GreaterOrEqual(line: Int, column: Int): Token(TokenType.GREATER_OR_EQUAL, line, column)
-    class Equal(line: Int, column: Int): Token(TokenType.EQUAL, line, column)
-    class NotEqual(line: Int, column: Int): Token(TokenType.NOT_EQUAL, line, column)
+    class Less(line: Int, column: Int, fileName: String): Token(TokenType.LESS, line, column, fileName)
+    class LessOrEqual(line: Int, column: Int, fileName: String): Token(TokenType.LESS_OR_EQUAL, line, column, fileName)
+    class Greater(line: Int, column: Int, fileName: String): Token(TokenType.GREATER, line, column, fileName)
+    class GreaterOrEqual(line: Int, column: Int, fileName: String): Token(TokenType.GREATER_OR_EQUAL, line, column, fileName)
+    class Equal(line: Int, column: Int, fileName: String): Token(TokenType.EQUAL, line, column, fileName)
+    class NotEqual(line: Int, column: Int, fileName: String): Token(TokenType.NOT_EQUAL, line, column, fileName)
 
-    class TrueLiteral(line: Int, column: Int): Token(TokenType.TRUE_LITERAL, line, column)
-    class FalseLiteral(line: Int, column: Int): Token(TokenType.FALSE_LITERAL, line, column)
-    class VoidLiteral(line: Int, column: Int): Token(TokenType.VOID_LITERAL, line, column)
-    class StringLiteral(val value: String, line: Int, column: Int): Token(TokenType.STRING_LITERAL, line, column) {
-        override fun toString() = "STRING_LITERAL(\"$value\") at $line:$column"
+    class TrueLiteral(line: Int, column: Int, fileName: String): Token(TokenType.TRUE_LITERAL, line, column, fileName)
+    class FalseLiteral(line: Int, column: Int, fileName: String): Token(TokenType.FALSE_LITERAL, line, column, fileName)
+    class VoidLiteral(line: Int, column: Int, fileName: String): Token(TokenType.VOID_LITERAL, line, column, fileName)
+    class StringLiteral(val value: String, line: Int, column: Int, fileName: String): Token(TokenType.STRING_LITERAL, line, column, fileName) {
+        override fun toString() = "STRING_LITERAL(\"$value\") at $fileName:$line:$column"
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is StringLiteral) return false
@@ -112,8 +113,8 @@ sealed class Token(
             return result
         }
     }
-    class IntLiteral(val value: Int, line: Int, column: Int): Token(TokenType.INT_LITERAL, line, column) {
-        override fun toString() = "INT_LITERAL($value) at $line:$column"
+    class IntLiteral(val value: Int, line: Int, column: Int, fileName: String): Token(TokenType.INT_LITERAL, line, column, fileName) {
+        override fun toString() = "INT_LITERAL($value) at $fileName:$line:$column"
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is IntLiteral) return false
@@ -128,8 +129,8 @@ sealed class Token(
             return result
         }
     }
-    class DoubleLiteral(val value: Double, line: Int, column: Int): Token(TokenType.DOUBLE_LITERAL, line, column) {
-        override fun toString() = "DOUBLE_LITERAL($value) at $line:$column"
+    class DoubleLiteral(val value: Double, line: Int, column: Int, fileName: String): Token(TokenType.DOUBLE_LITERAL, line, column, fileName) {
+        override fun toString() = "DOUBLE_LITERAL($value) at $fileName:$line:$column"
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is DoubleLiteral) return false
@@ -144,8 +145,8 @@ sealed class Token(
             return result
         }
     }
-    class Identifier(val value: String, line: Int, column: Int): Token(TokenType.IDENTIFIER, line, column) {
-        override fun toString(): String = "IDENTIFIER($value) at $line:$column"
+    class Identifier(val value: String, line: Int, column: Int, fileName: String): Token(TokenType.IDENTIFIER, line, column, fileName) {
+        override fun toString(): String = "IDENTIFIER($value) at $fileName:$line:$column"
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (other !is Identifier) return false
@@ -161,7 +162,7 @@ sealed class Token(
         }
     }
 
-    override fun toString() = "$type at $line:$column"
+    override fun toString() = "($type) at file:///$fileName:$line:$column"
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

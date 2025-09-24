@@ -29,7 +29,7 @@ data class Desugarer(
     private val moveNextMethodName: String = "moveNext",
 ) {
     fun desugarThis(functionName: Token.Identifier) =
-        TreeNode.Evaluable.VariableNameNode(Token.Identifier(thisKeyword, functionName.line, functionName.column))
+        TreeNode.Evaluable.VariableNameNode(Token.Identifier(thisKeyword, functionName.line, functionName.column, functionName.fileName))
 
     fun desugarFor(
         forKeyword: Token.For,
@@ -39,19 +39,19 @@ data class Desugarer(
     ) = TreeNode.BodyNode(
         listOf(
             TreeNode.VariableDeclarationNode(
-                Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column),
+                Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column, forKeyword.fileName),
                 TreeNode.Evaluable.FunctionCallNode(
                     iteratorProvider,
-                    Token.Identifier(getIteratorMethodName, forKeyword.line, forKeyword.column),
+                    Token.Identifier(getIteratorMethodName, forKeyword.line, forKeyword.column, forKeyword.fileName),
                     listOf()
                 )
             ),
             TreeNode.WhileNode(
                 TreeNode.Evaluable.FunctionCallNode(
                     TreeNode.Evaluable.VariableNameNode(
-                        Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column)
+                        Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column, forKeyword.fileName)
                     ),
-                    Token.Identifier(hasNextMethodName, forKeyword.line, forKeyword.column),
+                    Token.Identifier(hasNextMethodName, forKeyword.line, forKeyword.column, forKeyword.fileName),
                     listOf()
                 ),
                 TreeNode.BodyNode(
@@ -60,9 +60,9 @@ data class Desugarer(
                             indexer,
                             TreeNode.Evaluable.FunctionCallNode(
                                 TreeNode.Evaluable.VariableNameNode(
-                                    Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column)
+                                    Token.Identifier(iteratorLocalVariableName, forKeyword.line, forKeyword.column, forKeyword.fileName)
                                 ),
-                                Token.Identifier(moveNextMethodName, forKeyword.line, forKeyword.column),
+                                Token.Identifier(moveNextMethodName, forKeyword.line, forKeyword.column, forKeyword.fileName),
                                 listOf()
                             )
                         ),
@@ -79,13 +79,13 @@ data class Desugarer(
         argument: TreeNode.Evaluable,
     ) = TreeNode.Evaluable.FunctionCallNode(
         receiver,
-        Token.Identifier("$setPropertyMethodPrefix${propertyName.value}", propertyName.line, propertyName.column),
+        Token.Identifier("$setPropertyMethodPrefix${propertyName.value}", propertyName.line, propertyName.column, propertyName.fileName),
         listOf(argument)
     )
 
     fun desugarPropertyGetter(callable: TreeNode.Evaluable, propertyName: Token.Identifier) = TreeNode.Evaluable.FunctionCallNode(
         callable,
-        Token.Identifier("$getPropertyMethodPrefix${propertyName.value}", propertyName.line, propertyName.column),
+        Token.Identifier("$getPropertyMethodPrefix${propertyName.value}", propertyName.line, propertyName.column, propertyName.fileName),
         listOf()
     )
 
@@ -96,7 +96,7 @@ data class Desugarer(
         bracket: Token.OpenSquareBracket,
     ) = TreeNode.Evaluable.FunctionCallNode(
         receiver,
-        Token.Identifier(setAtMethodName, bracket.line, bracket.column),
+        Token.Identifier(setAtMethodName, bracket.line, bracket.column, bracket.fileName),
         listOf(index, value)
     )
 
@@ -106,7 +106,7 @@ data class Desugarer(
         bracket: Token.OpenSquareBracket,
     ) = TreeNode.Evaluable.FunctionCallNode(
         receiver,
-        Token.Identifier(getAtMethodName, bracket.line, bracket.column),
+        Token.Identifier(getAtMethodName, bracket.line, bracket.column, bracket.fileName),
         listOf(index)
     )
 
@@ -205,7 +205,7 @@ data class Desugarer(
         methodName: String,
     ) = TreeNode.Evaluable.FunctionCallNode(
         left,
-        Token.Identifier(methodName, operator.line, operator.column),
+        Token.Identifier(methodName, operator.line, operator.column, operator.fileName),
         listOf(right)
     )
 
@@ -215,7 +215,7 @@ data class Desugarer(
         methodName: String,
     ) = TreeNode.Evaluable.FunctionCallNode(
         operand,
-        Token.Identifier(methodName, operator.line, operator.column),
+        Token.Identifier(methodName, operator.line, operator.column, operator.fileName),
         listOf()
     )
 }

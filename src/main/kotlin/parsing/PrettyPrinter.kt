@@ -1,21 +1,30 @@
 package parsing
 
 class PrettyPrinter: Visitor<String> {
+    private var depth = 0
     override fun visit(node: TreeNode.RootNode): String {
-        return node.declarations.joinToString(" ") { it.accept(this) }
+        depth = 0
+        return node.declarations.joinToString("\n") { it.accept(this) }
     }
 
     override fun visit(node: TreeNode.DeclarationNode.ClassNode): String {
         val superClass = node.superClass?.value?.let { " : $it" } ?: ""
-        return "class ${node.name.value}$superClass { ${node.functions.joinToString(" ") { it.accept(this) }} }"
+        val beforeDepth = depth++
+        val result = "class ${node.name.value}$superClass {\n${node.functions.joinToString("\n") { it.accept(this) }}\n}"
+        depth = beforeDepth
+        return result
     }
 
     override fun visit(node: TreeNode.DeclarationNode.FunctionNode): String {
-        return "fun ${node.name.value}(${node.parameters.joinToString(", ")}) ${node.body.accept(this)}"
+        return "fun ${node.name.value}(${node.parameters.joinToString(", ") { it.value }}) ".tabulate() +
+                node.body.accept(this)
     }
 
     override fun visit(node: TreeNode.BodyNode): String {
-        return "{ ${node.children.joinToString(" ") { it.accept(this) } } }"
+        val beforeDepth = depth++
+        val result = "{\n${node.children.joinToString("\n") { it.accept(this).tabulate() } }\n"
+        depth = beforeDepth
+        return result + "}".tabulate()
     }
 
     override fun visit(node: TreeNode.IfBranch): String {
@@ -81,12 +90,14 @@ class PrettyPrinter: Visitor<String> {
         return "void"
     }
 
-    private fun refineEscapeCodes(input: String): String {
-        return input
-            .replace("\r", "\\r")
-            .replace("\n", "\\n")
-            .replace("\t", "\\t")
-            .replace("\\", "\\\\")
-            .replace("\"", "\\\"")
-    }
+    private fun String.tabulate(): String = "    ".repeat(depth) + this
+}
+
+private fun refineEscapeCodes(input: String): String {
+    return input
+        .replace("\r", "\\r")
+        .replace("\n", "\\n")
+        .replace("\t", "\\t")
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
 }
